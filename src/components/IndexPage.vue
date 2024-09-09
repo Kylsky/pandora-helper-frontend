@@ -11,7 +11,7 @@
             <div class="divider "><span>OR</span></div>
             <div class="alternative-login">
                 <div class="oauth-buttons">
-                    <img src="/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()">
+                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()">
                 </div>
                 <button type="button" @click="reset()">重置密码</button>
             </div>

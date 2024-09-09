@@ -2,8 +2,8 @@
   <el-container id="navi">
     <el-aside width="240px" class="sidebar">
       <h2 class="site-title" style="text-align: center;">Pandora Helper</h2>
-      <el-menu default-active="accountNav" class="el-menu-vertical-demo" background-color="#ffffff" text-color="#333"
-        active-text-color="#fff">
+      <el-menu @select="handleMenuSelect" default-active="accountNav" class="el-menu-vertical-demo"
+        background-color="#ffffff" text-color="#333" active-text-color="#fff">
         <el-menu-item index="accountNav">
           <span>账号管理</span>
         </el-menu-item>
@@ -22,14 +22,18 @@
     <el-main class="main-content">
       <el-dropdown class="user-menu" trigger="click">
         <span class="el-dropdown-link">
-          <el-avatar :size="44" src="/linuxdo.webp" class="user-avatar"></el-avatar>
+          <el-avatar :size="44" :src="avatar" class="user-avatar"></el-avatar>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="openActivateRedemptionModal">兑换码激活</el-dropdown-item>
+          <el-dropdown-item @click.native="showModal">兑换码激活</el-dropdown-item>
           <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
         </el-dropdown-menu>
+
       </el-dropdown>
 
+      <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
+        <form-input v-for="(field, index) in formFields" :key="index" :field="field" @updateValue="handleUpdateValue" />
+      </enhanced-dialog>
       <!-- 主要内容区域 -->
       <!-- <router-view></router-view> -->
       <component :is="currentComponent"></component>
@@ -39,17 +43,85 @@
 </template>
 
 <script>
-
+import FormInput from '../modules/FormInput'
+import EnhancedDialog from '../modules/EnhancedDialog.vue';
 import AccountPageVue from './AccountPage.vue';
+import SharePageVue from './SharePage.vue';
+import RedemptionPageVue from './RedemptionPage.vue'
+import CarPageVue from './CarPage.vue';
+import config from '../configs/config'
+import apiClient from '../configs/axios'
 export default {
+  components: {
+    EnhancedDialog,
+    FormInput
+  },
   name: 'NaviPage',
-  data(){
+  data() {
     return {
+      avatar: '/linuxdo.webp',
       activeMenu: 'accountNav',
-      currentComponent: AccountPageVue
+      currentComponent: AccountPageVue,
+      modalVisible: false,
+      itemData: '',
+      modalTitle: '',
+      formFields: [
+        { id: 'code', label: '兑换码', type: 'text', value: '', required: true },
+      ]
     };
   },
   methods: {
+    loadAvatar() {
+      // 从 localStorage 中获取头像
+      const storedAvatar = localStorage.getItem('img');
+      
+      // 如果 localStorage 中有头像数据，则替换默认头像
+      if (storedAvatar) {
+        this.avatar = storedAvatar;
+      }
+    },
+    handleUpdateValue(fieldId, newValue) {
+      // 更新 formData 中对应字段的值
+      // this.formData[fieldId] = newValue;
+      this.itemData = newValue;
+
+      // 更新 formFields 中对应字段的值
+      const fieldIndex = this.formFields.findIndex(field => field.id === fieldId);
+      if (fieldIndex !== -1) {
+        this.formFields[fieldIndex].value = newValue;
+      }
+    },
+    showModal() {
+      console.log(111)
+      this.modalTitle = '兑换码激活';
+      this.resetFormFields();
+      this.modalVisible = true;
+    },
+    closeModal() {
+      this.modalVisible = false;
+    },
+    async submitForm() {
+      console.log(this.itemData)
+      const response = await apiClient.get(`${config.apiBaseUrl}/redemption/activate?code=` + this.itemData, {
+        withCredentials: true,
+        headers: {
+          'Authorization': "Bearer " + localStorage.getItem('token')
+        }
+      });
+      if (response.data.status) {
+        alert('删除成功');
+      } else {
+        alert(response.data.message);
+      }
+    },
+    resetFormFields() {
+      this.formData = {};
+      this.formFields.forEach(field => {
+        const defaultValue = field.type === 'checkbox' ? false : '';
+        field.value = defaultValue;
+        this.formData[field.id] = defaultValue;
+      });
+    },
     handleMenuSelect(index) {
       this.activeMenu = index;
       switch (index) {
@@ -57,20 +129,17 @@ export default {
           this.currentComponent = AccountPageVue;
           break;
         case 'shareNav':
-          this.currentComponent = AccountPageVue;
+          this.currentComponent = SharePageVue;
           break;
         case 'redemptionNav':
-          this.currentComponent = AccountPageVue;
+          this.currentComponent = RedemptionPageVue;
           break;
         case 'carNav':
-          this.currentComponent = AccountPageVue;
+          this.currentComponent = CarPageVue;
           break;
         default:
-          this.currentComponent = AccountPageVue;
+          this.currentComponent = SharePageVue;
       }
-    },
-    openActivateRedemptionModal() {
-      // 实现兑换码激活逻辑
     },
     logout() {
       // 实现登出逻辑
@@ -78,6 +147,9 @@ export default {
       localStorage.removeItem('token')
       localStorage.removeItem('img')
     }
+  },
+  created() {
+    this.loadAvatar();
   }
 }
 </script>

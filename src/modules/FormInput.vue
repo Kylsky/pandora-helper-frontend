@@ -2,12 +2,16 @@
 <template>
     <div class="form-group">
         <label :for="field.id" class="form-label">{{ field.label }}</label>
-        <input v-if="field.type === 'text'" type="text" v-model="localValue" :id="field.id" class="form-input">
-        <select v-if="field.type === 'select'" v-model="localValue" :id="field.id" class="form-select">
+        <input v-if="field.type === 'number' | field.type === 'text' | field.type === 'date' | field.type === 'password'" :type="field.type"
+            v-model="localValue" :id="field.id" class="form-input">
+
+        <select v-if="field.type === 'select'" v-model="localValue" :id="field.id" class="form-select"
+            @change="handleSelectChange($event)">
             <option v-for="option in field.options" :key="option.value" :value="option.value">
                 {{ option.text }}
             </option>
         </select>
+
         <div v-if="field.type === 'checkbox'" class="switch-wrapper">
             <input type="checkbox" v-model="localValue" :id="field.id" class="switch-input">
             <label :for="field.id" class="switch-label">
@@ -34,12 +38,19 @@ export default {
                 return this.field.value || this.field.options[0].value;
             }
             return this.field.value;
+        },
+        handleSelectChange(event) {
+            const selectedValue = event.target.value;
+            // console.log("选中的值: ", selectedValue);
+            // 通过 $emit 将选中的值传递出去
+            this.$emit('handleSelectChange', {type:1, field: this.field, value: selectedValue });
         }
     },
     watch: {
         localValue(newValue) {
             this.$emit('updateValue', this.field.id, newValue);
         },
+
         field: {
             handler() {
                 this.localValue = this.initializeValue();

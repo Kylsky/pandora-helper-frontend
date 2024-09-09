@@ -37,9 +37,6 @@ export default {
         },
         confirm() {
             this.$emit('confirm');
-        },
-        updateValue() {
-            this.$emit('updateValue');
         }
     }
 };
