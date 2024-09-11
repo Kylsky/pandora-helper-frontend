@@ -41,9 +41,9 @@
 
                         <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
 
-                        <el-button size="mini" type="danger" @click="showConfirmDialog()">删除</el-button>
+                        <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
                         <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                            @confirm="handleDelete(scope.row.id)" />
+                            @confirm="handleDelete()" />
 
                     </template>
                 </el-table-column>
@@ -130,7 +130,8 @@ export default {
             }
 
         },
-        showConfirmDialog() {
+        showConfirmDialog(id) {
+            this.currentIndex = id;
             this.isDialogVisible = true;
         },
         async fetchItems(email) {
@@ -218,6 +219,7 @@ export default {
                 console.log(itemData)
                 itemData.accountId = itemData.accountOptions ? parseInt(itemData.accountOptions) : itemData.accountId
                 itemData.id = this.currentIndex
+                itemData.accountType = parseInt(itemData.accountType)
 
                 const response = await apiClient.post(`${config.apiBaseUrl}/share/distribute`, itemData, {
                     headers: {
@@ -265,9 +267,9 @@ export default {
             // 实现邮箱查询逻辑
             this.fetchItems(this.email)
         },
-        async handleDelete(id) {
+        async handleDelete() {
             // 实现删除逻辑
-            const response = await apiClient.delete(`${config.apiBaseUrl}/share/delete?id=` + id, {
+            const response = await apiClient.delete(`${config.apiBaseUrl}/share/delete?id=` + this.currentIndex, {
                 withCredentials: true,
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token')

@@ -28,9 +28,9 @@
                     <template slot-scope="scope">
                         <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
 
-                        <el-button size="mini" type="danger" @click="showConfirmDialog()">删除</el-button>
+                        <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
                         <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                            @confirm="handleDelete(scope.row.id)" />
+                            @confirm="handleDelete()" />
 
                     </template>
                 </el-table-column>
@@ -88,7 +88,8 @@ export default {
         }
     },
     methods: {
-        showConfirmDialog() {
+        showConfirmDialog(id) {
+            this.currentIndex = id;
             this.isDialogVisible = true;
         },
         async fetchItems(email) {
@@ -220,9 +221,9 @@ export default {
             // 实现邮箱查询逻辑
             this.fetchItems(this.email)
         },
-        async handleDelete(id) {
+        async handleDelete() {
             // 实现删除逻辑
-            const response = await apiClient.delete(`${config.apiBaseUrl}/redemption/delete?id=` + id, {
+            const response = await apiClient.delete(`${config.apiBaseUrl}/redemption/delete?id=` + this.currentIndex, {
                 withCredentials: true,
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token')

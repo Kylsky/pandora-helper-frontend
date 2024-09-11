@@ -29,7 +29,7 @@
                 <el-table-column prop="countDesc" label="已上车人数 / 总人数"></el-table-column>
                 <el-table-column label="操作" width="300">
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.applyNum" type="primary" size="mini"
+                        <el-button v-if="scope.row.authorized === true" type="primary" size="mini"
                             @click="showModal(scope.row.id)">审核</el-button>
                         <el-button type="warning" size="mini" @click="contact(scope.row.username)">联系车主</el-button>
 
@@ -49,8 +49,8 @@
                     </el-checkbox-group>
                 </div>
                 <span slot="footer" class="dialog-footer">
-                    <el-button @click="auditVisible = false" class="cancel-button">取消</el-button>
-                    <el-button type="primary" @click="submitAudit" class="submit-button">确认</el-button>
+                    <el-button type="danger" @click="submitAudit(0)" class="cancel-button">拒绝</el-button>
+                    <el-button type="primary" @click="submitAudit(1)" class="submit-button">通过</el-button>
                 </span>
             </el-dialog>
 
@@ -110,10 +110,10 @@ export default {
         }
     },
     methods: {
-        async submitAudit() {
+        async submitAudit(flag) {
             // 实现提交审核的逻辑
             console.log('提交审核', this.auditCarId, this.auditValues);
-            const response = await apiClient.post(`${config.apiBaseUrl}/car/audit`, { 'accountId': this.auditCarId, 'allowApply': 1, 'ids': this.auditValues }, {
+            const response = await apiClient.post(`${config.apiBaseUrl}/car/audit`, { 'accountId': this.auditCarId, 'allowApply': flag, 'ids': this.auditValues }, {
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token')
                 }
@@ -242,22 +242,6 @@ export default {
         emailQuery() {
             // 实现邮箱查询逻辑
             this.fetchItems(this.email)
-        },
-        async handleDelete(id) {
-            // 实现删除逻辑
-            const response = await apiClient.delete(`${config.apiBaseUrl}/redemption/delete?id=` + id, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
-                }
-            });
-            if (response.data.status) {
-                alert('删除成功');
-            } else {
-                alert('删除失败，请稍后重试');
-            }
-            this.fetchItems('')
-            this.isDialogVisible = false
         },
         handleCurrentChange(val) {
             // 处理页码变化

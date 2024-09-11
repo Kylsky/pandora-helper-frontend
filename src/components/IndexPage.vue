@@ -16,7 +16,7 @@
                 <button type="button" @click="reset()">重置密码</button>
             </div>
             <div class="footer" @click="index()">
-                <a href="https://shop.yeelo.fun" target="_blank">Powered by Yeelo</a>
+                <a href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" target="_blank">Powered by Yeelo</a>
             </div>
         </div>
     </div>
