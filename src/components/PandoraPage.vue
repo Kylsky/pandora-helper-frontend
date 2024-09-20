@@ -3,7 +3,7 @@
 
         <div class="login-container">
             <h1 style="margin-left: 10px">Pandora<span class="toggle-icon" @click="switchToFuclaude()"><img
-                        src="../assets/ph--user-switch.svg" title="切换至Fuclaude" alt="hi"></span></h1>
+                        src="../assets/ph--user-switch.svg" title="切换至Panel" alt="hi"></span></h1>
 
             <form @submit.prevent="userlogin()">
                 <input type="text" id="username" placeholder="用户名" required>
@@ -91,7 +91,7 @@ export default {
         },
 
         switchToFuclaude() {
-            this.$router.replace({ name: 'claude' });
+            this.$router.replace({ name: 'home' });
         }
     }
 }

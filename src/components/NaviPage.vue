@@ -16,6 +16,9 @@
         <el-menu-item index="carNav">
           <span>停车场</span>
         </el-menu-item>
+        <el-menu-item index="freeNav">
+          <span>免费号池</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -47,10 +50,13 @@ import FormInput from '../modules/FormInput'
 import EnhancedDialog from '../modules/EnhancedDialog.vue';
 import AccountPageVue from './AccountPage.vue';
 import SharePageVue from './SharePage.vue';
+import JumpPageVue from './Jump.vue';
 import RedemptionPageVue from './RedemptionPage.vue'
 import CarPageVue from './CarPage.vue';
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import { EventBus } from '../configs/eventBus';
+
 export default {
   components: {
     EnhancedDialog,
@@ -137,6 +143,9 @@ export default {
         case 'carNav':
           this.currentComponent = CarPageVue;
           break;
+        case 'freeNav':
+          this.currentComponent = JumpPageVue;
+          break;
         default:
           this.currentComponent = SharePageVue;
       }
@@ -150,6 +159,16 @@ export default {
   },
   created() {
     this.loadAvatar();
+    EventBus.$on('envVariableChanged', (newValue) => {
+      switch(newValue) {
+        case 'jump':
+          this.currentComponent = JumpPageVue;  
+          break;
+        case 'car':
+          this.currentComponent = CarPageVue;  
+          break;
+      }
+    });
   }
 }
 </script>

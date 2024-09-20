@@ -1,8 +1,20 @@
 <template>
     <div id="app">
         <div class="login-container">
-            <h1 style="margin-left: 10px">Panel<span class="toggle-icon" @click="switchToIndex()"><img
-                        src="../assets/ph--user-switch.svg" title="切换至Pandora" alt="hi"></span></h1>
+            <h1 style="margin-left: 10px">
+                Panel
+                <span class="toggle-icon-container" @mouseenter="showExtraIcons = true"
+                    @mouseleave="showExtraIcons = false">
+                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToIndex()">
+                    <transition name="fade">
+                        <div v-if="showExtraIcons" class="extra-icons">
+                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')">
+                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')">
+                        </div>
+                    </transition>
+                </span>
+            </h1>
+            <!-- Rest of your existing template code -->
             <form @submit.prevent="userlogin()">
                 <input type="text" id="username" placeholder="用户名" required>
                 <input type="password" id="password" placeholder="密码" required>
@@ -19,6 +31,7 @@
                 <a href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" target="_blank">Powered by Yeelo</a>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -32,7 +45,7 @@ export default {
     },
     data() {
         return {
-
+            showExtraIcons: false
         };
     },
     methods: {
@@ -99,13 +112,17 @@ export default {
         },
 
         switchToIndex() {
-            this.$router.replace({ name: 'pandora' });
+            // this.$router.replace({ name: 'pandora' });
+        },
+        navigateTo(pageName) {
+            this.$router.replace({ name: pageName });
         }
     }
 
 
 }
 </script>
+
 
 <style scoped>
 
@@ -263,6 +280,52 @@ button:hover {
     opacity: 0.7;
 }
 
+/* Your existing styles... */
+.toggle-icon-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.extra-icons {
+  position: absolute;
+  left: 100%;  /* Changed from right to left */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;  /* Changed to column */
+  align-items: flex-start;  /* Align items to the start of the flex container */
+  padding-left: 10px;  /* Add some padding to the left */
+}
+
+
+
+.extra-icons img {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 13px;  /* Changed from margin-left to margin-bottom */
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.extra-icons img:last-child {
+  margin-bottom: 0;  /* Remove margin from the last icon */
+}
+
+.extra-icons img:hover {
+  transform: scale(1.2);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+w-full fill-current {
+    box-sizing: border-box;
+    outline-color: hsl(var(--accent-main-100));
+}
 </style>
-
-

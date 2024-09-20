@@ -10,12 +10,8 @@
                         <el-button slot="append" @click="emailQuery">查询</el-button>
                     </el-input>
                 </el-col>
-                <el-col :span="6">
-                    <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal"
-                        @confirm="submitForm">
-                        <form-input v-for="(field, index) in formFields" :key="index" :field="field" />
-                    </enhanced-dialog>
-                </el-col>
+
+                
             </el-row>
             <el-table :data="tableData" style="width: 100%">
                 <el-table-column prop="email" label="账号"></el-table-column>
@@ -63,17 +59,14 @@
 
 <script>
 
-import EnhancedDialog from '../modules/EnhancedDialog.vue';
+
 import config from '../configs/config'
 import apiClient from '../configs/axios'
-import FormInput from '../modules/FormInput'
+import { EventBus } from '../configs/eventBus';
 
 export default {
     name: 'SharePage',
-    components: {
-        EnhancedDialog,
-        FormInput
-    },
+    
     data() {
         return {
             email: '',
@@ -110,6 +103,9 @@ export default {
         }
     },
     methods: {
+        async jump(){
+            EventBus.$emit('envVariableChanged', 'jump');
+        },
         async submitAudit(flag) {
             // 实现提交审核的逻辑
             console.log('提交审核', this.auditCarId, this.auditValues);

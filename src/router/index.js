@@ -10,6 +10,7 @@ import AccountPage from '@/components/AccountPage.vue';
 import SharePage from '@/components/SharePage.vue';
 import RedemptionPage from '@/components/RedemptionPage.vue';
 import CarPage from '@/components/CarPage.vue';
+import JumpPage from '@/components/Jump.vue';
 
 
 Vue.use(Router);
@@ -20,6 +21,7 @@ const routes = [
     { path: '/share', component: SharePage, name: 'share', meta: { title: '分享管理' } },
     { path: '/redemption', component: RedemptionPage, name: 'redemption', meta: { title: '兑换码' } },
     { path: '/car', component: CarPage, name: 'car', meta: { title: '停车场' } },
+    { path: '/jump', component: JumpPage, name: 'jump', meta: { title: '秋名山' } },
     { path: '/reset', component: ResetPage, name: 'reset', meta: { title: '重置密码' } },
     { path: '/pandora', component: PandoraPage, name: 'pandora', meta: { title: 'Pandora' } },
     { path: '/loading', component: LoadingPage, name: 'loading', meta: { title: 'Loading' } },

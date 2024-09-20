@@ -37,8 +37,8 @@
 
                 <el-table-column label="操作" width="400">
                     <template slot-scope="scope">
-                        <el-button size="mini" v-if="scope.row.accountType === 1"
-                            @click="statistic(scope.row.id)" style="background-color: #6fafd2;color: white;">统计</el-button>
+                        <el-button size="mini" v-if="scope.row.accountType === 1" @click="statistic(scope.row.id)"
+                            style="background-color: #6fafd2;color: white;">统计</el-button>
                         <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
                             @click="refresh(scope.row.id)">刷新</el-button>
                         <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
@@ -84,7 +84,7 @@ export default {
     data() {
         return {
             email: '',
-            tableData: [], // 这里应该填充实际的表格数据
+            tableData: [],
             currentPage: 1,
             shareAddFlag: false,
             total: 0,
@@ -145,7 +145,7 @@ export default {
                     }
                 },
                 legend: {
-                    data: ['GPT-4o', 'GPT-4', 'GPT-4o-mini'],
+                    data: ['GPT-4o', 'GPT-4', 'GPT-4o-mini', 'o1-preview', 'o1-mini'],
                     top: 'bottom'
                 },
                 xAxis: {
@@ -177,6 +177,18 @@ export default {
                         type: 'bar',
                         data: this.chartData.map(item => item.usage.gpt4omini),
                         itemStyle: { color: '#fac858' }
+                    },
+                    {
+                        name: 'o1-preview',
+                        type: 'bar',
+                        data: this.chartData.map(item => item.usage.o1Preview),
+                        itemStyle: { color: '#2980b9' }
+                    },
+                    {
+                        name: 'o1-mini',
+                        type: 'bar',
+                        data: this.chartData.map(item => item.usage.o1Mini),
+                        itemStyle: { color: '#f0ad5e' }
                     }
                 ]
             };
@@ -223,12 +235,12 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 });
-                if (response.data.status) {
+                if (response.data.status && response.data.data.total > 0) {
                     this.tableData = response.data.data.data
                     this.total = response.data.data.total
                 }
             } catch (error) {
-                alert(error)
+                console.log(error)
             }
 
         },
@@ -368,7 +380,7 @@ export default {
             this.fetchAccounts('')
         },
         async refresh(id) {
-            const response = await apiClient.post(`${config.apiBaseUrl}/account/refresh?id=` + id,{}, {
+            const response = await apiClient.post(`${config.apiBaseUrl}/account/refresh?id=` + id, {}, {
                 withCredentials: true,
                 headers: {
                     'Authorization': "Bearer " + localStorage.getItem('token')
@@ -444,6 +456,7 @@ export default {
     bottom: 5%;
     right: 3%;
 }
+
 .mychart {
     position: fixed;
     top: 0;

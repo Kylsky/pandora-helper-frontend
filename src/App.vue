@@ -22,4 +22,7 @@ body {
   height: 100%;
 }
 
+fill-current {
+  outline-color: hsl(var(--accent-main-100))
+}
 </style>
