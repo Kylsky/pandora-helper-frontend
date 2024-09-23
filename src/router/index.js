@@ -40,7 +40,7 @@ router.beforeEach((to, from, next) => {
     // 如果路由元信息中定义了标题，设置 document.title
     if (to.meta.title) {
         document.title = to.meta.title;
-        changeFavicon('humbleicons--coffee.svg')
+        changeFavicon('favicon.svg')
     } else {
         document.title = 'Pandora'; // 可以设置一个默认标题
     }

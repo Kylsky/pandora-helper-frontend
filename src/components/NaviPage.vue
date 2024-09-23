@@ -65,7 +65,7 @@ export default {
   name: 'NaviPage',
   data() {
     return {
-      avatar: '/linuxdo.webp',
+      avatar: 'img/linuxdo.webp',
       activeMenu: 'accountNav',
       currentComponent: AccountPageVue,
       modalVisible: false,
