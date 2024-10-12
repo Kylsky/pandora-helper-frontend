@@ -19,23 +19,23 @@
                     </enhanced-dialog>
                 </el-col>
             </el-row>
-            <el-table :data="tableData" style="width: 100%">
-                <el-table-column prop="email" label="邮箱" width="220"></el-table-column>
-                <el-table-column prop="type" label="账号类型" width="120"></el-table-column>
-                <el-table-column prop="accessToken" label="Access Token" width="200">
+            <el-table :data="tableData" style="width: 100%" :fit="true">
+                <el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
+                <!-- <el-table-column prop="accessToken" label="Access Token" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span class="ellipsis">{{ scope.row.accessToken }}</span>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
 
-                <el-table-column prop="shared" label="共享" width="80">
+                <el-table-column prop="shared" label="共享" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span class="ellipsis">{{ scope.row.shared === 1 ? '✅' : '❌' }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="updateTime" label="更新时间"></el-table-column>
 
-                <el-table-column label="操作" width="400">
+                <el-table-column label="操作" width="350">
                     <template slot-scope="scope">
                         <el-button size="mini" v-if="scope.row.accountType === 1" @click="statistic(scope.row.id)"
                             style="background-color: #6fafd2;color: white;">统计</el-button>
@@ -112,10 +112,10 @@ export default {
             accountFields: [
                 { id: 'name', label: '账号名称', type: 'text', value: '', required: true },
                 { id: 'email', label: '邮箱地址', type: 'text', value: '', required: true },
-                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }], required: true },
+                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' },{ value: 3, text: 'API' }], required: true },
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
-                { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', required: false },
+                { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', hideLabel: false },
                 { id: 'shared', label: '是否共享', type: 'checkbox', value: false, required: true },
                 { id: 'auto', label: '自动加入', type: 'checkbox', value: false, required: true },
             ],
@@ -254,6 +254,44 @@ export default {
             if (fieldIndex !== -1) {
                 this.formFields[fieldIndex].value = newValue;
             }
+
+            if (fieldId === 'accountType') {
+                const inputB = this.formFields.find(field => field.id === 'accessToken');
+                // 根据选中的值动态更新 inputB 的 label
+                switch (newValue) {
+                    case 1:
+                        inputB.label = 'ACCESS_TOKEN';
+                        break;
+                    case 2:
+                        inputB.label = 'SESSION_KEY';
+                        break;
+                    case 3:
+                        inputB.label = 'API_PROXY';
+                        break;
+                    default:
+                        inputB.label = 'ChatGPT';
+                }
+
+                const inputC = this.formFields.find(field => field.id === 'refreshToken');
+                inputC.hideLabel = false
+                // 根据选中的值动态更新 inputB 的 label
+                switch (newValue) {
+                    case 1:
+                        inputC.hideLabel = false;
+                        inputC.label = 'REFRESH_TOKEN';
+                        break;
+                    case 2:
+                        inputC.hideLabel = true;
+                        break;
+                    case 3:
+                        inputC.hideLabel = false;
+                        inputC.label = 'API_KEY';
+                        break;
+                    default:
+                        inputC.hideLabel = false;
+                        inputC.label = 'ChatGPT';
+                }
+            }
         },
         showModal() {
             this.modalTitle = '新增账号';
@@ -280,10 +318,35 @@ export default {
                 }
             });
             let acc = response.data.data;
+            let accountType = 1;
             this.formFields.forEach(field => {
                 field.value = acc[field.id];
+                if(field.id === 'accountType') {
+                    accountType = field.value
+                }
                 this.formData[field.id] = acc[field.id];
             });
+            const inputB = this.formFields.find(field => field.id === 'accessToken');
+            const inputC = this.formFields.find(field => field.id === 'refreshToken');
+            switch(accountType){
+                case 1:
+                        inputC.hideLabel = false;
+                        inputB.label = 'ACCESS_TOKEN';
+                        inputC.label = 'REFRESH_TOKEN';
+                        break;
+                    case 2:
+                        inputB.label = 'SESSION_KEY';
+                        inputC.hideLabel = true;
+                        break;
+                    case 3:
+                        inputB.label = 'API_PROXY';
+                        inputC.hideLabel = false;
+                        inputC.label = 'API_KEY';
+                        break;
+                    default:
+                        inputC.hideLabel = false;
+                        inputC.label = 'ChatGPT';
+            }
             this.modalVisible = true;
         },
         closeModal() {

@@ -19,31 +19,46 @@
                     </enhanced-dialog>
                 </el-col>
             </el-row>
-            <el-table :data="tableData" style="width: 100%">
+            <el-table :data="tableData" style="width: 100%" :fit="true">
                 <el-table-column prop="uniqueName" label="用户名"></el-table-column>
-                <el-table-column prop="gptCarName" label="ChatGPT账号">
+                <el-table-column prop="gptCarName" label="ChatGPT账号" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span class="ellipsis clickable-span underlined-span"  @click="openChat(scope.row.gptConfigId, 1)" :title="'点击跳转'">{{ scope.row.gptCarName}}</span>
+                        <span class="ellipsis clickable-span underlined-span"
+                            @click="openChat(scope.row.gptConfigId, 1)" :title="'点击跳转'">{{ scope.row.gptCarName
+                            }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="claudeCarName" label="Claude账号">
+                <el-table-column prop="claudeCarName" label="Claude账号" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <span class="ellipsis clickable-span underlined-span"  @click="openChat(scope.row.claudeConfigId, 2)" :title="'点击跳转'">{{ scope.row.claudeCarName}}</span>
+                        <span class="ellipsis clickable-span underlined-span"
+                            @click="openChat(scope.row.claudeConfigId, 2)" :title="'点击跳转'">{{
+                                scope.row.claudeCarName }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="comment" label="备注" width="120"></el-table-column>
-                <el-table-column prop="expiresAt" label="过期时间" width="120"></el-table-column>
-
-                <el-table-column label="操作">
+                <el-table-column prop="apiCarName" label="API账号" show-overflow-tooltip>
                     <template slot-scope="scope">
-                        <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">激活</el-button>
-                        <enhanced-dialog :visible.sync="modalVisible" title="新增共享" message="" @confirm="submitForm()" />
+                        <span class="ellipsis clickable-span underlined-span"
+                            @click="openChat(scope.row.apiConfigId, 3)" :title="'点击跳转'">{{
+                                scope.row.apiCarName }}</span>
+                    </template>
+                </el-table-column>
+                <!-- <el-table-column prop="comment" label="备注"></el-table-column> -->
+                <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
 
-                        <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                <el-table-column label="操作" width="250">
+                    <template slot-scope="scope">
+                        <div class="action-buttons" style="display: flex; gap: 2px;">
 
-                        <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
-                        <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                            @confirm="handleDelete()" />
+                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">激活</el-button>
+                            <enhanced-dialog :visible.sync="modalVisible" title="新增共享" message=""
+                                @confirm="submitForm()" />
+
+                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+
+                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
+                                @confirm="handleDelete()" />
+                        </div>
 
                     </template>
                 </el-table-column>
@@ -96,7 +111,7 @@ export default {
                 { id: 'expiresAt', label: '过期时间', type: 'date', value: '', required: true }
             ],
             shareFields: [
-                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }], required: true },
+                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }, { value: 3, text: 'API' }], required: true },
                 { id: 'accountOptions', label: '选择账号', type: 'select', value: '', options: this.accountOpts }
             ]
         }
@@ -119,6 +134,17 @@ export default {
             }
             else if (type === 2) {
                 const response = await apiClient.get(`${config.apiBaseUrl}/share/getClaudeShare?claudeConfigId=` + id, {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                if (response.data.status) {
+                    window.open(response.data.data)
+                }
+            }
+            else if (type === 3) {
+                const response = await apiClient.get(`${config.apiBaseUrl}/share/getApiShare?apiConfigId=` + id, {
                     withCredentials: true,
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
@@ -189,7 +215,7 @@ export default {
                 // console.log(newF)
                 newF.options = this.accountOpts;  // 更新 id 对应的字段
                 // newF.value = this.accountOpts[0].value
-                this.formData = {'accountId':parseInt(this.accountOpts[0].value),'id':id}
+                this.formData = { 'accountId': parseInt(this.accountOpts[0].value), 'id': id }
                 // console.log(this.formData)
             }
         },
@@ -246,7 +272,7 @@ export default {
                 }).catch(function (error) {
                     alert(error)
                 })
-                if(response.data.status) {
+                if (response.data.status) {
                     alert("编辑成功")
                 }
             }
@@ -289,7 +315,7 @@ export default {
             this.fetchItems('')
         },
         async handleSelectChange({ type, field, value }) {
-            if (type == 1 && field.id !="accountOptions") {
+            if (type == 1 && field.id != "accountOptions") {
                 const response = await apiClient.get(`${config.apiBaseUrl}/account/options?type=` + value, {
                     withCredentials: true,
                     headers: {
@@ -371,13 +397,18 @@ export default {
     position: absolute;
     bottom: 5%;
     right: 3%;
-}.clickable-span {
+}
+
+.clickable-span {
     cursor: pointer;
 }
+
 .underlined-span {
     text-decoration: underline;
 }
+
 .clickable-span:hover {
-    color: #409EFF; /* 使用 Element UI 的主题蓝色，您可以根据需要调整 */
+    color: #409EFF;
+    /* 使用 Element UI 的主题蓝色，您可以根据需要调整 */
 }
 </style>

@@ -1,8 +1,8 @@
 <!-- FormInput.vue -->
 <template>
     <div class="form-group">
-        <label :for="field.id" class="form-label">{{ field.label }}</label>
-        <input v-if="field.type === 'number' | field.type === 'text' | field.type === 'date' | field.type === 'password'" :type="field.type"
+        <label v-if="!field.hideLabel" :for="field.id" class="form-label">{{ field.label }}</label>
+        <input v-if="!field.hideLabel && (field.type === 'number' | field.type === 'text' | field.type === 'date' | field.type === 'password')" :type="field.type"
             v-model="localValue" :id="field.id" class="form-input">
 
         <select v-if="field.type === 'select'" v-model="localValue" :id="field.id" class="form-select"
