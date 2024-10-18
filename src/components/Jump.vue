@@ -1,21 +1,40 @@
 <template>
   <el-container class="panel">
     <el-header>
-      <h2>免费号池</h2>
+      <div class="header-content">
+        <h2>免费号池</h2>
+        <el-switch active-color="#0e8f6f"
+          v-model="showClaude"
+          active-text="Claude"
+          inactive-text="ChatGPT"
+          @change="toggleAIType"
+        ></el-switch>
+      </div>
     </el-header>
     <el-main>
-
       <el-row :gutter="20">
-        <el-col style="padding-bottom: 15px;" :xs="24" :sm="12" :md="8" :lg="6" :xl="4"
-          v-for="(account, index) in accounts" :key="index">
+        <el-col 
+          style="padding-bottom: 15px;" 
+          :xs="24" :sm="12" :md="8" :lg="6" :xl="4"
+          v-for="(account, index) in filteredAccounts" 
+          :key="index"
+        >
           <el-card :class="{ 'busy': account.sessionToken === '1' }">
             <div slot="header" class="clearfix">
               <span>{{ account.type }}账号 {{ index + 1 }}</span>
-              <el-tag :type="account.sessionToken === '' ? 'success' : 'danger'" size="small" style="float: right;">
+              <el-tag 
+                :type="account.sessionToken === '' ? 'success' : 'danger'" 
+                size="small" 
+                style="float: right;"
+              >
                 {{ account.sessionToken != '' ? "繁忙" : "空闲" }}
               </el-tag>
             </div>
-            <el-button type="primary" @click="useAccount(account.id)" :disabled="account.sessionToken != ''">
+            <el-button 
+              type="primary" 
+              @click="useAccount(account.id)" 
+              :disabled="account.sessionToken != ''"
+            >
               使用账号
             </el-button>
           </el-card>
@@ -33,7 +52,15 @@ export default {
   name: 'App',
   data() {
     return {
-      accounts: []
+      accounts: [],
+      showClaude: true
+    }
+  },
+  computed: {
+    filteredAccounts() {
+      return this.accounts.filter(account => 
+        this.showClaude ? account.type === 'Claude' : account.type === 'ChatGPT'
+      );
     }
   },
   created() {
@@ -45,7 +72,7 @@ export default {
     },
     async fetchAccounts() {
       try {
-        const response = await apiClient.get(`${config.apiBaseUrl}/account/list?type=2`, {
+        const response = await apiClient.get(`${config.apiBaseUrl}/account/list?type=`+(this.showClaude ? 2:1), {
           withCredentials: true,
           headers: {
             'Authorization': "Bearer " + localStorage.getItem('token')
@@ -75,6 +102,12 @@ export default {
       } catch (error) {
         alert(error)
       }
+    },
+    toggleAIType() {
+      this.fetchAccounts();
+    },
+    handleCheckboxChange(account, value) {
+      console.log(`Account ${account.id} selection changed to ${value}`);
     }
   }
 }
@@ -244,4 +277,51 @@ export default {
   background-color: #66b1ff;
   border-color: #66b1ff;
 }
+
+.panel {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 1% 15px;
+  height: 97%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.el-header {
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+}
+
+.header-content h2 {
+  margin-right: 20px;
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: #0c7a5e;
+  border-color: #0c7a5e;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  background-color: #0e8f6f;
+  border-color: #0e8f6f;
+}
+
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: #0e8f6f;
+}
+
+.el-switch.is-checked .el-switch__core {
+  border-color: #0e8f6f;
+  background-color: #0e8f6f;
+}
+
+
 </style>

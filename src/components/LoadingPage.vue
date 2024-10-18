@@ -41,10 +41,10 @@ export default {
                 withCredentials: true,
             });
             if (response.data.status && response.data.data.isShared) {
-                window.open(response.data.data)
+                window.open(response.data.data.address)
             } else {
                 alert("您的账号未激活，请联系管理员")
-                localStorage.setItem('token', response.data.data)
+                // localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'pandora' });
             }
         },
@@ -53,11 +53,11 @@ export default {
             const response = await apiClient.get(`${config.apiBaseUrl}/fuclaude/checkUser?username=${username}&jmc=${jmc}`, {
                 withCredentials: true,
             });
-            if (response.data.status && response.data.data.isShared) {
+            if (response.data.status) {
                 window.open(response.data.data)
             } else {
                 alert("您的账号未激活，请联系管理员")
-                localStorage.setItem('token', response.data.data)
+                // localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'claude' });
             }
         },
