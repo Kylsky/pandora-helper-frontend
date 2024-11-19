@@ -48,6 +48,7 @@ import EnhancedDialog from '../modules/EnhancedDialog.vue';
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
+import message from '@/configs/message'
 
 export default {
     name: 'SharePage',
@@ -106,7 +107,7 @@ export default {
                     this.total = response.data.data.total
                 }
             } catch (error) {
-                alert(error)
+                message.error(error)
             }
         },
         handleUpdateValue(fieldId, newValue) {
@@ -132,7 +133,7 @@ export default {
                     'Authorization': "Bearer " + localStorage.getItem('token')
                 }
             }).catch(function (error) {
-                alert(error)
+                message.error(error)
             });
             const newF = this.accountFields.find(f => f.id === "accountId");
             if (newF) {
@@ -184,25 +185,30 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 });
                 if (response.data.status) {
-                    alert('新增成功');
+                    message.success('新增成功');
                 } else {
-                    alert(response.data.message);
+                    message.error(response.data.message);
                 }
                 this.closeModal()
             }
             else{
                 itemData.id = this.currentIndex;
                 itemData.duration = parseInt(itemData.duration)
-                apiClient.patch(`${config.apiBaseUrl}/redemption/update`, itemData, {
+                const response = await apiClient.patch(`${config.apiBaseUrl}/redemption/update`, itemData, {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
+                if(!response.data.status) {
+                    message.error("更新异常，请稍后重试")
+                }else {
+                    message.success("更新成功")
+                }
             }
             this.fetchItems('')
             this.closeModal();
@@ -230,9 +236,9 @@ export default {
                 }
             });
             if (response.data.status) {
-                alert('删除成功');
+                message.success('删除成功');
             } else {
-                alert('删除失败，请稍后重试');
+                message.error('删除失败，请稍后重试');
             }
             this.fetchItems('')
             this.isDialogVisible = false

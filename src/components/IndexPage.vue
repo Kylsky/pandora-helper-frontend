@@ -38,6 +38,8 @@
 <script>
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import message from '@/configs/message';
+
 export default {
     name: 'IndexPage',
     props: {
@@ -71,7 +73,7 @@ export default {
                 this.loading = false;
                 const status = response.data.status;
                 if (!status) {
-                    alert(response.data.message);
+                    message.error(response.data.message);
                     spinner.style.display = 'none'; // 隐藏加载图标
                     btnText.style.visibility = 'visible'; // 显示按钮文本
                     return false;
@@ -91,7 +93,7 @@ export default {
                 spinner.style.display = 'none'; // 隐藏加载图标
                 btnText.style.visibility = 'visible'; // 显示按钮文本
                 var response = response
-                alert(response);
+                message.error(response);
             }
         },
 

@@ -13,6 +13,7 @@
 
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import message from '@/configs/message'
 export default {
 
     name: 'LoadingPage',
@@ -43,7 +44,7 @@ export default {
             if (response.data.status && response.data.data.isShared) {
                 window.open(response.data.data.address)
             } else {
-                alert("您的账号未激活，请联系管理员")
+                message.error("您的账号未激活，请联系管理员")
                 // localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'pandora' });
             }
@@ -56,7 +57,7 @@ export default {
             if (response.data.status) {
                 window.open(response.data.data)
             } else {
-                alert("您的账号未激活，请联系管理员")
+                message.error("您的账号未激活，请联系管理员")
                 // localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'claude' });
             }
@@ -71,7 +72,7 @@ export default {
                 localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'navi' });
             } else {
-                alert(response.data.message)
+                message.error(response.data.message)
                 this.$router.replace({ name: '' });
             }
 

@@ -21,7 +21,27 @@
             </el-row>
             <el-table :data="tableData" style="width: 100%" :fit="true">
                 <el-table-column prop="uniqueName" label="用户名"></el-table-column>
-                <el-table-column prop="gptCarName" label="ChatGPT账号" show-overflow-tooltip>
+                <el-table-column prop="gptCarName" label="ChatGPT账号" width="180">
+                    <template slot-scope="scope">
+                        <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
+                            @click="openChat(scope.row.gptConfigId, 1)" />
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="claudeCarName" label="Claude账号" width="180">
+                    <template slot-scope="scope">
+                        <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
+                            type="claude" @click="openChat(scope.row.claudeConfigId, 2)" />
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="apiCarName" label="API账号" width="180">
+                    <template slot-scope="scope">
+                        <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
+                            @click="openChat(scope.row.apiConfigId, 3)" />
+                    </template>
+                </el-table-column>
+                <!-- <el-table-column prop="gptCarName" label="ChatGPT账号" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span class="ellipsis clickable-span underlined-span"
                             @click="openChat(scope.row.gptConfigId, 1)" :title="'点击跳转'">{{ scope.row.gptCarName
@@ -41,7 +61,7 @@
                             @click="openChat(scope.row.apiConfigId, 3)" :title="'点击跳转'">{{
                                 scope.row.apiCarName }}</span>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <!-- <el-table-column prop="comment" label="备注"></el-table-column> -->
                 <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
 
@@ -76,13 +96,17 @@ import EnhancedDialog from '../modules/EnhancedDialog.vue';
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
+import SplitButton from './SplitButton.vue'  // 确保路径正确
+import message from '@/configs/message'
+
 
 export default {
     name: 'SharePage',
     components: {
         ConfirmDialog,
         EnhancedDialog,
-        FormInput
+        FormInput,
+        SplitButton
     },
     data() {
         return {
@@ -173,7 +197,7 @@ export default {
                     this.total = response.data.data.total
                 }
             } catch (error) {
-                alert(error)
+                message.error(error)
             }
 
         },
@@ -252,12 +276,12 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 });
                 if (response.data.status) {
-                    alert('激活成功');
+                    message.success('激活成功');
                 } else {
-                    alert(response.data.message);
+                    message.error(response.data.message);
                 }
                 this.fetchItems('')
                 this.currentIndex = null;
@@ -270,10 +294,10 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
                 if (response.data.status) {
-                    alert("编辑成功")
+                    message.success("编辑成功")
                 }
             }
             this.fetchItems('')
@@ -302,9 +326,9 @@ export default {
                 }
             });
             if (response.data.status) {
-                alert('删除成功');
+                message.success('删除成功');
             } else {
-                alert('删除失败，请稍后重试');
+                message.error('删除失败，请稍后重试');
             }
             this.fetchItems('')
             this.isDialogVisible = false

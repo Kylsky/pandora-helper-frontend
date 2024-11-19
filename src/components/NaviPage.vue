@@ -56,6 +56,7 @@ import CarPageVue from './CarPage.vue';
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import { EventBus } from '../configs/eventBus';
+import message from '@/configs/message'
 
 export default {
   components: {
@@ -115,9 +116,10 @@ export default {
         }
       });
       if (response.data.status) {
-        alert('删除成功');
+        this.modalVisible = true;
+        message.success('兑换成功');
       } else {
-        alert(response.data.message);
+        message.error(response.data.message);
       }
     },
     resetFormFields() {

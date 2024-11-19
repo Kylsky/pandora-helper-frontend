@@ -73,6 +73,7 @@ import EnhancedDialog from '../modules/EnhancedDialog.vue';
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
+import message from '@/configs/message'
 
 export default {
     name: 'AccountPage',
@@ -362,13 +363,18 @@ export default {
                 itemData.uniqueName = itemData.username
                 itemData.accountId = this.currentIndex
                 console.log(itemData)
-                apiClient.post(`${config.apiBaseUrl}/share/add`, itemData, {
+                const response = await apiClient.post(`${config.apiBaseUrl}/share/add`, itemData, {
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
+                if(!response.data.status) {
+                    message.error(response.data.message)
+                }else{
+                    message.success("新增账号共享成功")
+                }
             }
             else if (this.currentIndex !== null) {
                 itemData.auto = itemData.auto ? 1 : 0;
@@ -380,8 +386,9 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
+                message.success("修改成功")
             } else {
                 itemData.auto = itemData.auto ? 1 : 0;
                 itemData.shared = itemData.shared ? 1 : 0;
@@ -391,8 +398,9 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
+                message.success("新增成功")
             }
             this.fetchAccounts('')
             this.closeModal();
@@ -429,9 +437,9 @@ export default {
                 }
             });
             if (response.data.status) {
-                alert('删除成功');
+                message.success('删除成功');
             } else {
-                alert('删除失败，请稍后重试');
+                message.error('删除失败，请稍后重试');
             }
             this.fetchAccounts('')
             this.currentIndex = null;
@@ -450,9 +458,9 @@ export default {
                 }
             });
             if (response.data.status) {
-                alert('刷新成功');
+                message.success('刷新成功');
             } else {
-                alert('刷新失败，请稍后重试');
+                message.error('刷新失败，请稍后重试');
             }
         }
     },

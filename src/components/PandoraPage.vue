@@ -29,6 +29,7 @@
 <script>
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import message from '@/configs/message'
 
 
 export default {
@@ -63,12 +64,12 @@ export default {
                     spinner.style.display = 'none'; // 隐藏加载图标
                     btnText.style.visibility = 'visible'; // 显示按钮文本
                     var res = response.data.message
-                    alert(res);
+                    message.error(res);
                 }
             } catch (error) {
                 spinner.style.display = 'none'; // 隐藏加载图标
                 btnText.style.visibility = 'visible'; // 显示按钮文本
-                alert(error)
+                message.error(error)
             }
 
         },
@@ -85,7 +86,7 @@ export default {
                     console.error('No redirect URL provided');
                 }
             } catch (error) {
-                alert(error)
+                message.error(error)
             }
 
         },

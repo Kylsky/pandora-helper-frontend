@@ -63,6 +63,7 @@
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import { EventBus } from '../configs/eventBus';
+import message from '@/configs/message'
 
 export default {
     name: 'SharePage',
@@ -114,12 +115,13 @@ export default {
                     'Authorization': "Bearer " + localStorage.getItem('token')
                 }
             }).catch(function (error) {
-                alert(error)
+                message.error(error)
             });
             if (response.data.status) {
                 console.log("audit success");
+                message.success("审核成功")
             } else {
-                alert(response.data.message);
+                message.error(response.data.message);
             }
             this.auditVisible = false;
             this.auditValues = [];
@@ -132,12 +134,12 @@ export default {
                     'Authorization': "Bearer " + localStorage.getItem('token')
                 }
             }).catch(function (error) {
-                alert(error)
+                message.error(error)
             });
             if (response.data.status) {
-                alert('申请成功');
+                message.success('申请成功');
             } else {
-                alert(response.data.message);
+                message.error(response.data.message);
             }
             this.closeModal()
         },
@@ -154,7 +156,7 @@ export default {
                     this.total = response.data.data.total
                 }
             } catch (error) {
-                alert(error)
+                message.error(error)
             }
         },
         handleUpdateValue(fieldId, newValue) {
@@ -177,7 +179,7 @@ export default {
                     'Authorization': "Bearer " + localStorage.getItem('token')
                 }
             }).catch(function (error) {
-                alert(error)
+                message.error(error)
             });
             this.auditOptions = response.data.data;
         },
@@ -202,12 +204,12 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 });
                 if (response.data.status) {
-                    alert('新增成功');
+                    message.success('新增成功');
                 } else {
-                    alert(response.data.message);
+                    message.error(response.data.message);
                 }
                 this.closeModal()
             }
@@ -219,7 +221,7 @@ export default {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 }).catch(function (error) {
-                    alert(error)
+                    message.error(error)
                 })
             }
             this.fetchItems('')

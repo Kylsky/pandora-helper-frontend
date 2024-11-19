@@ -47,6 +47,7 @@
 <script>
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import message from '@/configs/message'
 
 export default {
   name: 'App',
@@ -82,7 +83,7 @@ export default {
           this.accounts = response.data.data.data
         }
       } catch (error) {
-        alert(error)
+        message.error(error)
       }
     },
     async useAccount(index) {
@@ -97,10 +98,10 @@ export default {
           // console.log(response.data.data)
           window.open(response.data.data)
         } else {
-          alert(response.data.message)
+          message.error(response.data.message)
         }
       } catch (error) {
-        alert(error)
+        message.error(error)
       }
     },
     toggleAIType() {
