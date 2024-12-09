@@ -37,8 +37,8 @@
 
                 <el-table-column label="操作" width="350">
                     <template slot-scope="scope">
-                        <el-button size="mini" v-if="scope.row.accountType === 1" @click="statistic(scope.row.id)"
-                            style="background-color: #6fafd2;color: white;">统计</el-button>
+                        <!-- <el-button size="mini" v-if="scope.row.accountType === 1" @click="statistic(scope.row.id)"
+                            style="background-color: #6fafd2;color: white;">统计</el-button> -->
                         <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
                             @click="refresh(scope.row.id)">刷新</el-button>
                         <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
