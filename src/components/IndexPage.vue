@@ -57,10 +57,9 @@ export default {
         },
 
         async userlogin() {
-            var spinner = document.querySelector('.spinner');
-            var btnText = document.querySelector('.btn-text');
-            btnText.style.visibility = 'hidden'; // 隐藏按钮文本
-            spinner.style.display = 'block'; // 显示加载图标
+            const button = document.querySelector('button[type="submit"]');
+            button.classList.add('loading');
+            
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
 
@@ -74,8 +73,7 @@ export default {
                 const status = response.data.status;
                 if (!status) {
                     message.error(response.data.message);
-                    spinner.style.display = 'none'; // 隐藏加载图标
-                    btnText.style.visibility = 'visible'; // 显示按钮文本
+                    button.classList.remove('loading');
                     return false;
                 }
                 const user = response.data;
@@ -85,13 +83,12 @@ export default {
                 if (avatar) {
                     localStorage.setItem("img", avatar)
                 }
-                spinner.style.display = 'none'; // 隐藏加载图标
-                btnText.textContent = '登录成功,跳转中...'; // 修改按钮文本为“跳转中”
-                btnText.style.visibility = 'visible'; // 显示按钮文本
+                button.classList.remove('loading');
+
                 this.$router.replace({ name: 'navi' });
             } catch (error) {
-                spinner.style.display = 'none'; // 隐藏加载图标
-                btnText.style.visibility = 'visible'; // 显示按钮文本
+                button.classList.remove('loading');
+
                 var response = response
                 message.error(response);
             }
@@ -229,7 +226,7 @@ button:hover {
     font-size: 12px;
 }
 
-.spinner {
+/* .spinner {
     display: none;
     border: 3px solid #f3f3f3;
     border-top: 3px solid #3498db;
@@ -242,16 +239,53 @@ button:hover {
     margin-top: 1px;
     margin-left: -13px;
     animation: spin 1s linear infinite;
+} */
+button[type="submit"] {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* padding: 8px 16px; */
+    min-width: 100px; /* 确保按钮有最小宽度 */
+    min-height: 36px; /* 确保按钮有最小高度 */
+}
+
+/* 按钮文字样式 */
+.btn-text {
+    display: inline-block;
+}
+
+/* Loading时隐藏文字 */
+button[type="submit"].loading .btn-text {
+    display: none;
+}
+
+/* Spinner样式 */
+.spinner {
+    display: none;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: spin 1s linear infinite;
+}
+
+/* Spinner显示状态 */
+button[type="submit"].loading .spinner {
+    display: block;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+/* 调整输入框样式以保持一致性 */
 
 .btn-text {
     visibility: visible;

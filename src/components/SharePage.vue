@@ -5,87 +5,118 @@
         </el-header>
         <el-main>
             <el-row class="search-bar">
-                <el-col :span="18">
+                <el-col :xs="24" :sm="18" :md="18">
                     <el-input id="email-query" placeholder="请输入邮箱或用户名" v-model="email">
                         <el-button slot="append" @click="emailQuery">查询</el-button>
                     </el-input>
                 </el-col>
-                <el-col :span="6">
-                    <!-- <el-button class="create-new" type="primary" @click="showModal()">新增</el-button> -->
-                    <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal"
-                        @confirm="submitForm">
-                        <form-input v-for="(field, index) in formFields" :key="index" :field="field"
-                            @updateValue="handleUpdateValue" @handleSelectChange="handleSelectChange" />
-                    </enhanced-dialog>
-                </el-col>
             </el-row>
-            <el-table :data="tableData" style="width: 100%" :fit="true">
-                <el-table-column prop="uniqueName" label="用户名"></el-table-column>
-                <el-table-column prop="gptCarName" label="ChatGPT账号" width="180">
-                    <template slot-scope="scope">
-                        <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
-                            @click="openChat(scope.row.gptConfigId, 1)" />
-                    </template>
-                </el-table-column>
 
-                <el-table-column prop="claudeCarName" label="Claude账号" width="180">
-                    <template slot-scope="scope">
-                        <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
-                            type="claude" @click="openChat(scope.row.claudeConfigId, 2)" />
-                    </template>
-                </el-table-column>
+            <!-- PC端表格视图 -->
+            <div class="pc-view">
+                <el-table :data="tableData" style="width: 100%" :fit="true">
+                    <el-table-column prop="uniqueName" label="用户名"></el-table-column>
+                    <el-table-column prop="gptCarName" label="ChatGPT账号" width="180">
+                        <template slot-scope="scope">
+                            <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
+                                :loading="scope.row.loading" @click="openChat(scope.row.gptConfigId, 1, scope)" />
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="claudeCarName" label="Claude账号" width="180">
+                        <template slot-scope="scope">
+                            <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
+                                type="claude" :loading="scope.row.loading"
+                                @click="openChat(scope.row.claudeConfigId, 2, scope)" />
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="apiCarName" label="API账号" width="180">
+                        <template slot-scope="scope">
+                            <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
+                                :loading="scope.row.loading" @click="openChat(scope.row.apiConfigId, 3, scope)" />
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
+                    <el-table-column label="操作" width="250">
+                        <template slot-scope="scope">
+                            <div class="action-row">
+                                <el-button type="primary" size="mini"
+                                    @click="showShareModal(scope.row.id)">激活</el-button>
+                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                                <el-button type="danger" size="mini"
+                                    @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
 
-                <el-table-column prop="apiCarName" label="API账号" width="180">
-                    <template slot-scope="scope">
-                        <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
-                            @click="openChat(scope.row.apiConfigId, 3)" />
-                    </template>
-                </el-table-column>
-                <!-- <el-table-column prop="gptCarName" label="ChatGPT账号" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span class="ellipsis clickable-span underlined-span"
-                            @click="openChat(scope.row.gptConfigId, 1)" :title="'点击跳转'">{{ scope.row.gptCarName
-                            }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="claudeCarName" label="Claude账号" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span class="ellipsis clickable-span underlined-span"
-                            @click="openChat(scope.row.claudeConfigId, 2)" :title="'点击跳转'">{{
-                                scope.row.claudeCarName }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="apiCarName" label="API账号" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span class="ellipsis clickable-span underlined-span"
-                            @click="openChat(scope.row.apiConfigId, 3)" :title="'点击跳转'">{{
-                                scope.row.apiCarName }}</span>
-                    </template>
-                </el-table-column> -->
-                <!-- <el-table-column prop="comment" label="备注"></el-table-column> -->
-                <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
+            <!-- 移动端卡片视图 -->
+            <div class="mobile-view">
+                <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
+                    <div class="mobile-card-header">
+                        <div class="username-badge">
+                            <i class="el-icon-user"></i>
+                            {{ item.uniqueName }}
+                        </div>
+                        <div class="expires-badge">
+                            {{ item.expiresAt }}
+                        </div>
+                    </div>
 
-                <el-table-column label="操作" width="250">
-                    <template slot-scope="scope">
-                        <div class="action-buttons" style="display: flex; gap: 2px;">
-
-                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">激活</el-button>
-                            <enhanced-dialog :visible.sync="modalVisible" title="新增共享" message=""
-                                @confirm="submitForm()" />
-
-                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
-
-                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
-                            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                                @confirm="handleDelete()" />
+                    <div class="mobile-card-content">
+                        <div class="account-item" v-if="item.gptCarName">
+                            <div class="account-label">ChatGPT账号</div>
+                            <div class="account-value">
+                                <split-button :name="item.gptCarName" :count="item.gptUserCount || 0" type="gpt"
+                                    :loading="item.loading" @click="openChat(item.gptConfigId, 1, item)" />
+                            </div>
                         </div>
 
-                    </template>
-                </el-table-column>
-            </el-table>
-            <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                layout="prev, pager, next, jumper" :total=total>
-            </el-pagination>
+                        <div class="account-item" v-if="item.claudeCarName">
+                            <div class="account-label">Claude账号</div>
+                            <div class="account-value">
+                                <split-button :name="item.claudeCarName" :count="item.claudeUserCount || 0"
+                                    type="claude" :loading="item.loading"
+                                    @click="openChat(item.claudeConfigId, 2, item)" />
+                            </div>
+                        </div>
+
+                        <div class="account-item" v-if="item.apiCarName">
+                            <div class="account-label">API账号</div>
+                            <div class="account-value">
+                                <split-button :name="item.apiCarName" :count="item.apiUserCount || 0" type="api"
+                                    :loading="item.loading" @click="openChat(item.apiConfigId, 3, item)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mobile-card-divider"></div>
+
+                    <div class="mobile-card-actions">
+                        <div class="action-row">
+                            <el-button type="primary" size="mini" @click="showShareModal(item.id)">激活</el-button>
+                            <el-button type="warning" size="mini" @click="editItem(item.id)">编辑</el-button>
+                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)">删除</el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pagination-container">
+                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
+                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
+                    :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
+                </el-pagination>
+            </div>
+
+            <!-- 弹窗组件 -->
+            <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
+                <form-input v-for="(field, index) in formFields" :key="index" :field="field"
+                    @updateValue="handleUpdateValue" @handleSelectChange="handleSelectChange" />
+            </enhanced-dialog>
+
+            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
+                @confirm="handleDelete" />
         </el-main>
     </el-container>
 </template>
@@ -98,6 +129,8 @@ import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
 import SplitButton from './SplitButton.vue'  // 确保路径正确
 import message from '@/configs/message'
+import { Loading } from 'element-ui';
+
 
 
 export default {
@@ -110,6 +143,7 @@ export default {
     },
     data() {
         return {
+            isMobile: false,
             email: '',
             tableData: [], // 这里应该填充实际的表格数据
             currentPage: 1,
@@ -141,43 +175,63 @@ export default {
         }
     },
     methods: {
-        async openChat(id, type) {
+        checkIsMobile() {
+            this.isMobile = window.innerWidth <= 768;
+        },
+        async openChat(id, type, scope) {
             if (id === null) {
                 return
             }
-            if (type === 1) {
-                const response = await apiClient.get(`${config.apiBaseUrl}/share/getGptShare?gptConfigId=` + id, {
-                    withCredentials: true,
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
+
+            const loading = Loading.service({
+                target: scope ? scope.el : document.body,
+                text: '加载中...',
+                spinner: 'el-icon-loading',
+                background: 'rgba(255, 255, 255, 0.7)'
+            });
+            try {
+                if (type === 1) {
+                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getGptShare?gptConfigId=` + id, {
+                        withCredentials: true,
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    if (response.data.status) {
+                        window.open(response.data.data)
                     }
-                });
-                if (response.data.status) {
-                    window.open(response.data.data)
                 }
-            }
-            else if (type === 2) {
-                const response = await apiClient.get(`${config.apiBaseUrl}/share/getClaudeShare?claudeConfigId=` + id, {
-                    withCredentials: true,
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
+                else if (type === 2) {
+                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getClaudeShare?claudeConfigId=` + id, {
+                        withCredentials: true,
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    if (response.data.status) {
+                        window.open(response.data.data)
                     }
-                });
-                if (response.data.status) {
-                    window.open(response.data.data)
                 }
-            }
-            else if (type === 3) {
-                const response = await apiClient.get(`${config.apiBaseUrl}/share/getApiShare?apiConfigId=` + id, {
-                    withCredentials: true,
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
+                else if (type === 3) {
+                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getApiShare?apiConfigId=` + id, {
+                        withCredentials: true,
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    if (response.data.status) {
+                        window.open(response.data.data)
                     }
-                });
-                if (response.data.status) {
-                    window.open(response.data.data)
                 }
+            } catch (error) {
+                console.error('请求失败:', error);
+                // 可以在这里添加错误提示
+                this.$message.error('操作失败，请重试');
+            } finally {
+                // 无论成功失败都关闭 loading
+                loading.close();
             }
+
 
         },
         showConfirmDialog(id) {
@@ -360,14 +414,18 @@ export default {
         },
     },
     mounted() {
-        // 组件挂载后的逻辑
         this.fetchItems('');
+        this.fetchItems('');
+        this.checkIsMobile();
+        window.addEventListener('resize', this.checkIsMobile);
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.checkIsMobile);
     }
 }
 </script>
 
 <style scoped>
-/* 保留原有的自定义样式 */
 .panel {
     background-color: #ffffff;
     border-radius: 5px;
@@ -377,32 +435,120 @@ export default {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* 搜索栏样式 */
 .search-bar {
     margin-bottom: 20px;
 }
 
-.create-new {
-    float: right;
+/* PC端表格相关样式 */
+.pc-view {
+    display: none;
 }
 
-.ellipsis,
-.share-ellipsis {
-    max-width: 120px;
+.action-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+/* 移动端卡片样式 */
+.mobile-view {
+    display: none;
+}
+
+.mobile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #ebeef5;
+}
+
+.mobile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.username-badge {
+    background: #f0f7ff;
+    color: #409eff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 70%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
 }
 
-.share-ellipsis {
-    max-width: 150px;
+.expires-badge {
+    color: #909399;
+    font-size: 13px;
 }
 
-/* 覆盖一些 Element UI 的默认样式以匹配原设计 */
+.mobile-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.account-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-label {
+    color: #909399;
+    font-size: 13px;
+}
+
+.account-value {
+    width: 100%;
+}
+
+.mobile-card-divider {
+    height: 1px;
+    background: #ebeef5;
+    margin: 16px 0;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-card-actions .action-row {
+    justify-content: space-between;
+}
+
+.mobile-card-actions .el-button {
+    flex: 1;
+}
+
+/* 分页器样式 */
+.pagination-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Element UI 按钮样式 */
 .el-button--primary {
-    /* background-color: #43cea2; */
     background-color: #0e8f6f;
-    /* border-color: #43cea2; */
     border-color: #0e8f6f;
 }
 
@@ -412,27 +558,137 @@ export default {
     border-color: #2980b9;
 }
 
-.el-table th {
-    background-color: #f2f2f2;
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+    .panel {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .pc-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .search-bar {
+        margin-bottom: 16px;
+    }
+
+    .pagination-wrapper {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: white;
+        padding: 10px 0;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
 }
 
-.el-pagination {
-    /* text-align: right; */
-    position: absolute;
-    bottom: 5%;
-    right: 3%;
+@media screen and (min-width: 769px) {
+    .pc-view {
+        display: block;
+    }
+
+    .mobile-view {
+        display: none;
+    }
 }
 
-.clickable-span {
-    cursor: pointer;
+.pagination-container {
+    position: relative;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px 0;
 }
 
-.underlined-span {
-    text-decoration: underline;
+.pagination-wrapper {
+    text-align: center;
 }
 
-.clickable-span:hover {
-    color: #409EFF;
-    /* 使用 Element UI 的主题蓝色，您可以根据需要调整 */
+/* 移动端样式优化 */
+
+
+
+/* 移动端分页器样式 */
+@media screen and (max-width: 768px) {
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 4px 0;
+        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
+        z-index: 1000;
+        height: 36px;
+    }
+
+    /* Element UI 分页器组件样式 */
+    :deep(.el-pagination) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 13px;
+        padding: 0 12px;
+        height: 100%;
+    }
+
+    :deep(.el-pagination .btn-prev),
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0 2px;
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        border-radius: 14px;
+    }
+
+    :deep(.el-pagination .number) {
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        margin: 0 2px;
+        border-radius: 14px;
+    }
+
+    /* 移动端卡片布局调整 */
+    .mobile-card:last-child {
+        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
+    }
+
+
+    /* 当前页码突出显示 */
+    :deep(.el-pagination .active) {
+        background-color: #0e8f6f;
+        color: white;
+        border-radius: 4px;
+    }
+
+    /* 调整内容区域的下边距 */
+    .el-main {
+        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
+    }
+}
+
+/* 暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.95);
+            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        :deep(.el-pagination) {
+            color: #e0e0e0;
+        }
+    }
 }
 </style>

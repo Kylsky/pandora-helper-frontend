@@ -4,61 +4,117 @@
             <h2>账号管理</h2>
         </el-header>
         <el-main>
-            <el-row class="search-bar">
-                <el-col :span="18">
-                    <el-input id="email-query" placeholder="请输入邮箱" v-model="email">
+            <!-- 搜索栏响应式布局 -->
+            <el-row class="search-bar" :gutter="20">
+                <el-col :xs="24" :sm="24" :md="18">
+                    <el-input id="email-query" placeholder="请输入邮箱" v-model="email" class="search-input">
                         <el-button slot="append" @click="emailQuery">查询</el-button>
                     </el-input>
                 </el-col>
-                <el-col :span="6">
+                <el-col :xs="24" :sm="24" :md="6" class="create-btn-wrapper">
                     <el-button class="create-new" type="primary" @click="showModal()">新增</el-button>
-                    <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal"
-                        @confirm="submitForm">
-                        <form-input v-for="(field, index) in formFields" :key="index" :field="field"
-                            @updateValue="handleUpdateValue" />
-                    </enhanced-dialog>
                 </el-col>
             </el-row>
-            <el-table :data="tableData" style="width: 100%" :fit="true">
-                <el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
-                <!-- <el-table-column prop="accessToken" label="Access Token" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span class="ellipsis">{{ scope.row.accessToken }}</span>
-                    </template>
-                </el-table-column> -->
 
-                <el-table-column prop="shared" label="共享" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                        <span class="ellipsis">{{ scope.row.shared === 1 ? '✅' : '❌' }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="updateTime" label="更新时间"></el-table-column>
+            <!-- PC端表格视图 -->
+            <div class="pc-view">
+                <el-table :data="tableData" style="width: 100%" :fit="true">
+                    <el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="shared" label="共享" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <span class="ellipsis">{{ scope.row.shared === 1 ? '✅' : '❌' }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="updateTime" label="更新时间"></el-table-column>
+                    <el-table-column label="操作" width="350">
+                        <template slot-scope="scope">
+                            <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
+                                @click="refresh(scope.row.id)">刷新</el-button>
+                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
+                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
 
-                <el-table-column label="操作" width="350">
-                    <template slot-scope="scope">
-                        <!-- <el-button size="mini" v-if="scope.row.accountType === 1" @click="statistic(scope.row.id)"
-                            style="background-color: #6fafd2;color: white;">统计</el-button> -->
-                        <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
-                            @click="refresh(scope.row.id)">刷新</el-button>
-                        <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
-                        <enhanced-dialog :visible.sync="modalVisible" title="新增共享" message="" @confirm="submitForm()" />
+            <div class="mobile-view">
+                <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
+                    <div class="mobile-card-header">
+                        <div class="email-badge">
+                            <i class="el-icon-message"></i>
+                            {{ item.email }}
+                        </div>
+                        <div class="status-badge" :class="{ 'status-shared': item.shared === 1 }">
+                            {{ item.shared === 1 ? '已共享' : '未共享' }}
+                        </div>
+                    </div>
 
-                        <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                    <div class="mobile-card-content">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="el-icon-user"></i>
+                                    账号类型
+                                </div>
+                                <div class="info-value">{{ item.type }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="el-icon-time"></i>
+                                    更新时间
+                                </div>
+                                <div class="info-value">{{ item.updateTime }}</div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
-                        <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                            @confirm="handleDelete()" />
+                    <div class="mobile-card-divider"></div>
 
-                    </template>
-                </el-table-column>
-            </el-table>
-            <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                layout="prev, pager, next, jumper" :total=total>
-            </el-pagination>
-            <div v-if="chartsVisible" class="mychart">
+                    <!-- 重新组织按钮布局 -->
+                    <div class="mobile-card-actions">
+                        <div class="action-row">
+                            <el-button v-if="item.accountType === 1" type="info" size="mini" @click="refresh(item.id)">
+                                <i class="el-icon-refresh"></i> 刷新
+                            </el-button>
+                            <el-button type="primary" size="mini" @click="showShareModal(item.id)">
+                                <i class="el-icon-share"></i> 共享
+                            </el-button>
+                            <el-button type="warning" size="mini" @click="editItem(item.id)">
+                                <i class="el-icon-edit"></i> 编辑
+                            </el-button>
+                        </div>
+                        <div class="action-row">
+                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)">
+                                <i class="el-icon-delete"></i> 删除
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页器 -->
+            <div class="pagination-container">
+                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
+                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
+                    :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
+                </el-pagination>
+            </div>
+
+            <!-- 弹窗组件保持不变 -->
+            <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
+                <form-input v-for="(field, index) in formFields" :key="index" :field="field"
+                    @updateValue="handleUpdateValue" />
+            </enhanced-dialog>
+
+            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
+                @confirm="handleDelete" />
+
+            <!-- 图表组件 -->
+            <div v-if="chartsVisible" class="chart-overlay">
                 <div class="chart-container">
-                    <div ref="chart" style="width: 600px; height: 400px;"></div>
+                    <div ref="chart" class="chart-content"></div>
                     <el-button @click="closeChart" type="primary" size="small">关闭</el-button>
                 </div>
             </div>
@@ -84,6 +140,7 @@ export default {
     },
     data() {
         return {
+            isMobile: false,
             email: '',
             tableData: [],
             currentPage: 1,
@@ -113,7 +170,7 @@ export default {
             accountFields: [
                 { id: 'name', label: '账号名称', type: 'text', value: '', required: true },
                 { id: 'email', label: '邮箱地址', type: 'text', value: '', required: true },
-                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' },{ value: 3, text: 'API' }], required: true },
+                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }, { value: 3, text: 'API' }], required: true },
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
                 { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', hideLabel: false },
@@ -129,6 +186,9 @@ export default {
         }
     },
     methods: {
+        checkIsMobile() {
+            this.isMobile = window.innerWidth <= 768;
+        },
         initChart() {
             if (this.chart) {
                 this.chart.dispose();
@@ -322,31 +382,31 @@ export default {
             let accountType = 1;
             this.formFields.forEach(field => {
                 field.value = acc[field.id];
-                if(field.id === 'accountType') {
+                if (field.id === 'accountType') {
                     accountType = field.value
                 }
                 this.formData[field.id] = acc[field.id];
             });
             const inputB = this.formFields.find(field => field.id === 'accessToken');
             const inputC = this.formFields.find(field => field.id === 'refreshToken');
-            switch(accountType){
+            switch (accountType) {
                 case 1:
-                        inputC.hideLabel = false;
-                        inputB.label = 'ACCESS_TOKEN';
-                        inputC.label = 'REFRESH_TOKEN';
-                        break;
-                    case 2:
-                        inputB.label = 'SESSION_KEY';
-                        inputC.hideLabel = true;
-                        break;
-                    case 3:
-                        inputB.label = 'API_PROXY';
-                        inputC.hideLabel = false;
-                        inputC.label = 'API_KEY';
-                        break;
-                    default:
-                        inputC.hideLabel = false;
-                        inputC.label = 'ChatGPT';
+                    inputC.hideLabel = false;
+                    inputB.label = 'ACCESS_TOKEN';
+                    inputC.label = 'REFRESH_TOKEN';
+                    break;
+                case 2:
+                    inputB.label = 'SESSION_KEY';
+                    inputC.hideLabel = true;
+                    break;
+                case 3:
+                    inputB.label = 'API_PROXY';
+                    inputC.hideLabel = false;
+                    inputC.label = 'API_KEY';
+                    break;
+                default:
+                    inputC.hideLabel = false;
+                    inputC.label = 'ChatGPT';
             }
             this.modalVisible = true;
         },
@@ -370,9 +430,9 @@ export default {
                 }).catch(function (error) {
                     message.error(error)
                 })
-                if(!response.data.status) {
+                if (!response.data.status) {
                     message.error(response.data.message)
-                }else{
+                } else {
                     message.success("新增账号共享成功")
                 }
             }
@@ -460,19 +520,22 @@ export default {
             if (response.data.status) {
                 message.success('刷新成功');
             } else {
-                message.error('刷新失败，请稍后重试');
+                message.error(response.data.msg);
             }
         }
     },
     mounted() {
-        // 组件挂载后的逻辑
         this.fetchAccounts('');
+        this.checkIsMobile();
+        window.addEventListener('resize', this.checkIsMobile);
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.checkIsMobile);
     }
 }
 </script>
 
 <style scoped>
-/* 保留原有的自定义样式 */
 .panel {
     background-color: #ffffff;
     border-radius: 5px;
@@ -482,53 +545,71 @@ export default {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* 搜索栏样式 */
 .search-bar {
     margin-bottom: 20px;
 }
 
+.search-input {
+    width: 100%;
+}
+
+.create-btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+}
+
 .create-new {
-    float: right;
+    margin-top: 0;
 }
 
-.ellipsis,
-.share-ellipsis {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
+/* PC端表格视图 */
+.pc-view {
+    display: none;
 }
 
-.share-ellipsis {
-    max-width: 150px;
+/* 移动端卡片视图 */
+.mobile-view {
+    display: none;
 }
 
-/* 覆盖一些 Element UI 的默认样式以匹配原设计 */
-.el-button--primary {
-    /* background-color: #43cea2; */
-    background-color: #0e8f6f;
-    /* border-color: #43cea2; */
-    border-color: #0e8f6f;
+.mobile-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.el-button--primary:hover,
-.el-button--primary:focus {
-    background-color: #2980b9;
-    border-color: #2980b9;
+.mobile-card-content {
+    margin-bottom: 15px;
 }
 
-.el-table th {
-    background-color: #f2f2f2;
+.mobile-card-item {
+    display: flex;
+    margin-bottom: 8px;
 }
 
-.el-pagination {
-    /* text-align: right; */
-    position: absolute;
-    bottom: 5%;
-    right: 3%;
+.mobile-card-item .label {
+    font-weight: bold;
+    min-width: 80px;
+    color: #606266;
 }
 
-.mychart {
+.mobile-card-item .value {
+    flex: 1;
+    word-break: break-all;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* 图表样式 */
+.chart-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -545,12 +626,356 @@ export default {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: 90%;
+    max-width: 800px;
 }
 
-.chart-container .el-button {
-    margin-top: 15px;
+.chart-content {
+    width: 100%;
+    height: 400px;
+}
+
+/* Element UI 按钮样式 */
+.el-button--primary {
+    background-color: #0e8f6f;
+    border-color: #0e8f6f;
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+    .panel {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .create-btn-wrapper {
+        justify-content: stretch;
+        margin-top: 10px;
+    }
+
+    .create-new {
+        width: 100%;
+    }
+
+    .pc-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .chart-container {
+        padding: 15px;
+    }
+
+    .chart-content {
+        height: 300px;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .pc-view {
+        display: block;
+    }
+
+    .mobile-view {
+        display: none;
+    }
+}
+
+/* 更新移动端卡片样式 */
+.mobile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #ebeef5;
+}
+
+.mobile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.email-badge {
+    background: #f0f7ff;
+    color: #409eff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email-badge i {
+    font-size: 16px;
+}
+
+.status-badge {
+    background: #f5f7fa;
+    color: #909399;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.status-shared {
+    background: #f0f9eb;
+    color: #67c23a;
+}
+
+.mobile-card-content {
+    padding: 8px 0;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    color: #909399;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.info-label i {
+    font-size: 14px;
+}
+
+.info-value {
+    color: #303133;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.mobile-card-divider {
+    height: 1px;
+    background: #ebeef5;
+    margin: 16px 0;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-button i {
+    font-size: 14px;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 480px) {
+    .mobile-card {
+        padding: 12px;
+    }
+
+    .info-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mobile-card-actions {
+        justify-content: stretch;
+    }
+
+    .action-button {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* 确保按钮颜色符合主题 */
+.el-button--primary {
+    background-color: #0e8f6f;
+    border-color: #0e8f6f;
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    /* 默认左对齐 */
+}
+
+/* 当容器宽度足够时，让按钮组两端对齐 */
+@media screen and (min-width: 480px) {
+    .mobile-card-actions {
+        justify-content: space-between;
+    }
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-row {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.action-row .el-button {
+    flex: 1;
+}
+
+/* 当只有一个按钮时的样式 */
+.action-row:last-child {
+    justify-content: stretch;
+}
+
+.action-row:last-child .el-button {
+    width: 100%;
+}
+
+/* 确保按钮组的高度一致 */
+.mobile-card-actions .el-button {
+    height: 32px;
+    padding: 0 12px;
+}
+
+/* 基础容器样式 */
+.panel {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 1% 15px;
+    min-height: calc(100vh - 30px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* 添加内容容器 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 主内容区域样式 */
+.el-main {
+    flex: 1;
+    padding-bottom: 48px; /* 为分页器预留空间 */
+    overflow-y: auto;     /* 允许内容滚动 */
+}
+
+/* 移动端分页器样式 */
+@media screen and (max-width: 768px) {
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 4px 0;
+        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
+        z-index: 1000;
+        height: 36px;
+    }
+
+    /* Element UI 分页器组件样式 */
+    :deep(.el-pagination) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 13px;
+        padding: 0 12px;
+        height: 100%;
+    }
+
+
+    /* 当前页码突出显示 */
+    :deep(.el-pagination .active) {
+        background-color: #0e8f6f;
+        color: white;
+        border-radius: 4px;
+    }
+
+    :deep(.el-pagination .btn-prev),
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0 2px;
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        border-radius: 14px;
+    }
+
+    :deep(.el-pagination .number) {
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        margin: 0 2px;
+        border-radius: 14px;
+    }
+
+    /* 移动端卡片布局调整 */
+    .mobile-card:last-child {
+        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
+    }
+
+    /* 调整内容区域的下边距 */
+    .el-main {
+        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
+    }
+}
+
+/* 暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.95);
+            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        :deep(.el-pagination) {
+            color: #e0e0e0;
+        }
+    }
 }
 </style>

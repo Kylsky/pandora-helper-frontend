@@ -4,40 +4,115 @@
             <h2>兑换码管理</h2>
         </el-header>
         <el-main>
+            <!-- 响应式搜索栏 -->
             <el-row class="search-bar">
-                <el-col :span="18">
+                <el-col :xs="24" :sm="18" :md="18">
                     <el-input id="email-query" placeholder="请输入邮箱" v-model="email">
                         <el-button slot="append" @click="emailQuery">查询</el-button>
                     </el-input>
                 </el-col>
-                <el-col :span="6">
+                <el-col :xs="24" :sm="6" :md="6" class="btn-col">
                     <el-button class="create-new" type="primary" @click="showModal()">新增</el-button>
-                    <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal"
-                        @confirm="submitForm">
-                        <form-input v-for="(field, index) in formFields" :key="index" :field="field"
-                            @updateValue="handleUpdateValue" @handleSelectChange="handleSelectChange" />
-                    </enhanced-dialog>
                 </el-col>
             </el-row>
-            <el-table :data="tableData" style="width: 100%">
-                <el-table-column prop="email" label="邮箱"></el-table-column>
-                <el-table-column prop="accountType" label="账号类型"></el-table-column>
-                <el-table-column prop="code" label="兑换码"></el-table-column>
-                <el-table-column prop="duration" label="兑换时长(天)"></el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
-                        <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
 
-                        <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
-                        <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
-                            @confirm="handleDelete()" />
+            <!-- PC端表格视图 -->
+            <div class="pc-view">
+                <el-table :data="tableData" style="width: 100%">
+                    <el-table-column prop="email" label="邮箱"></el-table-column>
+                    <el-table-column prop="accountType" label="账号类型"></el-table-column>
+                    <el-table-column prop="code" label="兑换码"></el-table-column>
+                    <el-table-column prop="duration" label="兑换时长(天)"></el-table-column>
+                    <el-table-column label="操作" width="200">
+                        <template slot-scope="scope">
+                            <div class="action-row">
+                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
 
-                    </template>
-                </el-table-column>
-            </el-table>
-            <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                layout="prev, pager, next, jumper" :total=total>
-            </el-pagination>
+            <!-- 移动端卡片视图 -->
+            <div class="mobile-view">
+                <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
+                    <div class="mobile-card-header">
+                        <div class="email-badge">
+                            <i class="el-icon-message"></i>
+                            {{ item.email }}
+                        </div>
+                        <div class="type-badge">
+                            {{ item.accountType }}
+                        </div>
+                    </div>
+
+                    <div class="mobile-card-content">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="el-icon-key"></i>
+                                    兑换码
+                                </div>
+                                <div class="info-value">{{ item.code }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="el-icon-time"></i>
+                                    兑换时长
+                                </div>
+                                <div class="info-value">{{ item.duration }} 天</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mobile-card-divider"></div>
+
+                    <div class="mobile-card-actions">
+                        <div class="action-row">
+                            <el-button type="warning" size="mini" @click="editItem(item.id)">
+                                <i class="el-icon-edit"></i> 编辑
+                            </el-button>
+                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)">
+                                <i class="el-icon-delete"></i> 删除
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 响应式分页器 -->
+            <div class="pagination-container">
+                <el-pagination 
+                    @current-change="handleCurrentChange" 
+                    :current-page.sync="currentPage" 
+                    :page-size="10"
+                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
+                    :pager-count="isMobile ? 5 : 7"
+                    :total="total"
+                    class="pagination-wrapper">
+                </el-pagination>
+            </div>
+
+            <!-- 弹窗组件 -->
+            <enhanced-dialog 
+                :isVisible="modalVisible" 
+                :title="modalTitle" 
+                @close="closeModal"
+                @confirm="submitForm">
+                <form-input 
+                    v-for="(field, index) in formFields" 
+                    :key="index" 
+                    :field="field"
+                    @updateValue="handleUpdateValue" 
+                    @handleSelectChange="handleSelectChange" />
+            </enhanced-dialog>
+
+            <confirm-dialog 
+                :visible.sync="isDialogVisible" 
+                title="确认删除" 
+                message="你确定要删除这个兑换码吗？"
+                @confirm="handleDelete" />
         </el-main>
     </el-container>
 </template>
@@ -59,6 +134,7 @@ export default {
     },
     data() {
         return {
+            isMobile: false,
             email: '',
             tableData: [], // 这里应该填充实际的表格数据
             currentPage: 1,
@@ -89,6 +165,9 @@ export default {
         }
     },
     methods: {
+        checkIsMobile() {
+            this.isMobile = window.innerWidth <= 768;
+        },
         showConfirmDialog(id) {
             this.currentIndex = id;
             this.isDialogVisible = true;
@@ -253,14 +332,17 @@ export default {
         },
     },
     mounted() {
-        // 组件挂载后的逻辑
         this.fetchItems('');
+        this.checkIsMobile();
+        window.addEventListener('resize', this.checkIsMobile);
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.checkIsMobile);
     }
 }
 </script>
 
 <style scoped>
-/* 保留原有的自定义样式 */
 .panel {
     background-color: #ffffff;
     border-radius: 5px;
@@ -270,32 +352,140 @@ export default {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* 搜索栏响应式样式 */
 .search-bar {
     margin-bottom: 20px;
 }
 
-.create-new {
-    float: right;
+.btn-col {
+    display: flex;
+    justify-content: flex-end;
 }
 
-.ellipsis,
-.share-ellipsis {
-    max-width: 120px;
+.create-new {
+    margin-top: 0;
+}
+
+/* PC端表格相关样式 */
+.pc-view {
+    display: none;
+}
+
+.action-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+/* 移动端卡片样式 */
+.mobile-view {
+    display: none;
+}
+
+.mobile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #ebeef5;
+}
+
+.mobile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.email-badge {
+    background: #f0f7ff;
+    color: #409eff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 70%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
 }
 
-.share-ellipsis {
-    max-width: 150px;
+.type-badge {
+    background: #f0f9eb;
+    color: #67c23a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
 }
 
-/* 覆盖一些 Element UI 的默认样式以匹配原设计 */
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    color: #909399;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.info-value {
+    color: #303133;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.mobile-card-divider {
+    height: 1px;
+    background: #ebeef5;
+    margin: 16px 0;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-card-actions .action-row {
+    justify-content: space-between;
+}
+
+.mobile-card-actions .el-button {
+    flex: 1;
+}
+
+/* 分页器样式 */
+.pagination-container {
+    margin-top: 20px;
+    padding: 10px 0;
+}
+
+.pagination-wrapper {
+    text-align: center;
+}
+
+/* Element UI 按钮样式 */
 .el-button--primary {
-    /* background-color: #43cea2; */
     background-color: #0e8f6f;
-    /* border-color: #43cea2; */
     border-color: #0e8f6f;
 }
 
@@ -305,14 +495,154 @@ export default {
     border-color: #2980b9;
 }
 
-.el-table th {
-    background-color: #f2f2f2;
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+    .panel {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .search-bar {
+        margin-bottom: 16px;
+    }
+
+    .btn-col {
+        margin-top: 10px;
+    }
+
+    .create-new {
+        width: 100%;
+    }
+
+    .pc-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: white;
+        padding: 10px;
+        box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        z-index: 1000;
+        margin: 0;
+    }
+
+    /* 为固定定位的分页器留出空间 */
+    .panel {
+        padding-bottom: 60px;
+    }
+
+    /* 优化移动端按钮触控区域 */
+    .mobile-card-actions .el-button {
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
 }
 
-.el-pagination {
-    /* text-align: right; */
-    position: absolute;
-    bottom: 5%;
-    right: 3%;
+@media screen and (min-width: 769px) {
+    .pc-view {
+        display: block;
+    }
+
+    .mobile-view {
+        display: none;
+    }
+
+    .btn-col {
+        justify-content: flex-end;
+    }
+
+    .create-new {
+        width: auto;
+    }
+}
+
+
+/* 移动端分页器样式 */
+@media screen and (max-width: 768px) {
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 4px 0;
+        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
+        z-index: 1000;
+        height: 36px;
+    }
+
+    /* Element UI 分页器组件样式 */
+    :deep(.el-pagination) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 13px;
+        padding: 0 12px;
+        height: 100%;
+    }
+
+    :deep(.el-pagination .btn-prev),
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0 2px;
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        border-radius: 14px;
+    }
+
+    :deep(.el-pagination .number) {
+        min-width: 28px;
+        height: 28px;
+        line-height: 28px;
+        margin: 0 2px;
+        border-radius: 14px;
+    }
+
+    /* 移动端卡片布局调整 */
+    .mobile-card:last-child {
+        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
+    }
+
+
+    /* 当前页码突出显示 */
+    :deep(.el-pagination .active) {
+        background-color: #0e8f6f;
+        color: white;
+        border-radius: 4px;
+    }
+
+    /* 调整内容区域的下边距 */
+    .el-main {
+        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
+    }
+}
+
+/* 暗色主题支持 */
+@media (prefers-color-scheme: dark) {
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.95);
+            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        :deep(.el-pagination) {
+            color: #e0e0e0;
+        }
+    }
 }
 </style>

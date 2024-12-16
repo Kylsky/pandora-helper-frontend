@@ -1,13 +1,15 @@
 <template>
     <div id="loading">
-        <div>
-            <div class="loader"></div>
+        <div class="loading-container">
+            <div class="loader-wrapper">
+                <div class="loader"></div>
+                <div class="loader-inner"></div>
+            </div>
             <p class="message">正在授权，请稍候...</p>
+            <p class="sub-message">Loading...</p>
         </div>
     </div>
-
 </template>
-
 <script>
 
 
@@ -97,53 +99,131 @@ export default {
 }
 </script>
 
-
 <style scoped>
-#loading,
-html {
-    height: 100%;
-    margin-bottom: 0;
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
-    font-family: Arial, sans-serif;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
-    color: #333;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
 }
 
 .loader {
-    border: 16px solid #f3f3f3;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 4px solid transparent;
+    border-top-color: #3498db;
+    border-right-color: #3498db;
     border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    animation: spin 2s linear infinite;
+    animation: spin 1.5s linear infinite;
+}
+
+.loader-inner {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border: 4px solid transparent;
+    border-top-color: #03a9f4;
+    border-right-color: #03a9f4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite reverse;
 }
 
 @keyframes spin {
     0% {
         transform: rotate(0deg);
     }
-
     100% {
         transform: rotate(360deg);
     }
 }
 
 .message {
+    margin-top: 30px;
+    font-size: 24px;
+    font-weight: 500;
+    color: #fff;
     text-align: center;
-    font-size: 20px;
-    margin-top: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-body,
-html,
-#app {
+.sub-message {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+}
+
+/* 添加一些光晕效果 */
+.loader::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(3, 169, 244, 0.1) 0%,
+        transparent 70%
+    );
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .loader-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+
+    .message {
+        font-size: 20px;
+    }
+
+    .sub-message {
+        font-size: 14px;
+    }
+}
+
+/* 确保根元素全屏 */
+:root {
     margin: 0;
-    /* 去除默认的外边距 */
     padding: 0;
-    /* 去除默认的内边距，防止有内边距 */
     height: 100%;
+}
+
+html, 
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
 }
 </style>
