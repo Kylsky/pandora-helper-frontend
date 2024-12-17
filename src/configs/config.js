@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const config = {
-  apiBaseUrl: 'http://127.0.0.1:8181', // 默认值
+  apiBaseUrl: 'https://connect.yeelo.fun', // 默认值
 };
 
 export const loadConfig = async () => {

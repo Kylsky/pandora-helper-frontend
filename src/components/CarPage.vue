@@ -681,14 +681,6 @@ export default {
         margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
     }
 
-
-    /* 当前页码突出显示 */
-    :deep(.el-pagination .active) {
-        background-color: #0e8f6f;
-        color: white;
-        border-radius: 4px;
-    }
-
     /* 调整内容区域的下边距 */
     .el-main {
         padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */

@@ -102,6 +102,7 @@
                 </el-pagination>
             </div>
 
+
             <!-- 弹窗组件保持不变 -->
             <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
                 <form-input v-for="(field, index) in formFields" :key="index" :field="field"
@@ -889,7 +890,6 @@ export default {
     margin: 1% 15px;
     min-height: calc(100vh - 30px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    /* 添加内容容器 */
     display: flex;
     flex-direction: column;
 }
@@ -897,9 +897,11 @@ export default {
 /* 主内容区域样式 */
 .el-main {
     flex: 1;
-    padding-bottom: 48px; /* 为分页器预留空间 */
-    overflow-y: auto;     /* 允许内容滚动 */
+    padding-bottom: 48px; 
+    overflow-y: auto;     
 }
+
+
 
 /* 移动端分页器样式 */
 @media screen and (max-width: 768px) {
@@ -924,14 +926,6 @@ export default {
         font-size: 13px;
         padding: 0 12px;
         height: 100%;
-    }
-
-
-    /* 当前页码突出显示 */
-    :deep(.el-pagination .active) {
-        background-color: #0e8f6f;
-        color: white;
-        border-radius: 4px;
     }
 
     :deep(.el-pagination .btn-prev),
@@ -959,6 +953,14 @@ export default {
         margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
     }
 
+
+    /* 当前页码突出显示 */
+    :deep(.el-pagination .active) {
+        background-color: #0e8f6f;
+        color: white;
+        border-radius: 4px;
+    }
+
     /* 调整内容区域的下边距 */
     .el-main {
         padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
@@ -977,5 +979,16 @@ export default {
             color: #e0e0e0;
         }
     }
+}
+
+
+/* 分页器样式 */
+.pagination-container {
+    margin-top: 20px;
+    padding: 8px 0;  /* 减小上下内边距 */
+}
+
+.pagination-wrapper {
+    text-align: center;
 }
 </style>

@@ -115,7 +115,7 @@
                     @updateValue="handleUpdateValue" @handleSelectChange="handleSelectChange" />
             </enhanced-dialog>
 
-            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个账号吗？"
+            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个共享账户吗？"
                 @confirm="handleDelete" />
         </el-main>
     </el-container>
