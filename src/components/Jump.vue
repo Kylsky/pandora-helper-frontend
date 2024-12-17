@@ -113,216 +113,175 @@ export default {
   }
 }
 </script>
-
 <style scoped>
-/* 保留原有的自定义样式 */
+/* 基础布局样式 */
 .panel {
-  background-color: #ffffff;
-  border-radius: 5px;
-  padding: 15px;
-  margin: 1% 15px;
-  height: 97%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.search-bar {
-  margin-bottom: 20px;
-}
-
-.create-new {
-  float: right;
-}
-
-.ellipsis,
-.share-ellipsis {
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-}
-
-.share-ellipsis {
-  max-width: 150px;
-}
-
-/* 覆盖一些 Element UI 的默认样式以匹配原设计 */
-.el-button--primary {
-  /* background-color: #43cea2; */
-  background-color: #0e8f6f;
-  /* border-color: #43cea2; */
-  border-color: #0e8f6f;
-}
-
-.el-button--primary:hover,
-.el-button--primary:focus {
-  background-color: #2980b9;
-  border-color: #2980b9;
-}
-
-.el-table th {
-  background-color: #f2f2f2;
-}
-
-.el-pagination {
-  /* text-align: right; */
-  position: absolute;
-  bottom: 5%;
-  right: 3%;
-}
-
-.modern-audit-dialog {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.modern-audit-dialog>>>.el-dialog__header {
-  background-color: #f5f7fa;
-  padding: 20px;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.modern-audit-dialog>>>.el-dialog__title {
-  font-size: 18px;
-  color: #303133;
-  font-weight: 600;
-}
-
-.modern-audit-dialog>>>.el-dialog__body {
-  padding: 30px 20px;
-}
-
-.audit-content {
-  background-color: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-.audit-title {
-  font-size: 16px;
-  color: #606266;
-  margin-bottom: 20px;
-  font-weight: 500;
-}
-
-.audit-checkbox-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.audit-checkbox-item {
-  margin-bottom: 15px;
-  transition: all 0.3s ease;
-}
-
-.audit-checkbox-item:hover {
-  background-color: #f5f7fa;
-  border-radius: 4px;
-}
-
-.audit-checkbox-item>>>.el-checkbox__label {
-  font-size: 14px;
-  color: #606266;
-  padding: 10px;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.audit-checkbox-item>>>.el-checkbox__input.is-checked+.el-checkbox__label {
-  color: #409EFF;
-}
-
-.audit-checkbox-item>>>.el-checkbox__inner {
-  border-color: #dcdfe6;
-  transition: all 0.3s ease;
-}
-
-.audit-checkbox-item>>>.el-checkbox__input.is-checked .el-checkbox__inner {
-  background-color: #409EFF;
-  border-color: #409EFF;
-}
-
-.dialog-footer {
-  text-align: right;
-  margin-top: 20px;
-}
-
-.cancel-button,
-.submit-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.cancel-button {
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  color: #606266;
-}
-
-.cancel-button:hover {
-  color: #409EFF;
-  border-color: #c6e2ff;
-  background-color: #ecf5ff;
-}
-
-.submit-button {
-  background-color: #409EFF;
-  border-color: #409EFF;
-  color: #ffffff;
-}
-
-.submit-button:hover {
-  background-color: #66b1ff;
-  border-color: #66b1ff;
-}
-
-.panel {
-  background-color: #ffffff;
-  border-radius: 5px;
-  padding: 15px;
-  margin: 1% 15px;
-  height: 97%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 10px;
+    margin: 1.5% 20px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .el-header {
-  padding: 0;
+    padding: 0;
+    margin-bottom: 24px;
 }
 
 .header-content {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
 }
 
 .header-content h2 {
-  margin-right: 20px;
+    margin: 0 24px 0 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
+}
+
+/* 搜索栏样式 */
+.search-bar {
+    margin-bottom: 28px;
+}
+
+/* 文本溢出处理 */
+.ellipsis,
+.share-ellipsis {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.share-ellipsis {
+    max-width: 150px;
+}
+
+/* Element UI 组件样式覆盖 */
+.el-button--primary {
+    background: linear-gradient(145deg, #0e8f6f, #0d8668);
+    border: none;
+    box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
+    transition: all 0.3s ease;
 }
 
 .el-button--primary:hover,
 .el-button--primary:focus {
-  background-color: #0c7a5e;
-  border-color: #0c7a5e;
+    background: linear-gradient(145deg, #0c7a5e, #0b7257);
+    box-shadow: 0 4px 12px rgba(14, 143, 111, 0.3);
+    transform: translateY(-1px);
 }
 
+.el-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.el-pagination {
+    position: fixed;
+    bottom: 24px;
+    right: 44px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* 对话框样式优化 */
+.modern-audit-dialog {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modern-audit-dialog >>> .el-dialog__header {
+    background-color: #f8f9fa;
+    padding: 24px;
+    border-bottom: 1px solid #ebeef5;
+}
+
+.modern-audit-dialog >>> .el-dialog__title {
+    font-size: 20px;
+    color: #303133;
+    font-weight: 600;
+}
+
+.modern-audit-dialog >>> .el-dialog__body {
+    padding: 32px 24px;
+}
+
+/* 审核内容样式 */
+.audit-content {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+}
+
+.audit-title {
+    font-size: 18px;
+    color: #303133;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+.audit-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.audit-checkbox-item {
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.audit-checkbox-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Checkbox 样式优化 */
 .el-checkbox__input.is-checked .el-checkbox__inner,
 .el-checkbox__input.is-indeterminate .el-checkbox__inner {
-  background-color: #0e8f6f;
-  border-color: #0e8f6f;
+    background: linear-gradient(145deg, #0e8f6f, #0d8668);
+    border-color: #0e8f6f;
 }
 
 .el-checkbox__input.is-checked + .el-checkbox__label {
-  color: #0e8f6f;
+    color: #0e8f6f;
 }
 
+/* Switch 开关样式 */
 .el-switch.is-checked .el-switch__core {
-  border-color: #0e8f6f;
-  background-color: #0e8f6f;
+    border-color: #0e8f6f;
+    background-color: #0e8f6f;
 }
 
-
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+    .panel {
+        background-color: #1e1e1e;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-content h2 {
+        color: #e0e0e0;
+    }
+    
+    .el-table th {
+        background-color: #2c2c2c;
+        color: #e0e0e0;
+    }
+    
+    .el-pagination {
+        background: rgba(30, 30, 30, 0.98);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+}
 </style>

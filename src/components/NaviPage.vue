@@ -117,7 +117,7 @@ export default {
       if (this.isMobile) {
         return this.isCollapse ? '0' : '240px';
       }
-      return this.isCollapse ? '64px' : '240px';
+      return this.isCollapse ? '66px' : '240px';
     }
   },
   methods: {
@@ -252,27 +252,28 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
-
+/* 基础样式 */
 #navi {
   height: 100vh;
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
 }
 
+/* 侧边栏样式 */
 .sidebar {
   background-color: #ffffff;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  padding: 24px 0;
-  transition: width 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   flex-direction: column;
+  z-index: 1000; /* 确保侧边栏在下拉菜单之上 */
 }
 
 .sidebar-header {
   padding: 0 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -281,290 +282,168 @@ export default {
 .site-title {
   color: #0e8f6f;
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .collapse-btn {
-  padding: 6px;
+  padding: 8px;
   border: none;
   background: transparent;
   cursor: pointer;
   color: #0e8f6f;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .collapse-btn:hover {
-  background: #f5f5f5;
+  background: rgba(14, 143, 111, 0.1);
 }
 
-/* 优化菜单样式 */
+/* 菜单样式优化 */
 .el-menu {
-  border-right: none;
+  border: none;
   flex: 1;
 }
 
 .el-menu-item {
-  margin: 4px 8px;
-  height: 50px;
-  line-height: 50px;
-  border-radius: 6px;
-  font-size: 15px;
+  margin: 4px 12px;
+  height: 48px;
+  line-height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .el-menu--collapse .el-menu-item {
-  margin: 4px;
+  margin: 4px 2px;
 }
 
 .el-menu-item:hover,
 .el-menu-item.is-active {
-  background-color: #0e8f6f !important;
+  background: linear-gradient(135deg, #0e8f6f 0%, #0d8668 100%) !important;
   color: #fff !important;
+  box-shadow: 0 2px 8px rgba(14, 143, 111, 0.25);
 }
 
 .el-menu-item i {
   font-size: 18px;
-  margin-right: 4px;
+  margin-right: 8px;
   width: 24px;
   text-align: center;
 }
 
-.el-menu--collapse .el-menu-item i {
-  margin: 0;
-}
-
-/* 头像容器样式 */
-.user-menu-container {
-  padding: 16px;
-  margin-top: auto;
-}
-
+/* 用户菜单样式 */
 .user-menu {
-  display: block;
+  padding: 15px;
+  padding-left: 12px;
+  margin-top: auto;
+  position: relative; /* 添加相对定位 */
 }
 
 .user-avatar {
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.el-dropdown-menu__item {
-  font-size: 14px;
-  font-weight: 400;
-  padding: 10px 20px;
-}
-
-.el-dropdown-menu__item i {
-  margin-right: 8px;
-}
-
-/* 全局样式优化 */
-* {
-  box-sizing: border-box;
-}
-
-/* 适配折叠状态 */
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 100%;
-}
-
-.el-menu--collapse {
-  width: 64px;
-}
-
+/* 主内容区域 */
 .main-content {
-  background-color: #f5f5f5;
+  background-color: #f8f9fa;
   padding: 0;
   min-height: 100vh;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-.main-content-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 16px 20px;
-  height: 100%;
-}
-
-.page-header {
-  margin-bottom: 16px;
-  /* 相应减小边距 */
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.page-content {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  padding: 16px;
-  /* 内容区域的 padding 也相应减小 */
-  min-height: calc(100vh - 140px);
-}
-
-/* 响应式布局调整 */
-@media (max-width: 1200px) {
-  .main-content-container {
-    padding: 14px 16px;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content-container {
-    padding: 12px;
-  }
-
-  .page-content {
-    padding: 12px;
-  }
-}
-
+/* 移动端触发器 */
 .menu-trigger {
   position: fixed;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 40px;
-  background-color: #0e8f6f;
-  border-radius: 0 4px 4px 0;
+  width: 32px;
+  height: 48px;
+  background: linear-gradient(135deg, #0e8f6f 0%, #0d8668 100%);
+  border-radius: 0 8px 8px 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   z-index: 1000;
 }
 
 .menu-trigger:hover {
-  width: 28px;
-  background-color: #0d7f62;
+  width: 36px;
+  box-shadow: 3px 0 16px rgba(0, 0, 0, 0.2);
 }
 
 .menu-trigger i {
   color: #fff;
-  font-size: 16px;
+  font-size: 18px;
 }
 
-/* 移动端侧边栏样式优化 */
-.mobile-sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 2001;
-  transform: translateX(0);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: #ffffff;
-}
-
-.mobile-sidebar.collapsed {
-  transform: translateX(-100%);
-}
-
-.mobile-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 2000;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
+/* 移动端适配 */
 @media screen and (max-width: 768px) {
+  .mobile-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 2001;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 2000;
+    opacity: 1;
+    transition: all 0.3s ease;
+  }
+
   .main-content {
     padding: 0;
   }
 }
 
-.user-menu-container {
-  padding: 16px;
-  margin-top: auto;
-  position: relative;
-}
-
-.avatar-wrapper {
-  cursor: pointer;
-  position: relative;
-  width: fit-content;
-}
-
-.user-avatar {
-  border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-}
-
-.custom-dropdown {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  /* 定位到头像上方 */
-  left: 16px;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  width: 140px;
-  z-index: 2000;
-  overflow: hidden;
-  animation: dropdownFade 0.2s ease-out;
-}
-
-.dropdown-item {
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f7fa;
-}
-
-.dropdown-item i {
-  margin-right: 8px;
-  font-size: 16px;
-  color: #909399;
-}
-
-@keyframes dropdownFade {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background-color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 移动端适配 */
-@media screen and (max-width: 768px) {
-  .user-menu-container {
-    padding: 12px;
+  .site-title {
+    color: #2ecc71;
   }
 
-  .custom-dropdown {
-    left: 12px;
+  .el-menu-item:hover,
+  .el-menu-item.is-active {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+  }
+
+  .main-content {
+    background-color: #121212;
   }
 }
 
@@ -636,7 +515,7 @@ body div[role="tooltip"].el-dropdown-menu {
 body > .el-dropdown-menu,
 .el-dropdown-menu[x-placement^="bottom"] {
   left: 16px !important;
-  margin-top: 12px !important;
+  margin-top: 10px !important;
   transform: translate(0, 0) !important;
   transform-origin: center top !important;
 }

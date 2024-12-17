@@ -343,172 +343,335 @@ export default {
 </script>
 
 <style scoped>
-/* 面板基础样式优化 */
+/* 基础布局 */
 .panel {
     background-color: #ffffff;
-    border-radius: 8px;
-    padding: 24px;
-    margin: 20px;
-    height: calc(100vh - 40px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    /* padding: 10px; */
+    margin: 1.5% 20px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
 }
 
-/* 页面标题样式 */
-.el-header {
-    padding: 0 0 20px 0;
-    border-bottom: 1px solid #eef2f6;
-    margin-bottom: 24px;
-}
-
-.el-header h2 {
-    font-size: 24px;
-    color: #2c3e50;
-    margin: 0;
-    font-weight: 600;
-}
-
-/* 搜索栏样式优化 */
+/* 搜索栏 */
 .search-bar {
+    margin-bottom: 28px;
+}
+
+.btn-col {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.create-new {
+    margin-top: 0;
+    transition: all 0.3s ease;
+}
+
+.create-new:hover {
+    transform: translateY(-2px);
+}
+
+/* PC端表格样式 */
+.pc-view {
+    display: none;
+}
+
+.action-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+}
+
+/* 移动端卡片样式 */
+.mobile-view {
+    display: none;
+}
+
+.mobile-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
     margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(235, 238, 245, 0.6);
+}
+
+.mobile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 20px;
 }
 
-@media screen and (min-width: 769px) {
-    .search-bar .el-input {
-        max-width: 460px;
-    }
-
-    .btn-col {
-        padding-left: 16px;
-    }
-
-    .create-new {
-        padding: 12px 24px;
-        font-size: 14px;
-        height: 40px;
-        transition: all 0.3s ease;
-    }
-
-    .create-new:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(14, 143, 111, 0.2);
-    }
-    
-    /* PC端表格样式优化 */
-    .pc-view {
-        flex: 1;
-        overflow: auto;
-    }
-
-    .pc-view .el-table {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    }
-
-    .pc-view .el-table::before {
-        display: none;
-    }
-
-    .pc-view .el-table th {
-        background-color: #f8fafc;
-        padding: 16px 12px;
-        font-weight: 600;
-        color: #2c3e50;
-        border-bottom: 1px solid #eef2f6;
-    }
-
-    .pc-view .el-table td {
-        padding: 16px 12px;
-        border-bottom: 1px solid #eef2f6;
-    }
-
-    .pc-view .el-table--striped .el-table__body tr.el-table__row--striped td {
-        background-color: #f9fafb;
-    }
-
-    .pc-view .el-table__body tr:hover > td {
-        background-color: #f5f7fa !important;
-    }
-
-    /* 表格内操作按钮样式 */
-    .action-row {
-        display: flex;
-        gap: 12px;
-    }
-
-    .action-row .el-button {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-
-    .action-row .el-button--warning {
-        background-color: #ff9f43;
-        border-color: #ff9f43;
-        color: white;
-    }
-
-    .action-row .el-button--warning:hover {
-        background-color: #ff8f2c;
-        border-color: #ff8f2c;
-        transform: translateY(-1px);
-    }
-
-    .action-row .el-button--danger {
-        background-color: #ee5253;
-        border-color: #ee5253;
-    }
-
-    .action-row .el-button--danger:hover {
-        background-color: #e84142;
-        border-color: #e84142;
-        transform: translateY(-1px);
-    }
+.email-badge {
+    background: linear-gradient(145deg, #f0f7ff, #e6f1ff);
+    color: #409eff;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
 }
 
-/* 分页器样式优化 */
+.type-badge {
+    background: linear-gradient(145deg, #f0f9eb, #e7f6e1);
+    color: #67c23a;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-label {
+    color: #909399;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.85;
+}
+
+.info-value {
+    color: #303133;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.mobile-card-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ebeef5, transparent);
+    margin: 20px 0;
+}
+
+.mobile-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobile-card-actions .action-row {
+    justify-content: space-between;
+}
+
+.mobile-card-actions .el-button {
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.mobile-card-actions .el-button:hover {
+    transform: translateY(-2px);
+}
+
+/* 分页器样式 */
 .pagination-container {
-    margin-top: 24px;
-    padding: 16px 0;
-    border-top: 1px solid #eef2f6;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+    /* background: rgba(255, 255, 255, 0.95); */
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
+    z-index: 1000;
 }
 
 .pagination-wrapper {
-    display: flex;
-    justify-content: center;
+    text-align: center;
 }
 
-/* Element UI 分页器组件样式 */
-.el-pagination.is-background .el-pager li:not(.disabled).active {
-    background-color: #0e8f6f;
-    color: white;
+/* Element UI 按钮样式优化 */
+.el-button--primary {
+    background: linear-gradient(145deg, #0e8f6f, #0d8668);
+    border: none;
+    transition: all 0.3s ease;
 }
 
-.el-pagination.is-background .el-pager li:not(.disabled):hover {
-    color: #0e8f6f;
+.el-button--primary:hover,
+.el-button--primary:focus {
+    background: linear-gradient(145deg, #2980b9, #2574ab);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(41, 128, 185, 0.2);
 }
 
-/* 弹窗样式优化 */
-.el-dialog {
-    border-radius: 12px;
-    overflow: hidden;
+/* 响应式布局优化 */
+@media screen and (max-width: 768px) {
+    .panel {
+        margin: 12px;
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .search-bar {
+        margin-bottom: 20px;
+    }
+
+    .btn-col {
+        margin-top: 12px;
+    }
+
+    .create-new {
+        width: 100%;
+    }
+
+    .pc-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 12px;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+        z-index: 1000;
+        margin: 0;
+    }
+
+    .panel {
+        padding-bottom: 72px;
+    }
+
+    .mobile-card-actions .el-button {
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 12px;
+    }
 }
 
-.el-dialog__header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #eef2f6;
+@media screen and (min-width: 769px) {
+    .pc-view {
+        display: block;
+    }
+
+    .mobile-view {
+        display: none;
+    }
+
+    .btn-col {
+        justify-content: flex-end;
+    }
+
+    .create-new {
+        width: auto;
+    }
 }
 
-.el-dialog__body {
-    padding: 24px;
+/* 移动端分页器样式优化 */
+@media screen and (max-width: 768px) {
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 6px 0;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+        z-index: 1000;
+        height: 44px;
+    }
+
+    :deep(.el-pagination) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        padding: 0 16px;
+        height: 100%;
+    }
+
+    :deep(.el-pagination .btn-prev),
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0 4px;
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+    }
+
+    :deep(.el-pagination .number) {
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        margin: 0 4px;
+        border-radius: 16px;
+        font-weight: 500;
+    }
+
+    .mobile-card:last-child {
+        margin-bottom: 56px;
+    }
+
+    :deep(.el-pagination .active) {
+        background: linear-gradient(145deg, #0e8f6f, #0d8668);
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
+    }
+
+    .el-main {
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    }
 }
 
-.el-dialog__footer {
-    padding: 16px 24px;
-    border-top: 1px solid #eef2f6;
+/* 暗色主题优化 */
+@media (prefers-color-scheme: dark) {
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.98);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        :deep(.el-pagination) {
+            color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .active) {
+            background: linear-gradient(145deg, #0e8f6f, #0d8668);
+            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
+        }
+    }
 }
 </style>

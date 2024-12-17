@@ -332,8 +332,130 @@ export default {
     }
 }
 </script>
-
 <style scoped>
+/* 基础布局 */
+.panel {
+    background-color: #ffffff;
+    border-radius: 16px;
+    /* padding: 24px; */
+    margin: 1.5% 20px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 搜索栏 */
+.search-bar {
+    margin-bottom: 28px;
+}
+
+.search-input {
+    width: 100%;
+}
+
+/* 视图切换 */
+.pc-view, .mobile-view {
+    display: none;
+}
+
+/* 状态标签 */
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.status-yes {
+    background: linear-gradient(135deg, #f0f9eb 0%, #e7f6e1 100%);
+    color: #67c23a;
+}
+
+.status-no {
+    background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
+    color: #909399;
+}
+
+/* 移动端卡片 */
+.mobile-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 10px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(235, 238, 245, 0.6);
+}
+
+.mobile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* 操作按钮 */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .el-button {
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+    .panel {
+        margin: 16px;
+        padding: 20px;
+    }
+    
+    .pc-view {
+        display: none;
+    }
+    
+    .mobile-view {
+        display: block;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .pc-view {
+        display: block;
+    }
+    
+    .mobile-view {
+        display: none;
+    }
+}
+
+/* 暗色主题 */
+@media (prefers-color-scheme: dark) {
+    .panel {
+        background-color: #1a1a1a;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-card {
+        background: #242424;
+        border-color: rgba(51, 51, 51, 0.6);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .status-yes {
+        background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.1) 100%);
+    }
+
+    .status-no {
+        background: linear-gradient(135deg, rgba(144, 147, 153, 0.15) 0%, rgba(144, 147, 153, 0.1) 100%);
+    }
+}
 .panel {
     background-color: #ffffff;
     border-radius: 5px;
@@ -478,8 +600,15 @@ export default {
 
 /* 分页器样式 */
 .pagination-container {
-    margin-top: 20px;
-    padding: 8px 0;  /* 减小上下内边距 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+    /* background: rgba(255, 255, 255, 0.95); */
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
+    z-index: 1000;
 }
 
 .pagination-wrapper {

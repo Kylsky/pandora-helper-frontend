@@ -424,20 +424,22 @@ export default {
     }
 }
 </script>
-
 <style scoped>
+/* 基础布局 */
 .panel {
     background-color: #ffffff;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 1% 15px;
-    height: 97%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    /* padding: 10px; */
+    margin: 1.5% 20px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
 }
 
 /* 搜索栏样式 */
 .search-bar {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 
 /* PC端表格相关样式 */
@@ -447,7 +449,7 @@ export default {
 
 .action-row {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     justify-content: flex-start;
 }
 
@@ -458,61 +460,64 @@ export default {
 
 .mobile-card {
     background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
-    border: 1px solid #ebeef5;
+    border: 1px solid rgba(235, 238, 245, 0.2);
 }
 
 .mobile-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .mobile-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .username-badge {
-    background: #f0f7ff;
+    background: linear-gradient(145deg, #f0f7ff, #e6f1ff);
     color: #409eff;
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 24px;
     font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     max-width: 70%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
 }
 
 .expires-badge {
     color: #909399;
     font-size: 13px;
+    font-weight: 500;
 }
 
 .mobile-card-content {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 .account-item {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .account-label {
     color: #909399;
     font-size: 13px;
+    font-weight: 500;
 }
 
 .account-value {
@@ -521,14 +526,14 @@ export default {
 
 .mobile-card-divider {
     height: 1px;
-    background: #ebeef5;
-    margin: 16px 0;
+    background: linear-gradient(90deg, transparent, #ebeef5, transparent);
+    margin: 20px 0;
 }
 
 .mobile-card-actions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .mobile-card-actions .action-row {
@@ -537,32 +542,46 @@ export default {
 
 .mobile-card-actions .el-button {
     flex: 1;
+    transition: all 0.3s ease;
 }
 
 /* 分页器样式 */
-.pagination-wrapper {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
+.pagination-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+    /* background: rgba(255, 255, 255, 0.95); */
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
+    z-index: 1000;
 }
 
-/* Element UI 按钮样式 */
+.pagination-wrapper {
+    text-align: center;
+}
+
+/* Element UI 按钮样式优化 */
 .el-button--primary {
-    background-color: #0e8f6f;
-    border-color: #0e8f6f;
+    background: linear-gradient(145deg, #0e8f6f, #0d8668);
+    border: none;
+    box-shadow: 0 4px 12px rgba(14, 143, 111, 0.2);
 }
 
 .el-button--primary:hover,
 .el-button--primary:focus {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background: linear-gradient(145deg, #0fa67f, #0e9272);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(14, 143, 111, 0.3);
 }
 
-/* 响应式布局 */
+/* 响应式布局优化 */
 @media screen and (max-width: 768px) {
     .panel {
-        margin: 10px;
-        padding: 10px;
+        margin: 12px;
+        padding: 16px;
+        border-radius: 20px;
     }
 
     .pc-view {
@@ -574,7 +593,7 @@ export default {
     }
 
     .search-bar {
-        margin-bottom: 16px;
+        margin-bottom: 20px;
     }
 
     .pagination-wrapper {
@@ -582,9 +601,10 @@ export default {
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: white;
-        padding: 10px 0;
-        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 12px 0;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
         z-index: 1000;
     }
 }
@@ -600,42 +620,42 @@ export default {
 }
 
 .pagination-container {
-    position: relative;
-    width: 100%;
-    margin-top: 20px;
-    padding: 10px 0;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+    /* background: rgba(255, 255, 255, 0.95); */
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
+    z-index: 1000;
 }
 
 .pagination-wrapper {
     text-align: center;
 }
 
-/* 移动端样式优化 */
-
-
-
-/* 移动端分页器样式 */
+/* 移动端分页器样式优化 */
 @media screen and (max-width: 768px) {
     .pagination-container {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 4px 0;
-        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 6px 0;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
         z-index: 1000;
-        height: 36px;
+        height: 44px;
     }
 
-    /* Element UI 分页器组件样式 */
     :deep(.el-pagination) {
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 13px;
-        padding: 0 12px;
+        font-size: 14px;
+        padding: 0 16px;
         height: 100%;
     }
 
@@ -644,50 +664,53 @@ export default {
         background: transparent;
         border: none;
         padding: 0;
-        margin: 0 2px;
-        min-width: 28px;
-        height: 28px;
-        line-height: 28px;
-        border-radius: 14px;
+        margin: 0 4px;
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
     }
 
     :deep(.el-pagination .number) {
-        min-width: 28px;
-        height: 28px;
-        line-height: 28px;
-        margin: 0 2px;
-        border-radius: 14px;
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        margin: 0 4px;
+        border-radius: 16px;
+        font-weight: 500;
     }
 
-    /* 移动端卡片布局调整 */
     .mobile-card:last-child {
-        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
+        margin-bottom: 56px;
     }
 
-
-    /* 当前页码突出显示 */
     :deep(.el-pagination .active) {
-        background-color: #0e8f6f;
+        background: linear-gradient(145deg, #0e8f6f, #0d8668);
         color: white;
-        border-radius: 4px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
     }
 
-    /* 调整内容区域的下边距 */
     .el-main {
-        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
     }
 }
 
-/* 暗色主题支持 */
+/* 暗色主题优化 */
 @media (prefers-color-scheme: dark) {
     @media screen and (max-width: 768px) {
         .pagination-container {
-            background: rgba(30, 30, 30, 0.95);
-            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
+            background: rgba(30, 30, 30, 0.98);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
         }
 
         :deep(.el-pagination) {
             color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .active) {
+            background: linear-gradient(145deg, #0e8f6f, #0d8668);
+            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
         }
     }
 }

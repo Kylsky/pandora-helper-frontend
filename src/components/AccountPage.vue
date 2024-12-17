@@ -23,7 +23,8 @@
                     <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="shared" label="共享" show-overflow-tooltip>
                         <template slot-scope="scope">
-                            <span class="ellipsis">{{ scope.row.shared === 1 ? '✅' : '❌' }}</span>
+                            <i class="el-icon-circle-check" v-if="scope.row.shared === 1" style="color: green;"></i>
+                            <i class="el-icon-circle-close" v-else style="color: red;"></i>
                         </template>
                     </el-table-column>
                     <el-table-column prop="updateTime" label="更新时间"></el-table-column>
@@ -537,18 +538,21 @@ export default {
 </script>
 
 <style scoped>
+/* 基础布局 */
 .panel {
     background-color: #ffffff;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 1% 15px;
-    height: 97%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    /* padding: 10px; */
+    margin: 1.5% 20px;
+    min-height: calc(100vh - 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
 }
 
-/* 搜索栏样式 */
+/* 搜索栏 */
 .search-bar {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 
 .search-input {
@@ -560,108 +564,174 @@ export default {
     justify-content: flex-end;
 }
 
-.create-new {
-    margin-top: 0;
-}
-
-/* PC端表格视图 */
-.pc-view {
-    display: none;
-}
-
-/* 移动端卡片视图 */
+/* 视图切换 */
+.pc-view,
 .mobile-view {
     display: none;
 }
 
+/* 移动端卡片 */
 .mobile-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(235, 238, 245, 0.6);
 }
 
-.mobile-card-content {
-    margin-bottom: 15px;
+.mobile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
-.mobile-card-item {
+/* 卡片头部 */
+.mobile-card-header {
     display: flex;
-    margin-bottom: 8px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-.mobile-card-item .label {
-    font-weight: bold;
-    min-width: 80px;
+/* 邮箱标签 */
+.email-badge {
+    background: linear-gradient(135deg, #ecf5ff 0%, #e6f1ff 100%);
+    color: #409eff;
+    padding: 10px 18px;
+    border-radius: 28px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
+}
+
+.email-badge i {
+    font-size: 16px;
+}
+
+/* 状态标签 */
+.status-badge {
+    background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
     color: #606266;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
-.mobile-card-item .value {
-    flex: 1;
-    word-break: break-all;
+.status-shared {
+    background: linear-gradient(135deg, #f0f9eb 0%, #e7f6e1 100%);
+    color: #67c23a;
 }
 
+/* 卡片内容 */
+.mobile-card-content {
+    padding: 16px 0;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 24px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-label {
+    color: #909399;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.info-label i {
+    font-size: 16px;
+}
+
+.info-value {
+    color: #303133;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 分割线 */
+.mobile-card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #ebeef5 0%, rgba(235, 238, 245, 0.4) 100%);
+    margin: 24px 0;
+}
+
+/* 按钮组 */
 .mobile-card-actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 14px;
 }
 
-/* 图表样式 */
-.chart-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+.action-row {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.chart-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-}
-
-.chart-content {
+    gap: 14px;
+    justify-content: space-between;
     width: 100%;
-    height: 400px;
 }
 
-/* Element UI 按钮样式 */
+.action-row .el-button {
+    flex: 1;
+    height: 40px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 主题色按钮 */
 .el-button--primary {
-    background-color: #0e8f6f;
-    border-color: #0e8f6f;
+    background: linear-gradient(135deg, #0e8f6f 0%, #0d8365 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(14, 143, 111, 0.2);
 }
 
 .el-button--primary:hover,
 .el-button--primary:focus {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background: linear-gradient(135deg, #2980b9 0%, #2472a8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(41, 128, 185, 0.25);
+}
+
+/* 分页器 */
+.pagination-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+    /* background: rgba(255, 255, 255, 0.95); */
+    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
+    z-index: 1000;
+}
+
+.pagination-wrapper {
+    text-align: center;
 }
 
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
     .panel {
-        margin: 10px;
-        padding: 10px;
-    }
-
-    .create-btn-wrapper {
-        justify-content: stretch;
-        margin-top: 10px;
-    }
-
-    .create-new {
-        width: 100%;
+        margin: 16px;
+        padding: 20px;
     }
 
     .pc-view {
@@ -672,12 +742,43 @@ export default {
         display: block;
     }
 
-    .chart-container {
-        padding: 15px;
+    .create-btn-wrapper {
+        justify-content: stretch;
+        margin-top: 16px;
     }
 
-    .chart-content {
-        height: 300px;
+    .create-new {
+        width: 100%;
+    }
+
+    .mobile-card {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .pagination-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        padding: 12px 0;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+        z-index: 1000;
+    }
+
+    .mobile-card:last-child {
+        margin-bottom: 70px;
+    }
+
+    .el-main {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
     }
 }
 
@@ -691,304 +792,43 @@ export default {
     }
 }
 
-/* 更新移动端卡片样式 */
-.mobile-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    border: 1px solid #ebeef5;
-}
-
-.mobile-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
-.mobile-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.email-badge {
-    background: #f0f7ff;
-    color: #409eff;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 70%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.email-badge i {
-    font-size: 16px;
-}
-
-.status-badge {
-    background: #f5f7fa;
-    color: #909399;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.status-shared {
-    background: #f0f9eb;
-    color: #67c23a;
-}
-
-.mobile-card-content {
-    padding: 8px 0;
-}
-
-.info-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.info-label {
-    color: #909399;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.info-label i {
-    font-size: 14px;
-}
-
-.info-value {
-    color: #303133;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.mobile-card-divider {
-    height: 1px;
-    background: #ebeef5;
-    margin: 16px 0;
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.action-button {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.action-button i {
-    font-size: 14px;
-}
-
-/* 响应式调整 */
-@media screen and (max-width: 480px) {
-    .mobile-card {
-        padding: 12px;
-    }
-
-    .info-row {
-        grid-template-columns: 1fr;
-    }
-
-    .mobile-card-actions {
-        justify-content: stretch;
-    }
-
-    .action-button {
-        flex: 1;
-        justify-content: center;
-    }
-}
-
-/* 确保按钮颜色符合主题 */
-.el-button--primary {
-    background-color: #0e8f6f;
-    border-color: #0e8f6f;
-}
-
-.el-button--primary:hover,
-.el-button--primary:focus {
-    background-color: #2980b9;
-    border-color: #2980b9;
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-start;
-    /* 默认左对齐 */
-}
-
-/* 当容器宽度足够时，让按钮组两端对齐 */
-@media screen and (min-width: 480px) {
-    .mobile-card-actions {
-        justify-content: space-between;
-    }
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.action-row {
-    display: flex;
-    gap: 8px;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.action-row .el-button {
-    flex: 1;
-}
-
-/* 当只有一个按钮时的样式 */
-.action-row:last-child {
-    justify-content: stretch;
-}
-
-.action-row:last-child .el-button {
-    width: 100%;
-}
-
-/* 确保按钮组的高度一致 */
-.mobile-card-actions .el-button {
-    height: 32px;
-    padding: 0 12px;
-}
-
-/* 基础容器样式 */
-.panel {
-    background-color: #ffffff;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 1% 15px;
-    min-height: calc(100vh - 30px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-}
-
-/* 主内容区域样式 */
-.el-main {
-    flex: 1;
-    padding-bottom: 48px; 
-    overflow-y: auto;     
-}
-
-
-
-/* 移动端分页器样式 */
-@media screen and (max-width: 768px) {
-    .pagination-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 4px 0;
-        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
-        z-index: 1000;
-        height: 36px;
-    }
-
-    /* Element UI 分页器组件样式 */
-    :deep(.el-pagination) {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 13px;
-        padding: 0 12px;
-        height: 100%;
-    }
-
-    :deep(.el-pagination .btn-prev),
-    :deep(.el-pagination .btn-next) {
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0 2px;
-        min-width: 28px;
-        height: 28px;
-        line-height: 28px;
-        border-radius: 14px;
-    }
-
-    :deep(.el-pagination .number) {
-        min-width: 28px;
-        height: 28px;
-        line-height: 28px;
-        margin: 0 2px;
-        border-radius: 14px;
-    }
-
-    /* 移动端卡片布局调整 */
-    .mobile-card:last-child {
-        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
-    }
-
-
-    /* 当前页码突出显示 */
-    :deep(.el-pagination .active) {
-        background-color: #0e8f6f;
-        color: white;
-        border-radius: 4px;
-    }
-
-    /* 调整内容区域的下边距 */
-    .el-main {
-        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
-    }
-}
-
-/* 暗色主题支持 */
+/* 暗色主题 */
 @media (prefers-color-scheme: dark) {
-    @media screen and (max-width: 768px) {
-        .pagination-container {
-            background: rgba(30, 30, 30, 0.95);
-            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        :deep(.el-pagination) {
-            color: #e0e0e0;
-        }
+    .panel {
+        background-color: #1a1a1a;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
-}
 
+    .mobile-card {
+        background: #242424;
+        border-color: rgba(51, 51, 51, 0.6);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
 
-/* 分页器样式 */
-.pagination-container {
-    margin-top: 20px;
-    padding: 8px 0;  /* 减小上下内边距 */
-}
+    .email-badge {
+        background: linear-gradient(135deg, rgba(64, 158, 255, 0.15) 0%, rgba(64, 158, 255, 0.1) 100%);
+        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.05);
+    }
 
-.pagination-wrapper {
-    text-align: center;
+    .status-badge {
+        background: linear-gradient(135deg, rgba(144, 147, 153, 0.15) 0%, rgba(144, 147, 153, 0.1) 100%);
+    }
+
+    .status-shared {
+        background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.1) 100%);
+    }
+
+    .info-value {
+        color: #e0e0e0;
+    }
+
+    .mobile-card-divider {
+        background: linear-gradient(90deg, #333 0%, rgba(51, 51, 51, 0.4) 100%);
+    }
+
+    .pagination-container {
+        background: rgba(26, 26, 26, 0.98);
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+    }
 }
 </style>
