@@ -1,38 +1,49 @@
 <template>
     <div id="claude">
         <div class="login-container">
-            <h1 style="margin-left: 10px">Fuclaude<span class="toggle-icon" @click="switchToPandora()"><img
-                        src="../assets/ph--user-switch.svg" title="切换至Panel" alt="hi"></span></h1>
+            <h1 style="margin-left: 10px">
+                Fuclaude
+                <span class="toggle-icon-container" @mouseenter="showExtraIcons = true" @mouseleave="showExtraIcons = false">
+                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToPandora()" loading="lazy">
+                    <transition name="fade">
+                        <div v-if="showExtraIcons" class="extra-icons">
+                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')" loading="lazy">
+                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')" loading="lazy">
+                        </div>
+                    </transition>
+                </span>
+            </h1>
 
             <form @submit.prevent="userlogin()">
                 <input type="text" id="username" placeholder="用户名" required>
                 <input type="password" id="password" placeholder="密码" required>
                 <button type="submit"><span class="btn-text">登录</span><span class="spinner"></span></button>
             </form>
-            <div class="divider "><span>OR</span></div>
+            <div class="divider"><span>OR</span></div>
             <div class="alternative-login">
                 <div class="oauth-buttons">
-                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()">
+                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()" loading="lazy">
                 </div>
                 <button type="button" @click="reset()">重置密码</button>
             </div>
-
             <div class="footer">
-                Powered by Fuclaude
+                <span>Powered by Fuclaude</span>
             </div>
         </div>
     </div>
 </template>
 
-
 <script>
-
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 
 export default {
-
     name: 'ClaudePage',
+    data() {
+        return {
+            showExtraIcons: false
+        };
+    },
     methods: {
         reset() {
             this.$router.replace({ name: 'reset' });
@@ -41,7 +52,6 @@ export default {
         async userlogin() {
             const button = document.querySelector('button[type="submit"]');
             button.classList.add('loading');
-            
             
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
@@ -58,7 +68,6 @@ export default {
                     window.open(response.data.data);
                 } else {
                     button.classList.remove('loading');
-
                     var res = response.data.message
                     alert(res);
                 }
@@ -66,13 +75,11 @@ export default {
                 button.classList.remove('loading');
                 alert(error)
             }
-
         },
 
         async initiateOAuth() {
             try {
                 const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=Claude`)
-
                 var data = response;
                 console.log(data)
                 if (data.data) {
@@ -83,12 +90,14 @@ export default {
             } catch (error) {
                 alert(error)
             }
-
         },
-
 
         switchToPandora() {
             this.$router.replace({ name: 'home' });
+        },
+        
+        navigateTo(pageName) {
+            this.$router.replace({ name: pageName });
         }
     }
 }
@@ -96,74 +105,88 @@ export default {
 
 <style scoped>
 #claude {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: linear-gradient(135deg, #d9534f 0%, #185a9d 100%);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
+    padding: 20px;
 }
 
 .login-container {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     padding: 40px;
-    width: 300px;
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.3s ease;
+}
+
+.login-container:hover {
+    transform: translateY(-5px);
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #2c3e50;
     margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
 }
 
 input {
     width: 100%;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 2px solid #eee;
+    border-radius: 8px;
     box-sizing: border-box;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #d9534f;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.1);
 }
 
 .oauth-buttons {
     display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    justify-content: center;
+    margin: 15px 0;
 }
 
 .oauth-buttons img {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.oauth-buttons img:hover {
+    transform: scale(1.1);
 }
 
 button {
     width: 100%;
-    padding: 10px;
-    background-color: #3498db;
+    padding: 15px;
+    background-color: #d9534f;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s ease;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #185a9d;
-}
-
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    margin-left: 7px;
-    margin-right: 7px;
-    border-bottom: 1px solid #ccc;
+    background-color: #c9302c;
+    transform: translateY(-2px);
 }
 
 .divider {
@@ -171,6 +194,15 @@ button:hover {
     align-items: center;
     text-align: center;
     margin: 20px 0;
+    color: #6c757d;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 2px solid #eee;
+    margin: 0 15px;
 }
 
 .alternative-login {
@@ -179,21 +211,62 @@ button:hover {
 
 .alternative-login button {
     background-color: white;
-    color: #333;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    transition: background-color 0.3s ease;
+    color: #2c3e50;
+    border: 2px solid #eee;
+    margin-top: 10px;
 }
 
 .alternative-login button:hover {
-    background-color: #f5f5f5;
+    border-color: #d9534f;
+    color: #d9534f;
+    background-color: white;
 }
 
 .footer {
     text-align: center;
-    margin-top: 20px;
-    color: #888;
-    font-size: 12px;
+    margin-top: 30px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.toggle-icon-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.extra-icons {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 15px;
+    z-index: 10;
+}
+
+.extra-icons img {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.extra-icons img:hover {
+    transform: scale(1.2);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateX(-10px);
 }
 
 button[type="submit"] {
@@ -201,76 +274,30 @@ button[type="submit"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* padding: 8px 16px; */
-    min-width: 100px; /* 确保按钮有最小宽度 */
-    min-height: 36px; /* 确保按钮有最小高度 */
 }
 
-/* 按钮文字样式 */
-.btn-text {
-    display: inline-block;
-}
-
-/* Loading时隐藏文字 */
-button[type="submit"].loading .btn-text {
-    display: none;
-}
-
-/* Spinner样式 */
 .spinner {
     display: none;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    border-top-color: white;
     animation: spin 1s linear infinite;
+    position: absolute;
 }
 
-/* Spinner显示状态 */
 button[type="submit"].loading .spinner {
     display: block;
 }
 
+button[type="submit"].loading .btn-text {
+    visibility: hidden;
+}
+
 @keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-.btn-text {
-    visibility: visible;
-}
-
-#loginForm {
-    position: fixed;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    /*border: solid white;*/
-    padding: 40px;
-    /* 增加填充来使弹窗更大 */
-    /*box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);*/
-    background: white;
-    display: none;
-    width: 300px;
-    /* 增加宽度 */
-    height: auto;
-    /* 自动调整高度 */
-    z-index: 1000;
-    /* 确保弹窗位于最顶层 */
-}
-
-.toggle-icon {
-    margin-left: 10px;
-    cursor: pointer;
-    /*vertical-align: super;*/
-}
-
-.toggle-icon:hover {
-    opacity: 0.7;
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

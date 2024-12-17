@@ -13,8 +13,8 @@
             </el-row>
 
             <!-- PC端表格视图 -->
-            <div class="pc-view">
-                <el-table :data="tableData" style="width: 100%">
+            <div v-show="!isMobile" class="pc-view">
+                <el-table :data="tableData" style="width: 100%" v-loading="loading">
                     <el-table-column prop="email" label="账号"></el-table-column>
                     <el-table-column prop="type" label="账号类型"></el-table-column>
                     <el-table-column prop="auto" label="自动上车">
@@ -41,7 +41,7 @@
             </div>
 
             <!-- 移动端卡片视图 -->
-            <div class="mobile-view">
+            <div v-show="isMobile" class="mobile-view">
                 <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
                     <div class="mobile-card-header">
                         <div class="account-badge">
@@ -49,7 +49,7 @@
                             {{ item.email }}
                         </div>
                         <div :class="['auto-badge', item.auto === 1 ? 'auto-yes' : 'auto-no']">
-                            {{ item.auto === 1 ? '自动上车' : '手动上车' }}
+                            {{ item.auto === 1 ? '自动上车' : '审核上车' }}
                         </div>
                     </div>
 
@@ -100,9 +100,14 @@
 
             <!-- 分页器 -->
             <div class="pagination-container">
-                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
-                    :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
+                <el-pagination 
+                    @current-change="handleCurrentChange" 
+                    :current-page.sync="currentPage" 
+                    :page-size="pageSize"
+                    :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
+                    :pager-count="isMobile ? 5 : 7"
+                    :total="total"
+                    class="pagination-wrapper">
                 </el-pagination>
             </div>
 
@@ -126,8 +131,6 @@
 </template>
 
 <script>
-
-
 import config from '../configs/config'
 import apiClient from '../configs/axios'
 import { EventBus } from '../configs/eventBus';
@@ -140,20 +143,21 @@ export default {
         return {
             isMobile: false,
             email: '',
-            tableData: [], // 这里应该填充实际的表格数据
+            tableData: [], 
             currentPage: 1,
             total: 0,
             isDialogVisible: false,
             isAccDialogVisible: false,
             modalVisible: false,
             modalTitle: '新增项目',
-            currentIndex: null, // 用于追踪当前编辑的项目索引
+            currentIndex: null,
             activateFlag: false,
             accountOpts: [],
             auditVisible: false,
             auditValues: [],
             auditOptions: [],
             auditCarId: null,
+            loading: false,
 
             formData: {},
             shareFormData: {},
@@ -180,82 +184,91 @@ export default {
             EventBus.$emit('envVariableChanged', 'jump');
         },
         async submitAudit(flag) {
-            // 实现提交审核的逻辑
-            console.log('提交审核', this.auditCarId, this.auditValues);
-            const response = await apiClient.post(`${config.apiBaseUrl}/car/audit`, { 'accountId': this.auditCarId, 'allowApply': flag, 'ids': this.auditValues }, {
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+            try {
+                const response = await apiClient.post(`${config.apiBaseUrl}/car/audit`, { 
+                    'accountId': this.auditCarId, 
+                    'allowApply': flag, 
+                    'ids': this.auditValues 
+                }, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                
+                if (response.data.status) {
+                    message.success("审核成功")
+                } else {
+                    message.error(response.data.message);
                 }
-            }).catch(function (error) {
+                
+                this.auditVisible = false;
+                this.auditValues = [];
+                this.auditCarId = null;
+                this.fetchItems('');
+            } catch (error) {
                 message.error(error)
-            });
-            if (response.data.status) {
-                console.log("audit success");
-                message.success("审核成功")
-            } else {
-                message.error(response.data.message);
             }
-            this.auditVisible = false;
-            this.auditValues = [];
-            this.auditCarId = null;
-            this.fetchItems('');
         },
         async applyCar(id) {
-            const response = await apiClient.post(`${config.apiBaseUrl}/car/apply`, { 'accountId': id }, {
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+            try {
+                const response = await apiClient.post(`${config.apiBaseUrl}/car/apply`, { 'accountId': id }, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                
+                if (response.data.status) {
+                    message.success('申请成功');
+                } else {
+                    message.error(response.data.message);
                 }
-            }).catch(function (error) {
+                this.closeModal()
+            } catch (error) {
                 message.error(error)
-            });
-            if (response.data.status) {
-                message.success('申请成功');
-            } else {
-                message.error(response.data.message);
             }
-            this.closeModal()
         },
         async fetchItems(email) {
+            this.loading = true;
             try {
-                const response = await apiClient.get(`${config.apiBaseUrl}/car/list?page=` + this.currentPage + `&size=` + 10 + `&owner=` + email, {
+                const response = await apiClient.get(`${config.apiBaseUrl}/car/list?page=${this.currentPage}&size=10&owner=${email}`, {
                     withCredentials: true,
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 });
+                
                 if (response.data.status) {
                     this.tableData = response.data.data.data
                     this.total = response.data.data.total
                 }
             } catch (error) {
                 message.error(error)
+            } finally {
+                this.loading = false;
             }
         },
         handleUpdateValue(fieldId, newValue) {
-            // 更新 formData 中对应字段的值
-            // this.formData[fieldId] = newValue;
             this.$set(this.formData, fieldId, newValue)
-
-            // 更新 formFields 中对应字段的值
             const fieldIndex = this.formFields.findIndex(field => field.id === fieldId);
             if (fieldIndex !== -1) {
                 this.formFields[fieldIndex].value = newValue;
             }
         },
         async showModal(id) {
-            console.log(this.auditVisible)
-            this.auditVisible = true;
-            this.auditCarId = id;
-            const response = await apiClient.get(`${config.apiBaseUrl}/car/fetchApplies?accountId=` + this.auditCarId, {
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
-                }
-            }).catch(function (error) {
+            try {
+                this.auditVisible = true;
+                this.auditCarId = id;
+                const response = await apiClient.get(`${config.apiBaseUrl}/car/fetchApplies?accountId=${this.auditCarId}`, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                this.auditOptions = response.data.data;
+            } catch (error) {
                 message.error(error)
-            });
-            this.auditOptions = response.data.data;
+            }
         },
-        async contact(contact) {
+        contact(contact) {
             window.open("https://linux.do/u/" + contact + "/summary")
         },
         closeModal() {
@@ -265,40 +278,38 @@ export default {
         },
         async submitForm() {
             const itemData = { ...this.formData };
-            if (!this.currentIndex) {
-                console.log(itemData)
-                itemData.accountId = parseInt(itemData.accountId)
-                itemData.count = parseInt(itemData.count)
-                itemData.duration = parseInt(itemData.duration)
+            try {
+                if (!this.currentIndex) {
+                    itemData.accountId = parseInt(itemData.accountId)
+                    itemData.count = parseInt(itemData.count)
+                    itemData.duration = parseInt(itemData.duration)
 
-                const response = await apiClient.post(`${config.apiBaseUrl}/redemption/add`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    const response = await apiClient.post(`${config.apiBaseUrl}/redemption/add`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    
+                    if (response.data.status) {
+                        message.success('新增成功');
+                    } else {
+                        message.error(response.data.message);
                     }
-                }).catch(function (error) {
-                    message.error(error)
-                });
-                if (response.data.status) {
-                    message.success('新增成功');
+                    this.closeModal()
                 } else {
-                    message.error(response.data.message);
+                    itemData.id = this.currentIndex;
+                    itemData.duration = parseInt(itemData.duration)
+                    await apiClient.patch(`${config.apiBaseUrl}/redemption/update`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
                 }
-                this.closeModal()
+                this.fetchItems('')
+                this.closeModal();
+            } catch (error) {
+                message.error(error)
             }
-            else {
-                itemData.id = this.currentIndex;
-                itemData.duration = parseInt(itemData.duration)
-                apiClient.patch(`${config.apiBaseUrl}/redemption/update`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
-                    }
-                }).catch(function (error) {
-                    message.error(error)
-                })
-            }
-            this.fetchItems('')
-            this.closeModal();
-
         },
         resetFormFields() {
             this.shareAdd = false;
@@ -310,12 +321,9 @@ export default {
             });
         },
         emailQuery() {
-            // 实现邮箱查询逻辑
             this.fetchItems(this.email)
         },
-        handleCurrentChange(val) {
-            // 处理页码变化
-            console.log(val)
+        handleCurrentChange() {
             this.fetchItems('')
         },
         async handleSelectChange({ type, field, value }) {
@@ -337,7 +345,7 @@ export default {
 .panel {
     background-color: #ffffff;
     border-radius: 16px;
-    /* padding: 24px; */
+    /* padding: 10px; */
     margin: 1.5% 20px;
     min-height: calc(100vh - 40px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -348,6 +356,7 @@ export default {
 /* 搜索栏 */
 .search-bar {
     margin-bottom: 28px;
+    transition: all 0.3s ease;
 }
 
 .search-input {
@@ -356,7 +365,12 @@ export default {
 
 /* 视图切换 */
 .pc-view, .mobile-view {
-    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* 状态标签 */
@@ -368,27 +382,31 @@ export default {
     font-size: 13px;
     font-weight: 600;
     transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
 }
 
 .status-yes {
     background: linear-gradient(135deg, #f0f9eb 0%, #e7f6e1 100%);
     color: #67c23a;
+    box-shadow: 0 2px 8px rgba(103, 194, 58, 0.15);
 }
 
 .status-no {
     background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
     color: #909399;
+    box-shadow: 0 2px 8px rgba(144, 147, 153, 0.15);
 }
 
 /* 移动端卡片 */
 .mobile-card {
     background: #ffffff;
     border-radius: 20px;
-    padding: 10px;
+    padding: 20px;
     margin-bottom: 24px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: 1px solid rgba(235, 238, 245, 0.6);
+    backdrop-filter: blur(12px);
 }
 
 .mobile-card:hover {
@@ -407,62 +425,52 @@ export default {
     font-weight: 600;
     border-radius: 8px;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(4px);
+}
+
+.action-buttons .el-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
     .panel {
-        margin: 16px;
-        padding: 20px;
+        margin: 12px;
+        padding: 16px;
     }
-    
-    .pc-view {
-        display: none;
-    }
-    
-    .mobile-view {
-        display: block;
-    }
-}
 
-@media screen and (min-width: 769px) {
-    .pc-view {
-        display: block;
+    .action-buttons {
+        flex-direction: column;
     }
-    
-    .mobile-view {
-        display: none;
+
+    .action-buttons .el-button {
+        width: 100%;
     }
 }
 
 /* 暗色主题 */
 @media (prefers-color-scheme: dark) {
     .panel {
-        background-color: #1a1a1a;
+        background-color: rgba(26, 26, 26, 0.8);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
     .mobile-card {
-        background: #242424;
+        background: rgba(36, 36, 36, 0.8);
         border-color: rgba(51, 51, 51, 0.6);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
     .status-yes {
         background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.1) 100%);
+        box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
     }
 
     .status-no {
         background: linear-gradient(135deg, rgba(144, 147, 153, 0.15) 0%, rgba(144, 147, 153, 0.1) 100%);
+        box-shadow: 0 2px 8px rgba(144, 147, 153, 0.1);
     }
-}
-.panel {
-    background-color: #ffffff;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 1% 15px;
-    height: 97%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* 搜索栏样式 */
@@ -471,10 +479,6 @@ export default {
 }
 
 /* PC端表格样式 */
-.pc-view {
-    display: none;
-}
-
 .status-tag {
     display: inline-block;
     padding: 2px 8px;
@@ -493,10 +497,6 @@ export default {
 }
 
 /* 移动端卡片样式 */
-.mobile-view {
-    display: none;
-}
-
 .mobile-card {
     background: #ffffff;
     border-radius: 12px;
@@ -604,10 +604,8 @@ export default {
     bottom: 20px;
     right: 20px;
     padding: 16px;
-    /* background: rgba(255, 255, 255, 0.95); */
     backdrop-filter: blur(8px);
     border-radius: 8px;
-    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
     z-index: 1000;
 }
 
@@ -649,14 +647,6 @@ export default {
         padding: 10px;
     }
 
-    .pc-view {
-        display: none;
-    }
-
-    .mobile-view {
-        display: block;
-    }
-
     .pagination-container {
         position: fixed;
         bottom: 0;
@@ -685,14 +675,6 @@ export default {
 }
 
 @media screen and (min-width: 769px) {
-    .pc-view {
-        display: block;
-    }
-
-    .mobile-view {
-        display: none;
-    }
-
     .modern-audit-dialog {
         width: 500px !important;
     }
@@ -759,7 +741,6 @@ export default {
     }
 }
 
-
 /* 移动端分页器样式 */
 @media screen and (max-width: 768px) {
     .pagination-container {
@@ -807,12 +788,12 @@ export default {
 
     /* 移动端卡片布局调整 */
     .mobile-card:last-child {
-        margin-bottom: 48px; /* 确保最后一张卡片不被分页器遮挡 */
+        margin-bottom: 48px;
     }
 
     /* 调整内容区域的下边距 */
     .el-main {
-        padding-bottom: calc(48px + env(safe-area-inset-bottom)); /* 适配全面屏 */
+        padding-bottom: calc(48px + env(safe-area-inset-bottom));
     }
 }
 

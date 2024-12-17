@@ -14,29 +14,29 @@
 
             <!-- PC端表格视图 -->
             <div class="pc-view">
-                <el-table :data="tableData" style="width: 100%" :fit="true">
+                <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading">
                     <el-table-column prop="uniqueName" label="用户名"></el-table-column>
                     <el-table-column prop="gptCarName" label="ChatGPT账号" width="180">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
-                                :loading="scope.row.loading" @click="openChat(scope.row.gptConfigId, 1, scope)" />
+                                :loading="scope.row.loading" @click="openChat(scope.row.gptConfigId, 1)" />
                         </template>
                     </el-table-column>
                     <el-table-column prop="claudeCarName" label="Claude账号" width="180">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
                                 type="claude" :loading="scope.row.loading"
-                                @click="openChat(scope.row.claudeConfigId, 2, scope)" />
+                                @click="openChat(scope.row.claudeConfigId, 2)" />
                         </template>
                     </el-table-column>
                     <el-table-column prop="apiCarName" label="API账号" width="180">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
-                                :loading="scope.row.loading" @click="openChat(scope.row.apiConfigId, 3, scope)" />
+                                :loading="scope.row.loading" @click="openChat(scope.row.apiConfigId, 3)" />
                         </template>
                     </el-table-column>
                     <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
-                    <el-table-column label="操作" width="250">
+                    <el-table-column label="操作" width="250" fixed="right">
                         <template slot-scope="scope">
                             <div class="action-row">
                                 <el-button type="primary" size="mini"
@@ -52,7 +52,7 @@
 
             <!-- 移动端卡片视图 -->
             <div class="mobile-view">
-                <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
+                <div v-for="(item, index) in tableData" :key="index" class="mobile-card" v-loading="item.loading">
                     <div class="mobile-card-header">
                         <div class="username-badge">
                             <i class="el-icon-user"></i>
@@ -68,7 +68,7 @@
                             <div class="account-label">ChatGPT账号</div>
                             <div class="account-value">
                                 <split-button :name="item.gptCarName" :count="item.gptUserCount || 0" type="gpt"
-                                    :loading="item.loading" @click="openChat(item.gptConfigId, 1, item)" />
+                                    :loading="item.loading" @click="openChat(item.gptConfigId, 1)" />
                             </div>
                         </div>
 
@@ -76,8 +76,7 @@
                             <div class="account-label">Claude账号</div>
                             <div class="account-value">
                                 <split-button :name="item.claudeCarName" :count="item.claudeUserCount || 0"
-                                    type="claude" :loading="item.loading"
-                                    @click="openChat(item.claudeConfigId, 2, item)" />
+                                    type="claude" :loading="item.loading" @click="openChat(item.claudeConfigId, 2)" />
                             </div>
                         </div>
 
@@ -85,7 +84,7 @@
                             <div class="account-label">API账号</div>
                             <div class="account-value">
                                 <split-button :name="item.apiCarName" :count="item.apiUserCount || 0" type="api"
-                                    :loading="item.loading" @click="openChat(item.apiConfigId, 3, item)" />
+                                    :loading="item.loading" @click="openChat(item.apiConfigId, 3)" />
                             </div>
                         </div>
                     </div>
@@ -94,17 +93,20 @@
 
                     <div class="mobile-card-actions">
                         <div class="action-row">
-                            <el-button type="primary" size="mini" @click="showShareModal(item.id)">激活</el-button>
-                            <el-button type="warning" size="mini" @click="editItem(item.id)">编辑</el-button>
-                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)">删除</el-button>
+                            <el-button type="primary" size="mini" :loading="item.actionLoading"
+                                @click="showShareModal(item.id)">激活</el-button>
+                            <el-button type="warning" size="mini" :loading="item.actionLoading"
+                                @click="editItem(item.id)">编辑</el-button>
+                            <el-button type="danger" size="mini" :loading="item.actionLoading"
+                                @click="showConfirmDialog(item.id)">删除</el-button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="pagination-container">
-                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
+                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage"
+                    :page-size="pageSize" :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
                     :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
                 </el-pagination>
             </div>
@@ -131,8 +133,6 @@ import SplitButton from './SplitButton.vue'  // 确保路径正确
 import message from '@/configs/message'
 import { Loading } from 'element-ui';
 
-
-
 export default {
     name: 'SharePage',
     components: {
@@ -145,17 +145,17 @@ export default {
         return {
             isMobile: false,
             email: '',
-            tableData: [], // 这里应该填充实际的表格数据
+            tableData: [],
             currentPage: 1,
             total: 0,
             isDialogVisible: false,
             isAccDialogVisible: false,
             modalVisible: false,
             modalTitle: '新增项目',
-            currentIndex: null, // 用于追踪当前编辑的项目索引
+            currentIndex: null,
             activateFlag: false,
             accountOpts: [],
-
+            loading: false,
             formData: {},
             shareFormData: {},
             formFields: [
@@ -178,89 +178,77 @@ export default {
         checkIsMobile() {
             this.isMobile = window.innerWidth <= 768;
         },
-        async openChat(id, type, scope) {
+        async openChat(id, type) {
             if (id === null) {
                 return
             }
 
-            const loading = Loading.service({
-                target: scope ? scope.el : document.body,
+            const loadingInstance = Loading.service({
+                fullscreen: true,
                 text: '加载中...',
-                spinner: 'el-icon-loading',
-                background: 'rgba(255, 255, 255, 0.7)'
+                background: 'rgba(0, 0, 0, 0.7)'
             });
+
             try {
-                if (type === 1) {
-                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getGptShare?gptConfigId=` + id, {
-                        withCredentials: true,
-                        headers: {
-                            'Authorization': "Bearer " + localStorage.getItem('token')
-                        }
-                    });
-                    if (response.data.status) {
-                        window.open(response.data.data)
+                let response;
+                const body = {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
                     }
+                };
+
+                switch (type) {
+                    case 1:
+                        response = await apiClient.get(`${config.apiBaseUrl}/share/getGptShare?gptConfigId=${id}`, body);
+                        break;
+                    case 2:
+                        response = await apiClient.get(`${config.apiBaseUrl}/share/getClaudeShare?claudeConfigId=${id}`, body);
+                        break;
+                    case 3:
+                        response = await apiClient.get(`${config.apiBaseUrl}/share/getApiShare?apiConfigId=${id}`, body);
+                        break;
                 }
-                else if (type === 2) {
-                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getClaudeShare?claudeConfigId=` + id, {
-                        withCredentials: true,
-                        headers: {
-                            'Authorization': "Bearer " + localStorage.getItem('token')
-                        }
-                    });
-                    if (response.data.status) {
-                        window.open(response.data.data)
-                    }
-                }
-                else if (type === 3) {
-                    const response = await apiClient.get(`${config.apiBaseUrl}/share/getApiShare?apiConfigId=` + id, {
-                        withCredentials: true,
-                        headers: {
-                            'Authorization': "Bearer " + localStorage.getItem('token')
-                        }
-                    });
-                    if (response.data.status) {
-                        window.open(response.data.data)
-                    }
+
+                if (response?.data?.status) {
+                    window.open(response.data.data)
                 }
             } catch (error) {
                 console.error('请求失败:', error);
-                // 可以在这里添加错误提示
                 this.$message.error('操作失败，请重试');
             } finally {
-                // 无论成功失败都关闭 loading
-                loading.close();
+                loadingInstance.close();
             }
-
-
         },
         showConfirmDialog(id) {
             this.currentIndex = id;
             this.isDialogVisible = true;
         },
         async fetchItems(email) {
+            this.loading = true;
             try {
-                const response = await apiClient.get(`${config.apiBaseUrl}/share/list?page=` + this.currentPage + `&size=` + 10 + `&emailAddr=` + email, {
+                const response = await apiClient.get(`${config.apiBaseUrl}/share/list?page=${this.currentPage}&size=10&emailAddr=${email}`, {
                     withCredentials: true,
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 });
                 if (response.data.status) {
-                    this.tableData = response.data.data.data
-                    this.total = response.data.data.total
+                    this.tableData = response.data.data.data.map(item => ({
+                        ...item,
+                        loading: false,
+                        actionLoading: false
+                    }));
+                    this.total = response.data.data.total;
                 }
             } catch (error) {
                 message.error(error)
+            } finally {
+                this.loading = false;
             }
-
         },
         handleUpdateValue(fieldId, newValue) {
-            // 更新 formData 中对应字段的值
-            // this.formData[fieldId] = newValue;
-            this.$set(this.formData, fieldId, newValue)
-
-            // 更新 formFields 中对应字段的值
+            this.$set(this.formData, fieldId, newValue);
             const fieldIndex = this.formFields.findIndex(field => field.id === fieldId);
             if (fieldIndex !== -1) {
                 this.formFields[fieldIndex].value = newValue;
@@ -277,86 +265,105 @@ export default {
             this.shareAddFlag = true;
             this.modalTitle = '激活';
             this.currentIndex = id;
-            this.formFields = this.shareFields
+            this.formFields = this.shareFields;
             this.resetFormFields();
             this.modalVisible = true;
             this.activateFlag = true;
-            const response = await apiClient.get(`${config.apiBaseUrl}/account/options?type=1`, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+
+            try {
+                const response = await apiClient.get(`${config.apiBaseUrl}/account/options?type=1`, {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+
+                this.accountOpts = response.data.data;
+                const newF = this.shareFields.find(f => f.id === "accountOptions");
+                if (newF) {
+                    newF.options = this.accountOpts;
+                    this.formData = {
+                        'accountId': parseInt(this.accountOpts[0]?.value),
+                        'id': id
+                    };
                 }
-            });
-            this.accountOpts = response.data.data;
-            const newF = this.shareFields.find(f => f.id === "accountOptions");
-            if (newF) {
-                // console.log(newF)
-                newF.options = this.accountOpts;  // 更新 id 对应的字段
-                // newF.value = this.accountOpts[0].value
-                this.formData = { 'accountId': parseInt(this.accountOpts[0].value), 'id': id }
-                // console.log(this.formData)
+            } catch (error) {
+                message.error('获取账号选项失败');
             }
         },
         async editItem(index) {
             this.modalTitle = '编辑共享';
             this.formFields = this.accountFields;
             this.currentIndex = index;
-            const response = await apiClient.get(`${config.apiBaseUrl}/share/getById?id=` + index, {
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
-                }
-            });
-            let acc = response.data.data;
-            this.formFields.forEach(field => {
-                field.value = acc[field.id];
-                this.formData[field.id] = acc[field.id];
-            });
-            this.modalVisible = true;
+
+            try {
+                const response = await apiClient.get(`${config.apiBaseUrl}/share/getById?id=${index}`, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+
+                let acc = response.data.data;
+                this.formFields.forEach(field => {
+                    field.value = acc[field.id];
+                    this.formData[field.id] = acc[field.id];
+                });
+                this.modalVisible = true;
+            } catch (error) {
+                message.error('获取共享信息失败');
+            }
         },
         closeModal() {
             this.modalVisible = false;
             this.shareAddFlag = false;
+            this.activateFlag = false;
+            this.formData = {};
         },
         async submitForm() {
             const itemData = { ...this.formData };
-            if (this.activateFlag) {
-                console.log(itemData)
-                itemData.accountId = itemData.accountOptions ? parseInt(itemData.accountOptions) : itemData.accountId
-                itemData.id = this.currentIndex
-                itemData.accountType = parseInt(itemData.accountType)
-
-                const response = await apiClient.post(`${config.apiBaseUrl}/share/distribute`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
-                    }
-                }).catch(function (error) {
-                    message.error(error)
-                });
-                if (response.data.status) {
-                    message.success('激活成功');
-                } else {
-                    message.error(response.data.message);
-                }
-                this.fetchItems('')
-                this.currentIndex = null;
-                this.activateFlag = false;
+            const item = this.tableData.find(item => item.id === this.currentIndex);
+            if (item) {
+                item.actionLoading = true;
             }
-            else if (this.currentIndex !== null) {
-                itemData.id = this.currentIndex;
-                const response = await apiClient.patch(`${config.apiBaseUrl}/share/update`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
-                    }
-                }).catch(function (error) {
-                    message.error(error)
-                })
-                if (response.data.status) {
-                    message.success("编辑成功")
-                }
-            }
-            this.fetchItems('')
-            this.closeModal();
 
+            try {
+                if (this.activateFlag) {
+                    itemData.accountId = itemData.accountOptions ? parseInt(itemData.accountOptions) : itemData.accountId;
+                    itemData.id = this.currentIndex;
+                    itemData.accountType = parseInt(itemData.accountType);
+
+                    const response = await apiClient.post(`${config.apiBaseUrl}/share/distribute`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+
+                    if (response.data.status) {
+                        message.success('激活成功');
+                    } else {
+                        message.error(response.data.message);
+                    }
+                } else if (this.currentIndex !== null) {
+                    itemData.id = this.currentIndex;
+                    const response = await apiClient.patch(`${config.apiBaseUrl}/share/update`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+
+                    if (response.data.status) {
+                        message.success("编辑成功");
+                    }
+                }
+            } catch (error) {
+                message.error('操作失败');
+            } finally {
+                if (item) {
+                    item.actionLoading = false;
+                }
+                await this.fetchItems('');
+                this.closeModal();
+            }
         },
         resetFormFields() {
             this.shareAdd = false;
@@ -368,53 +375,63 @@ export default {
             });
         },
         emailQuery() {
-            // 实现邮箱查询逻辑
-            this.fetchItems(this.email)
+            this.fetchItems(this.email);
         },
         async handleDelete() {
-            // 实现删除逻辑
-            const response = await apiClient.delete(`${config.apiBaseUrl}/share/delete?id=` + this.currentIndex, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
-                }
-            });
-            if (response.data.status) {
-                message.success('删除成功');
-            } else {
-                message.error('删除失败，请稍后重试');
+            const item = this.tableData.find(item => item.id === this.currentIndex);
+            if (item) {
+                item.actionLoading = true;
             }
-            this.fetchItems('')
-            this.isDialogVisible = false
-        },
-        handleCurrentChange(val) {
-            // 处理页码变化
-            console.log(val)
-            this.fetchItems('')
-        },
-        async handleSelectChange({ type, field, value }) {
-            if (type == 1 && field.id != "accountOptions") {
-                const response = await apiClient.get(`${config.apiBaseUrl}/account/options?type=` + value, {
+
+            try {
+                const response = await apiClient.delete(`${config.apiBaseUrl}/share/delete?id=${this.currentIndex}`, {
                     withCredentials: true,
                     headers: {
                         'Authorization': "Bearer " + localStorage.getItem('token')
                     }
                 });
-                this.accountOpts = response.data.data;
-                field.value = value
-                const newF = this.shareFields.find(f => f.id === "accountOptions");
-                if (newF) {
-                    // console.log(newF)
-                    newF.options = this.accountOpts;  // 更新 id 对应的字段
-                }
-            } else {
-                console.log(field)
-            }
 
+                if (response.data.status) {
+                    message.success('删除成功');
+                } else {
+                    message.error('删除失败，请稍后重试');
+                }
+            } catch (error) {
+                message.error('删除失败');
+            } finally {
+                if (item) {
+                    item.actionLoading = false;
+                }
+                await this.fetchItems('');
+                this.isDialogVisible = false;
+            }
+        },
+        handleCurrentChange() {
+            this.fetchItems('');
+        },
+        async handleSelectChange({ type, field, value }) {
+            if (type === 1 && field.id !== "accountOptions") {
+                try {
+                    const response = await apiClient.get(`${config.apiBaseUrl}/account/options?type=${value}`, {
+                        withCredentials: true,
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+
+                    this.accountOpts = response.data.data;
+                    field.value = value;
+                    const newF = this.shareFields.find(f => f.id === "accountOptions");
+                    if (newF) {
+                        newF.options = this.accountOpts;
+                    }
+                } catch (error) {
+                    message.error('获取账号选项失败');
+                }
+            }
         },
     },
     mounted() {
-        this.fetchItems('');
         this.fetchItems('');
         this.checkIsMobile();
         window.addEventListener('resize', this.checkIsMobile);
@@ -429,7 +446,6 @@ export default {
 .panel {
     background-color: #ffffff;
     border-radius: 16px;
-    /* padding: 10px; */
     margin: 1.5% 20px;
     min-height: calc(100vh - 40px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -551,10 +567,8 @@ export default {
     bottom: 20px;
     right: 20px;
     padding: 16px;
-    /* background: rgba(255, 255, 255, 0.95); */
     backdrop-filter: blur(8px);
     border-radius: 8px;
-    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
     z-index: 1000;
 }
 
@@ -624,10 +638,8 @@ export default {
     bottom: 20px;
     right: 20px;
     padding: 16px;
-    /* background: rgba(255, 255, 255, 0.95); */
     backdrop-filter: blur(8px);
     border-radius: 8px;
-    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
     z-index: 1000;
 }
 

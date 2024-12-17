@@ -3,20 +3,25 @@
         <div class="reset-container">
             <h1>重置密码</h1>
             <form @submit.prevent="resetPassword()">
-                <input type="text" id="username" placeholder="用户名" required>
-                <input type="password" id="oldPassword" placeholder="旧密码" required>
-                <input type="password" id="newPassword" placeholder="新密码" required>
-                <input type="password" id="confirmPassword" placeholder="再次确认新密码" required>
-                <button type="submit">重置</button>
-                <button type="button" class="home-button" @click="goHome()">返回主页</button>
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="用户名" required>
+                    <input type="password" id="oldPassword" placeholder="旧密码" required>
+                    <input type="password" id="newPassword" placeholder="新密码" required>
+                    <input type="password" id="confirmPassword" placeholder="再次确认新密码" required>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="primary-button">
+                        <span class="btn-text">重置</span>
+                        <span class="spinner"></span>
+                    </button>
+                    <button type="button" class="home-button" @click="goHome()">返回主页</button>
+                </div>
             </form>
             <div class="footer">
-                Powered by Yeelo
+                <span>Powered by Yeelo</span>
             </div>
         </div>
-
     </div>
-
 </template>
 
 <script>
@@ -75,71 +80,154 @@ export default {
 
 <style scoped>
 #reset {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
+    padding: 20px;
 }
 
 .reset-container {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     padding: 40px;
-    width: 300px;
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.3s ease;
+}
+
+.reset-container:hover {
+    transform: translateY(-5px);
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #2c3e50;
     margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.input-group {
+    margin-bottom: 20px;
 }
 
 input {
     width: 100%;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 2px solid #eee;
+    border-radius: 8px;
     box-sizing: border-box;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #43cea2;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 206, 162, 0.1);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 button {
     width: 100%;
-    padding: 10px;
-    background-color: #00a86b;
-    color: white;
+    padding: 15px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s ease;
-    margin-top: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-button:hover {
-    background-color: #008f5b;
+.primary-button {
+    background-color: #43cea2;
+    color: white;
+}
+
+.primary-button:hover {
+    background-color: #3bb592;
+    transform: translateY(-2px);
 }
 
 .home-button {
     background-color: white;
-    color: #333;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    transition: background-color 0.3s ease;
+    color: #2c3e50;
+    border: 2px solid #eee;
 }
 
 .home-button:hover {
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
+    border-color: #43cea2;
 }
 
 .footer {
     text-align: center;
-    margin-top: 20px;
-    color: #888;
-    font-size: 12px;
+    margin-top: 30px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.footer span {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.footer span:hover {
+    opacity: 1;
+}
+
+.spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+button.loading .btn-text {
+    visibility: hidden;
+}
+
+button.loading .spinner {
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .reset-container {
+        padding: 30px 20px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    input, button {
+        padding: 12px;
+    }
 }
 </style>

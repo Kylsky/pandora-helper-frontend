@@ -11,21 +11,32 @@
         ></el-switch>
       </div>
     </el-header>
-    <el-main>
-      <el-row :gutter="20">
+    <el-main v-loading="pageLoading" element-loading-text="加载中...">
+      <el-skeleton :loading="pageLoading" animated :count="4" v-if="pageLoading">
+        <template slot="template">
+          <el-row :gutter="20">
+            <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" style="padding-bottom: 15px;">
+              <el-skeleton-item variant="rect" style="height: 150px; border-radius: 8px;"/>
+            </el-col>
+          </el-row>
+        </template>
+      </el-skeleton>
+
+      <el-row :gutter="20" v-else>
         <el-col 
           style="padding-bottom: 15px;" 
           :xs="24" :sm="12" :md="8" :lg="6" :xl="4"
           v-for="(account, index) in filteredAccounts" 
           :key="index"
         >
-          <el-card :class="{ 'busy': account.sessionToken === '1' }">
+          <el-card :class="{ 'busy': account.sessionToken === '1' }" shadow="hover">
             <div slot="header" class="clearfix">
-              <span>{{ account.type }}账号 {{ index + 1 }}</span>
+              <span class="account-title">{{ account.type }}账号 {{ index + 1 }}</span>
               <el-tag 
                 :type="account.sessionToken === '' ? 'success' : 'danger'" 
                 size="small" 
-                style="float: right;"
+                effect="dark"
+                class="status-tag"
               >
                 {{ account.sessionToken != '' ? "繁忙" : "空闲" }}
               </el-tag>
@@ -34,12 +45,18 @@
               type="primary" 
               @click="useAccount(account.id)" 
               :disabled="account.sessionToken != ''"
+              class="use-button"
+              :loading="loadingId === account.id"
             >
-              使用账号
+              {{ account.sessionToken != '' ? '暂不可用' : '立即使用' }}
             </el-button>
           </el-card>
         </el-col>
       </el-row>
+      <div v-if="!pageLoading && filteredAccounts.length === 0" class="empty-state">
+        <i class="el-icon-warning-outline"></i>
+        <p>暂无可用账号</p>
+      </div>
     </el-main>
   </el-container>
 </template>
@@ -54,7 +71,12 @@ export default {
   data() {
     return {
       accounts: [],
-      showClaude: true
+      showClaude: true,
+      loadingId: null,
+      pageLoading: true,
+      refreshInterval: null,
+      retryCount: 0,
+      maxRetries: 3
     }
   },
   computed: {
@@ -64,51 +86,84 @@ export default {
       );
     }
   },
-  created() {
-    this.fetchAccounts();
+  async created() {
+    await this.initializeData();
+    this.startAutoRefresh();
+  },
+  beforeDestroy() {
+    this.stopAutoRefresh();
   },
   methods: {
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath);
+    async initializeData() {
+      await this.fetchAccounts();
+      this.pageLoading = false;
+    },
+    startAutoRefresh() {
+      this.refreshInterval = setInterval(() => {
+        this.fetchAccounts();
+      }, 30000);
+    },
+    stopAutoRefresh() {
+      if(this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+      }
     },
     async fetchAccounts() {
       try {
-        const response = await apiClient.get(`${config.apiBaseUrl}/account/list?type=`+(this.showClaude ? 2:1), {
-          withCredentials: true,
-          headers: {
-            'Authorization': "Bearer " + localStorage.getItem('token')
+        const response = await apiClient.get(
+          `${config.apiBaseUrl}/account/list?type=`+(this.showClaude ? 2:1), 
+          {
+            withCredentials: true,
+            headers: {
+              'Authorization': "Bearer " + localStorage.getItem('token')
+            },
+            timeout: 10000 // 10秒超时
           }
-        });
+        );
         if (response.data.status) {
-          this.accounts = response.data.data.data
+          this.accounts = response.data.data.data;
+          this.retryCount = 0; // 重置重试计数
         }
       } catch (error) {
-        message.error(error)
+        if (this.retryCount < this.maxRetries) {
+          this.retryCount++;
+          setTimeout(() => {
+            this.fetchAccounts();
+          }, 2000 * this.retryCount); // 递增重试延迟
+        } else {
+          message.error('获取账号列表失败，请刷新页面重试');
+        }
       }
     },
     async useAccount(index) {
+      this.loadingId = index;
       try {
-        const response = await apiClient.get(`${config.apiBaseUrl}/account/share?id=` + index, {
-          withCredentials: true,
-          headers: {
-            'Authorization': "Bearer " + localStorage.getItem('token')
+        const response = await apiClient.get(
+          `${config.apiBaseUrl}/account/share?id=` + index, 
+          {
+            withCredentials: true,
+            headers: {
+              'Authorization': "Bearer " + localStorage.getItem('token')
+            },
+            timeout: 15000 // 15秒超时
           }
-        });
+        );
         if (response.data.status) {
-          // console.log(response.data.data)
-          window.open(response.data.data)
+          window.open(response.data.data);
+          await this.fetchAccounts();
         } else {
-          message.error(response.data.message)
+          message.error(response.data.message || '使用账号失败');
         }
       } catch (error) {
-        message.error(error)
+        message.error('系统错误,请稍后重试');
+      } finally {
+        this.loadingId = null;
       }
     },
-    toggleAIType() {
-      this.fetchAccounts();
-    },
-    handleCheckboxChange(account, value) {
-      console.log(`Account ${account.id} selection changed to ${value}`);
+    async toggleAIType() {
+      this.pageLoading = true;
+      await this.fetchAccounts();
+      this.pageLoading = false;
     }
   }
 }
@@ -118,7 +173,7 @@ export default {
 .panel {
     background-color: #ffffff;
     border-radius: 16px;
-    padding: 10px;
+    padding: 20px;
     margin: 1.5% 20px;
     min-height: calc(100vh - 40px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -143,23 +198,54 @@ export default {
     color: #303133;
 }
 
-/* 搜索栏样式 */
-.search-bar {
-    margin-bottom: 28px;
+/* 卡片样式优化 */
+.el-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    will-change: transform;
 }
 
-/* 文本溢出处理 */
-.ellipsis,
-.share-ellipsis {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
+.el-card:hover {
+    transform: translateY(-2px);
 }
 
-.share-ellipsis {
-    max-width: 150px;
+.el-card.busy {
+    opacity: 0.8;
+    background: #f5f7fa;
+}
+
+.account-title {
+    font-weight: 500;
+    color: #606266;
+}
+
+.status-tag {
+    float: right;
+    font-weight: 500;
+}
+
+.use-button {
+    width: 100%;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* 空状态样式 */
+.empty-state {
+    text-align: center;
+    padding: 40px 0;
+    color: #909399;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 0;
 }
 
 /* Element UI 组件样式覆盖 */
@@ -177,90 +263,20 @@ export default {
     transform: translateY(-1px);
 }
 
-.el-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.el-pagination {
-    position: fixed;
-    bottom: 24px;
-    right: 44px;
-    padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.98);
-    border-radius: 24px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-}
-
-/* 对话框样式优化 */
-.modern-audit-dialog {
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.modern-audit-dialog >>> .el-dialog__header {
-    background-color: #f8f9fa;
-    padding: 24px;
-    border-bottom: 1px solid #ebeef5;
-}
-
-.modern-audit-dialog >>> .el-dialog__title {
-    font-size: 20px;
-    color: #303133;
-    font-weight: 600;
-}
-
-.modern-audit-dialog >>> .el-dialog__body {
-    padding: 32px 24px;
-}
-
-/* 审核内容样式 */
-.audit-content {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    padding: 24px;
-}
-
-.audit-title {
-    font-size: 18px;
-    color: #303133;
-    margin-bottom: 24px;
-    font-weight: 500;
-}
-
-.audit-checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.audit-checkbox-item {
-    padding: 12px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.audit-checkbox-item:hover {
-    background-color: #f8f9fa;
-}
-
-/* Checkbox 样式优化 */
-.el-checkbox__input.is-checked .el-checkbox__inner,
-.el-checkbox__input.is-indeterminate .el-checkbox__inner {
-    background: linear-gradient(145deg, #0e8f6f, #0d8668);
-    border-color: #0e8f6f;
-}
-
-.el-checkbox__input.is-checked + .el-checkbox__label {
-    color: #0e8f6f;
+.el-button--primary:disabled {
+    background: #a0cfbe;
+    opacity: 0.7;
 }
 
 /* Switch 开关样式 */
 .el-switch.is-checked .el-switch__core {
     border-color: #0e8f6f;
     background-color: #0e8f6f;
+}
+
+/* 骨架屏样式 */
+.el-skeleton {
+    padding: 20px;
 }
 
 /* 暗色主题适配 */
@@ -274,14 +290,21 @@ export default {
         color: #e0e0e0;
     }
     
-    .el-table th {
+    .el-card {
         background-color: #2c2c2c;
-        color: #e0e0e0;
+        border: 1px solid #3c3c3c;
     }
     
-    .el-pagination {
-        background: rgba(30, 30, 30, 0.98);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    .el-card.busy {
+        background-color: #262626;
+    }
+    
+    .account-title {
+        color: #d0d0d0;
+    }
+    
+    .empty-state {
+        color: #909399;
     }
 }
 </style>

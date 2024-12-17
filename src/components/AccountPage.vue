@@ -17,8 +17,8 @@
             </el-row>
 
             <!-- PC端表格视图 -->
-            <div class="pc-view">
-                <el-table :data="tableData" style="width: 100%" :fit="true">
+            <div v-if="!isMobile" class="pc-view">
+                <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading">
                     <el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="shared" label="共享" show-overflow-tooltip>
@@ -40,7 +40,7 @@
                 </el-table>
             </div>
 
-            <div class="mobile-view">
+            <div v-else class="mobile-view">
                 <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
                     <div class="mobile-card-header">
                         <div class="email-badge">
@@ -97,15 +97,21 @@
 
             <!-- 分页器 -->
             <div class="pagination-container">
-                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="10"
-                    :layout="isMobile ? 'prev, pager, next' : 'prev, pager, next, jumper'"
-                    :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
+                <el-pagination 
+                    @current-change="handleCurrentChange" 
+                    :current-page.sync="currentPage" 
+                    :page-size="pageSize"
+                    :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
+                    :pager-count="isMobile ? 5 : 7"
+                    :total="total"
+                    class="pagination-wrapper">
                 </el-pagination>
             </div>
 
+            
 
             <!-- 弹窗组件保持不变 -->
-            <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
+            <enhanced-dialog v-if="modalVisible" :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
                 <form-input v-for="(field, index) in formFields" :key="index" :field="field"
                     @updateValue="handleUpdateValue" />
             </enhanced-dialog>
@@ -142,6 +148,7 @@ export default {
     },
     data() {
         return {
+            loading: false,
             isMobile: false,
             email: '',
             tableData: [],
@@ -195,67 +202,69 @@ export default {
             if (this.chart) {
                 this.chart.dispose();
             }
-            this.chart = echarts.init(this.$refs.chart);
-            const option = {
-                title: {
-                    text: 'GPT使用情况',
-                    left: 'center'
-                },
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: {
-                        type: 'shadow'
-                    }
-                },
-                legend: {
-                    data: ['GPT-4o', 'GPT-4', 'GPT-4o-mini', 'o1-preview', 'o1-mini'],
-                    top: 'bottom'
-                },
-                xAxis: {
-                    type: 'category',
-                    data: this.chartData.map(item => item.uniqueName),
-                    axisLabel: {
-                        rotate: 45
-                    }
-                },
-                yAxis: {
-                    type: 'value',
-                    name: '使用次数'
-                },
-                series: [
-                    {
-                        name: 'GPT-4o',
-                        type: 'bar',
-                        data: this.chartData.map(item => item.usage.gpt4o),
-                        itemStyle: { color: '#91cc75' }
+            this.$nextTick(() => {
+                this.chart = echarts.init(this.$refs.chart);
+                const option = {
+                    title: {
+                        text: 'GPT使用情况',
+                        left: 'center'
                     },
-                    {
-                        name: 'GPT-4',
-                        type: 'bar',
-                        data: this.chartData.map(item => item.usage.gpt4),
-                        itemStyle: { color: '#5470c6' }
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
                     },
-                    {
-                        name: 'GPT-4o-mini',
-                        type: 'bar',
-                        data: this.chartData.map(item => item.usage.gpt4omini),
-                        itemStyle: { color: '#fac858' }
+                    legend: {
+                        data: ['GPT-4o', 'GPT-4', 'GPT-4o-mini', 'o1-preview', 'o1-mini'],
+                        top: 'bottom'
                     },
-                    {
-                        name: 'o1-preview',
-                        type: 'bar',
-                        data: this.chartData.map(item => item.usage.o1Preview),
-                        itemStyle: { color: '#2980b9' }
+                    xAxis: {
+                        type: 'category',
+                        data: this.chartData.map(item => item.uniqueName),
+                        axisLabel: {
+                            rotate: 45
+                        }
                     },
-                    {
-                        name: 'o1-mini',
-                        type: 'bar',
-                        data: this.chartData.map(item => item.usage.o1Mini),
-                        itemStyle: { color: '#f0ad5e' }
-                    }
-                ]
-            };
-            this.chart.setOption(option);
+                    yAxis: {
+                        type: 'value',
+                        name: '使用次数'
+                    },
+                    series: [
+                        {
+                            name: 'GPT-4o',
+                            type: 'bar',
+                            data: this.chartData.map(item => item.usage.gpt4o),
+                            itemStyle: { color: '#91cc75' }
+                        },
+                        {
+                            name: 'GPT-4',
+                            type: 'bar',
+                            data: this.chartData.map(item => item.usage.gpt4),
+                            itemStyle: { color: '#5470c6' }
+                        },
+                        {
+                            name: 'GPT-4o-mini',
+                            type: 'bar',
+                            data: this.chartData.map(item => item.usage.gpt4omini),
+                            itemStyle: { color: '#fac858' }
+                        },
+                        {
+                            name: 'o1-preview',
+                            type: 'bar',
+                            data: this.chartData.map(item => item.usage.o1Preview),
+                            itemStyle: { color: '#2980b9' }
+                        },
+                        {
+                            name: 'o1-mini',
+                            type: 'bar',
+                            data: this.chartData.map(item => item.usage.o1Mini),
+                            itemStyle: { color: '#f0ad5e' }
+                        }
+                    ]
+                };
+                this.chart.setOption(option);
+            });
         },
         async statistic(id) {
             try {
@@ -268,9 +277,7 @@ export default {
                 });
                 if (response.data.status) {
                     this.chartData = response.data.data;
-                    this.$nextTick(() => {
-                        this.initChart();
-                    });
+                    this.initChart();
                 } else {
                     this.$message.error('获取统计数据失败');
                 }
@@ -292,6 +299,7 @@ export default {
         },
         async fetchAccounts(email) {
             try {
+                this.loading = true;
                 const response = await apiClient.get(`${config.apiBaseUrl}/account/list?page=` + this.currentPage + `&size=` + 10 + `&emailAddr=` + email, {
                     withCredentials: true,
                     headers: {
@@ -304,15 +312,14 @@ export default {
                 }
             } catch (error) {
                 console.log(error)
+                message.error('获取账号列表失败')
+            } finally {
+                this.loading = false;
             }
-
         },
         handleUpdateValue(fieldId, newValue) {
-            // 更新 formData 中对应字段的值
-            // this.formData[fieldId] = newValue;
             this.$set(this.formData, fieldId, newValue)
 
-            // 更新 formFields 中对应字段的值
             const fieldIndex = this.formFields.findIndex(field => field.id === fieldId);
             if (fieldIndex !== -1) {
                 this.formFields[fieldIndex].value = newValue;
@@ -320,37 +327,25 @@ export default {
 
             if (fieldId === 'accountType') {
                 const inputB = this.formFields.find(field => field.id === 'accessToken');
-                // 根据选中的值动态更新 inputB 的 label
+                const inputC = this.formFields.find(field => field.id === 'refreshToken');
+                
                 switch (newValue) {
                     case 1:
                         inputB.label = 'ACCESS_TOKEN';
-                        break;
-                    case 2:
-                        inputB.label = 'SESSION_KEY';
-                        break;
-                    case 3:
-                        inputB.label = 'API_PROXY';
-                        break;
-                    default:
-                        inputB.label = 'ChatGPT';
-                }
-
-                const inputC = this.formFields.find(field => field.id === 'refreshToken');
-                inputC.hideLabel = false
-                // 根据选中的值动态更新 inputB 的 label
-                switch (newValue) {
-                    case 1:
                         inputC.hideLabel = false;
                         inputC.label = 'REFRESH_TOKEN';
                         break;
                     case 2:
+                        inputB.label = 'SESSION_KEY';
                         inputC.hideLabel = true;
                         break;
                     case 3:
+                        inputB.label = 'API_PROXY';
                         inputC.hideLabel = false;
                         inputC.label = 'API_KEY';
                         break;
                     default:
+                        inputB.label = 'ChatGPT';
                         inputC.hideLabel = false;
                         inputC.label = 'ChatGPT';
                 }
@@ -372,45 +367,49 @@ export default {
             this.modalVisible = true;
         },
         async editItem(index) {
-            this.modalTitle = '编辑账号';
-            this.formFields = this.accountFields;
-            this.currentIndex = index;
-            const response = await apiClient.get(`${config.apiBaseUrl}/account/getById?id=` + index, {
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+            try {
+                this.modalTitle = '编辑账号';
+                this.formFields = this.accountFields;
+                this.currentIndex = index;
+                const response = await apiClient.get(`${config.apiBaseUrl}/account/getById?id=` + index, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                let acc = response.data.data;
+                let accountType = 1;
+                this.formFields.forEach(field => {
+                    field.value = acc[field.id];
+                    if (field.id === 'accountType') {
+                        accountType = field.value
+                    }
+                    this.formData[field.id] = acc[field.id];
+                });
+                const inputB = this.formFields.find(field => field.id === 'accessToken');
+                const inputC = this.formFields.find(field => field.id === 'refreshToken');
+                switch (accountType) {
+                    case 1:
+                        inputC.hideLabel = false;
+                        inputB.label = 'ACCESS_TOKEN';
+                        inputC.label = 'REFRESH_TOKEN';
+                        break;
+                    case 2:
+                        inputB.label = 'SESSION_KEY';
+                        inputC.hideLabel = true;
+                        break;
+                    case 3:
+                        inputB.label = 'API_PROXY';
+                        inputC.hideLabel = false;
+                        inputC.label = 'API_KEY';
+                        break;
+                    default:
+                        inputC.hideLabel = false;
+                        inputC.label = 'ChatGPT';
                 }
-            });
-            let acc = response.data.data;
-            let accountType = 1;
-            this.formFields.forEach(field => {
-                field.value = acc[field.id];
-                if (field.id === 'accountType') {
-                    accountType = field.value
-                }
-                this.formData[field.id] = acc[field.id];
-            });
-            const inputB = this.formFields.find(field => field.id === 'accessToken');
-            const inputC = this.formFields.find(field => field.id === 'refreshToken');
-            switch (accountType) {
-                case 1:
-                    inputC.hideLabel = false;
-                    inputB.label = 'ACCESS_TOKEN';
-                    inputC.label = 'REFRESH_TOKEN';
-                    break;
-                case 2:
-                    inputB.label = 'SESSION_KEY';
-                    inputC.hideLabel = true;
-                    break;
-                case 3:
-                    inputB.label = 'API_PROXY';
-                    inputC.hideLabel = false;
-                    inputC.label = 'API_KEY';
-                    break;
-                default:
-                    inputC.hideLabel = false;
-                    inputC.label = 'ChatGPT';
+                this.modalVisible = true;
+            } catch (error) {
+                message.error('获取账号信息失败');
             }
-            this.modalVisible = true;
         },
         closeModal() {
             this.currentIndex = null;
@@ -418,55 +417,50 @@ export default {
             this.shareAddFlag = false;
         },
         async submitForm() {
-            console.log(this.formData);
-            const itemData = { ...this.formData };
+            try {
+                const itemData = { ...this.formData };
 
-            if (this.shareAddFlag) {
-                itemData.uniqueName = itemData.username
-                itemData.accountId = this.currentIndex
-                console.log(itemData)
-                const response = await apiClient.post(`${config.apiBaseUrl}/share/add`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
+                if (this.shareAddFlag) {
+                    itemData.uniqueName = itemData.username
+                    itemData.accountId = this.currentIndex
+                    const response = await apiClient.post(`${config.apiBaseUrl}/share/add`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    if (!response.data.status) {
+                        message.error(response.data.message)
+                    } else {
+                        message.success("新增账号共享成功")
                     }
-                }).catch(function (error) {
-                    message.error(error)
-                })
-                if (!response.data.status) {
-                    message.error(response.data.message)
-                } else {
-                    message.success("新增账号共享成功")
                 }
+                else if (this.currentIndex !== null) {
+                    itemData.auto = itemData.auto ? 1 : 0;
+                    itemData.shared = itemData.shared ? 1 : 0;
+                    itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
+                    itemData.id = this.currentIndex;
+                    await apiClient.patch(`${config.apiBaseUrl}/account/update`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    message.success("修改成功")
+                } else {
+                    itemData.auto = itemData.auto ? 1 : 0;
+                    itemData.shared = itemData.shared ? 1 : 0;
+                    itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
+                    await apiClient.post(`${config.apiBaseUrl}/account/add`, itemData, {
+                        headers: {
+                            'Authorization': "Bearer " + localStorage.getItem('token')
+                        }
+                    });
+                    message.success("新增成功")
+                }
+                this.fetchAccounts('')
+                this.closeModal();
+            } catch (error) {
+                message.error('操作失败，请稍后重试');
             }
-            else if (this.currentIndex !== null) {
-                itemData.auto = itemData.auto ? 1 : 0;
-                itemData.shared = itemData.shared ? 1 : 0;
-                itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
-                itemData.id = this.currentIndex;
-                apiClient.patch(`${config.apiBaseUrl}/account/update`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
-                    }
-                }).catch(function (error) {
-                    message.error(error)
-                })
-                message.success("修改成功")
-            } else {
-                itemData.auto = itemData.auto ? 1 : 0;
-                itemData.shared = itemData.shared ? 1 : 0;
-                itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
-                apiClient.post(`${config.apiBaseUrl}/account/add`, itemData, {
-                    headers: {
-                        'Authorization': "Bearer " + localStorage.getItem('token')
-                    }
-                }).catch(function (error) {
-                    message.error(error)
-                })
-                message.success("新增成功")
-            }
-            this.fetchAccounts('')
-            this.closeModal();
-
         },
         resetFormFields() {
             this.shareAdd = false;
@@ -478,51 +472,46 @@ export default {
             });
         },
         emailQuery() {
-            // 实现邮箱查询逻辑
-            console.log(this.email);
             this.fetchAccounts(this.email)
         },
-        handleEdit(id) {
-            // 实现编辑逻辑
-            console.log(id + 123123123)
-        },
-        handleAdd() {
-            // 实现编辑逻辑
-            console.log()
-        },
         async handleDelete() {
-            // 实现删除逻辑
-            const response = await apiClient.delete(`${config.apiBaseUrl}/account/delete?id=` + this.currentIndex, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+            try {
+                const response = await apiClient.delete(`${config.apiBaseUrl}/account/delete?id=` + this.currentIndex, {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                if (response.data.status) {
+                    message.success('删除成功');
+                } else {
+                    message.error('删除失败，请稍后重试');
                 }
-            });
-            if (response.data.status) {
-                message.success('删除成功');
-            } else {
+                this.fetchAccounts('')
+                this.currentIndex = null;
+                this.isDialogVisible = false
+            } catch (error) {
                 message.error('删除失败，请稍后重试');
             }
-            this.fetchAccounts('')
-            this.currentIndex = null;
-            this.isDialogVisible = false
         },
-        handleCurrentChange(val) {
-            // 处理页码变化
-            console.log(val)
+        handleCurrentChange() {
             this.fetchAccounts('')
         },
         async refresh(id) {
-            const response = await apiClient.post(`${config.apiBaseUrl}/account/refresh?id=` + id, {}, {
-                withCredentials: true,
-                headers: {
-                    'Authorization': "Bearer " + localStorage.getItem('token')
+            try {
+                const response = await apiClient.post(`${config.apiBaseUrl}/account/refresh?id=` + id, {}, {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                if (response.data.status) {
+                    message.success('刷新成功');
+                } else {
+                    message.error(response.data.msg);
                 }
-            });
-            if (response.data.status) {
-                message.success('刷新成功');
-            } else {
-                message.error(response.data.msg);
+            } catch (error) {
+                message.error('刷新失败，请稍后重试');
             }
         }
     },
@@ -533,6 +522,9 @@ export default {
     },
     beforeDestroy() {
         window.removeEventListener('resize', this.checkIsMobile);
+        if (this.chart) {
+            this.chart.dispose();
+        }
     }
 }
 </script>
@@ -562,12 +554,6 @@ export default {
 .create-btn-wrapper {
     display: flex;
     justify-content: flex-end;
-}
-
-/* 视图切换 */
-.pc-view,
-.mobile-view {
-    display: none;
 }
 
 /* 移动端卡片 */
@@ -716,12 +702,11 @@ export default {
     bottom: 20px;
     right: 20px;
     padding: 16px;
-    /* background: rgba(255, 255, 255, 0.95); */
     backdrop-filter: blur(8px);
     border-radius: 8px;
-    /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); */
     z-index: 1000;
 }
+
 
 .pagination-wrapper {
     text-align: center;
@@ -732,14 +717,6 @@ export default {
     .panel {
         margin: 16px;
         padding: 20px;
-    }
-
-    .pc-view {
-        display: none;
-    }
-
-    .mobile-view {
-        display: block;
     }
 
     .create-btn-wrapper {
@@ -779,16 +756,6 @@ export default {
 
     .el-main {
         padding-bottom: calc(70px + env(safe-area-inset-bottom));
-    }
-}
-
-@media screen and (min-width: 769px) {
-    .pc-view {
-        display: block;
-    }
-
-    .mobile-view {
-        display: none;
     }
 }
 
