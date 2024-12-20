@@ -48,6 +48,10 @@
             <i class="el-icon-key"></i>
             <span>兑换码激活</span>
           </el-dropdown-item>
+          <el-dropdown-item @click.native="showResetModal">
+            <i class="el-icon-refresh"></i>
+            <span>重置密码</span>
+          </el-dropdown-item>
           <el-dropdown-item @click.native="logout">
             <i class="el-icon-switch-button"></i>
             <span>退出登录</span>
@@ -67,6 +71,12 @@
       <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
         <form-input v-for="(field, index) in formFields" :key="index" :field="field" @updateValue="handleUpdateValue" />
       </enhanced-dialog>
+
+      <!-- 重置密码弹窗 -->
+      <enhanced-dialog :isVisible="resetModalVisible" :title="'重置密码'" @close="closeResetModal" @confirm="submitResetForm">
+        <form-input v-for="(field, index) in resetFormFields" :key="index" :field="field" @updateValue="handleResetUpdateValue" />
+      </enhanced-dialog>
+
       <component :is="currentComponent"></component>
     </el-main>
 
@@ -104,12 +114,23 @@ export default {
       activeMenu: 'accountNav',
       currentComponent: AccountPageVue,
       modalVisible: false,
+      resetModalVisible: false,
       itemData: '',
       modalTitle: '',
       isCollapse: false,
       formFields: [
         { id: 'code', label: '兑换码', type: 'text', value: '', required: true },
-      ]
+      ],
+      resetFormFields: [
+        { id: 'oldPassword', label: '旧密码', type: 'password', value: '', required: true },
+        { id: 'newPassword', label: '新密码', type: 'password', value: '', required: true },
+        { id: 'confirmPassword', label: '确认新密码', type: 'password', value: '', required: true }
+      ],
+      resetFormData: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }
     };
   },
   computed: {
@@ -153,13 +174,31 @@ export default {
         this.formFields[fieldIndex].value = newValue;
       }
     },
+    handleResetUpdateValue(fieldId, newValue) {
+      this.resetFormData[fieldId] = newValue;
+      const fieldIndex = this.resetFormFields.findIndex(field => field.id === fieldId);
+      if (fieldIndex !== -1) {
+        this.resetFormFields[fieldIndex].value = newValue;
+      }
+    },
     showModal() {
       this.modalTitle = '兑换码激活';
-      this.resetFormFields();
+      this.resetFormField();
       this.modalVisible = true;
+    },
+    showResetModal() {
+      this.resetModalVisible = true;
     },
     closeModal() {
       this.modalVisible = false;
+    },
+    closeResetModal() {
+      this.resetModalVisible = false;
+      this.resetFormData = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
     },
     async submitForm() {
       const response = await apiClient.get(`${config.apiBaseUrl}/redemption/activate?code=` + this.itemData, {
@@ -175,7 +214,38 @@ export default {
         message.error(response.data.message);
       }
     },
-    resetFormFields() {
+    async submitResetForm() {
+      try {
+        if(this.resetFormData.newPassword !== this.resetFormData.confirmPassword) {
+          message.error('两次输入的新密码不一致');
+          return;
+        }
+        const response = await apiClient.post(`${config.apiBaseUrl}/user/reset`, {
+          oldPassword: this.resetFormData.oldPassword,
+          newPassword: this.resetFormData.newPassword,
+          confirmPassword: this.resetFormData.confirmPassword
+        }, {
+          headers: {
+            'Authorization': "Bearer " + localStorage.getItem('token')
+          }
+        });
+        if (response.data.status) {
+          message.success('密码重置成功');
+          this.closeResetModal();
+        } else {
+          message.error(response.data.message);
+        }
+        // 重置密码
+        this.resetFormData = {
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+      } catch (error) {
+        message.error('密码重置失败');
+      }
+    },
+    resetFormField() {
       this.formData = {};
       this.formFields.forEach(field => {
         const defaultValue = field.type === 'checkbox' ? false : '';
@@ -268,7 +338,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  z-index: 1000; /* 确保侧边栏在下拉菜单之上 */
+  z-index: 1000;
 }
 
 .sidebar-header {
@@ -316,7 +386,7 @@ export default {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .el-menu--collapse .el-menu-item {
@@ -342,7 +412,8 @@ export default {
   padding: 15px;
   padding-left: 12px;
   margin-top: auto;
-  position: relative; /* 添加相对定位 */
+  position: relative;
+  display: block;
 }
 
 .user-avatar {
@@ -426,44 +497,90 @@ export default {
   }
 }
 
-/* 暗色主题适配 */
+/* 深色主题优化 */
 @media (prefers-color-scheme: dark) {
   .sidebar {
     background-color: #1a1a1a;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .site-title {
-    color: #2ecc71;
+    color: #6ee7b7;
+    text-shadow: 0 0 10px rgba(110, 231, 183, 0.3);
+  }
+
+  .collapse-btn {
+    color: #6ee7b7;
+    transition: all 0.3s ease;
+  }
+
+  .collapse-btn:hover {
+    background: rgba(110, 231, 183, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .el-menu {
+    background-color: #1a1a1a !important;
+  }
+
+  .el-menu-item {
+    color: #f3f4f6 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .el-menu-item:hover,
   .el-menu-item.is-active {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%) !important;
+    box-shadow: 0 4px 15px rgba(110, 231, 183, 0.3) !important;
+    transform: translateY(-1px);
+  }
+
+  .el-menu-item i {
+    color: #6ee7b7 !important;
+    transition: all 0.3s ease;
+  }
+
+  .el-menu-item:hover i,
+  .el-menu-item.is-active i {
+    transform: scale(1.1);
+    color: #ffffff !important;
+  }
+
+  .user-avatar {
+    border: 2px solid #2d3748;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .user-avatar:hover {
+    border-color: #6ee7b7;
+    box-shadow: 0 6px 20px rgba(110, 231, 183, 0.25);
+    transform: translateY(-2px) scale(1.05);
   }
 
   .main-content {
-    background-color: #121212;
+    background-color: #111827;
+  }
+
+  .menu-trigger {
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+    box-shadow: 0 4px 15px rgba(110, 231, 183, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .menu-trigger:hover {
+    box-shadow: 0 6px 20px rgba(110, 231, 183, 0.3);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .mobile-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
   }
 }
 
-.user-menu {
-  display: block;
-}
-
-.user-avatar {
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-
+/* 下拉菜单样式 */
 body div[role="tooltip"].el-dropdown-menu {
   transform-origin: unset !important;
   position: fixed !important;
@@ -484,7 +601,7 @@ body div[role="tooltip"].el-dropdown-menu {
 </style>
 
 <style>
-/* 注意：这里不使用 scoped，确保样式可以作用到 popper */
+/* 下拉菜单全局样式 */
 .user-dropdown {
   left: 16px !important;
   transform: none !important;
@@ -511,7 +628,6 @@ body div[role="tooltip"].el-dropdown-menu {
   transform: translate(0, 0) !important;
 }
 
-/* 用更强的选择器覆盖默认样式 */
 body > .el-dropdown-menu,
 .el-dropdown-menu[x-placement^="bottom"] {
   left: 16px !important;
@@ -520,9 +636,38 @@ body > .el-dropdown-menu,
   transform-origin: center top !important;
 }
 
-/* 确保菜单项左对齐 */
 .el-dropdown-menu__item {
   justify-content: flex-start !important;
   padding-right: 20px !important;
+}
+
+/* 深色模式下拉菜单样式 */
+@media (prefers-color-scheme: dark) {
+  .el-dropdown-menu {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(12px) !important;
+  }
+
+  .el-dropdown-menu__item {
+    color: #f3f4f6 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .el-dropdown-menu__item:hover {
+    background: linear-gradient(135deg, rgba(110, 231, 183, 0.1), rgba(52, 211, 153, 0.1)) !important;
+    color: #6ee7b7 !important;
+    transform: translateX(4px);
+  }
+
+  .el-dropdown-menu__item i {
+    color: #6ee7b7 !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .el-dropdown-menu__item:hover i {
+    transform: scale(1.1) rotate(10deg);
+  }
 }
 </style>

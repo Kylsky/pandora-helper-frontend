@@ -14,21 +14,54 @@
 
             <!-- PC端表格视图 -->
             <div v-show="!isMobile" class="pc-view">
-                <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                    <el-table-column prop="email" label="账号"></el-table-column>
-                    <el-table-column prop="type" label="账号类型"></el-table-column>
-                    <el-table-column prop="auto" label="自动上车">
+                <el-table :data="tableData" style="width: 100%" v-loading="loading" :cell-style="{padding: '12px 0'}">
+                    <el-table-column prop="email" label="账号" min-width="160" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i class="el-icon-message" style="color: #909399; font-size: 14px;"></i>
+                                <span>{{ scope.row.email }}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="type" label="账号类型" min-width="160" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <span>{{ scope.row.type }}</span>
+                            <template v-if="scope.row.type === 'ChatGPT'">
+                                <el-tag v-if="scope.row.planType === 'plus'" type="warning" effect="plain" size="mini" style="margin-left: 5px; color: #DAA520; border-color: #DAA520">Plus</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'free'" type="success" effect="plain" size="mini" style="margin-left: 5px; color: #67C23A; border-color: #67C23A">Free</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'team'" type="info" effect="plain" size="mini" style="margin-left: 5px; color: #87CEEB; border-color: #87CEEB">Team</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'pro'" type="info" effect="plain" size="mini" style="margin-left: 5px; color: #000000; border-color: #FFD700">Pro</el-tag>
+                                <el-tag v-else type="info" effect="plain" size="mini" style="margin-left: 5px; color: #808080; border-color: #808080">无效</el-tag>
+                            </template>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="auto" label="自动上车" min-width="160" align="center">
                         <template slot-scope="scope">
                             <span :class="['status-tag', scope.row.auto === 1 ? 'status-yes' : 'status-no']">
                                 {{ scope.row.auto === 1 ? 'yes!' : 'No' }}
                             </span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="usernameDesc" label="车主"></el-table-column>
-                    <el-table-column prop="countDesc" label="已上车人数 / 总人数"></el-table-column>
-                    <el-table-column label="操作" width="300">
+                    <el-table-column prop="usernameDesc" label="车主" min-width="160" show-overflow-tooltip>
                         <template slot-scope="scope">
-                            <div class="action-buttons">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i class="el-icon-user" style="color: #909399; font-size: 14px;"></i>
+                                <span>{{ scope.row.usernameDesc }}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="countDesc" label="已上车人数 / 总人数" min-width="160" align="center">
+                        <template slot-scope="scope">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <span style="color: #67C23A; font-weight: 600">{{ scope.row.countDesc.split('/')[0] }}</span>
+                                <span style="color: #909399">/</span>
+                                <span style="color: #409EFF; font-weight: 600">{{ scope.row.countDesc.split('/')[1] }}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" min-width="160" fixed="right">
+                        <template slot-scope="scope">
+                            <div class="action-buttons" style="display: flex; gap: 8px;">
                                 <el-button v-if="scope.row.authorized === true" type="primary" size="mini"
                                     @click="showModal(scope.row.id)">审核</el-button>
                                 <el-button type="warning" size="mini"

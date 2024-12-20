@@ -358,4 +358,9 @@
       font-size: 0.875rem;
     }
   }
+
+
+.custom-message {
+  z-index: 9999 !important;
+}
   </style>

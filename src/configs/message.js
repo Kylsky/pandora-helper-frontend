@@ -7,7 +7,8 @@ const message = {
       message: text,
       type: 'success',
       duration: duration,
-      showClose: true
+      showClose: true,
+      customClass: 'custom-message'
     })
   },
 
@@ -16,7 +17,8 @@ const message = {
       message: text,
       type: 'error',
       duration: duration,
-      showClose: true
+      showClose: true,
+      customClass: 'custom-message'
     })
   },
 
@@ -25,7 +27,8 @@ const message = {
       message: text,
       type: 'warning',
       duration: duration,
-      showClose: true
+      showClose: true,
+      customClass: 'custom-message'
     })
   },
 
@@ -34,7 +37,8 @@ const message = {
       message: text,
       type: 'info',
       duration: duration,
-      showClose: true
+      showClose: true,
+      customClass: 'custom-message'
     })
   },
 

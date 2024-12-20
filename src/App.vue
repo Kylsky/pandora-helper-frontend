@@ -25,4 +25,8 @@ body {
 fill-current {
   outline-color: hsl(var(--accent-main-100))
 }
+
+.custom-message {
+  z-index: 9999 !important;
+}
 </style>

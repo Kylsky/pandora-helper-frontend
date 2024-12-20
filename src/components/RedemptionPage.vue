@@ -18,22 +18,49 @@
 
             <!-- PC端表格视图 -->
             <div v-if="!isMobile" class="pc-view">
-                <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                    <el-table-column prop="email" label="邮箱" min-width="180"></el-table-column>
-                    <el-table-column prop="accountType" label="账号类型" width="120"></el-table-column>
-                    <el-table-column prop="code" label="兑换码" min-width="150">
+                <el-table :data="tableData" style="width: 100%" v-loading="loading" :cell-style="{padding: '12px 0'}">
+                    <el-table-column prop="email" label="名称" min-width="200" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i class="el-icon-user" style="color: #909399; font-size: 14px;"></i>
+                                <span>{{ scope.row.email }}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="accountType" label="账号类型" width="140" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <el-tag size="mini" effect="plain" :type="scope.row.accountType === 'ChatGPT' ? 'success' : scope.row.accountType === 'Claude' ? 'warning' : 'info'">
+                                {{ scope.row.accountType }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="code" label="兑换码" min-width="180" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <el-tooltip :content="scope.row.code" placement="top" effect="light">
-                                <span>{{ scope.row.code }}</span>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="el-icon-key" style="color: #909399; font-size: 14px;"></i>
+                                    <span>{{ scope.row.code }}</span>
+                                </div>
                             </el-tooltip>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="duration" label="兑换时长(天)" width="120"></el-table-column>
-                    <el-table-column label="操作" width="200" fixed="right">
+                    <el-table-column prop="duration" label="兑换时长" width="140" show-overflow-tooltip>
                         <template slot-scope="scope">
-                            <div class="action-row">
-                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
-                                <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i class="el-icon-time" style="color: #909399; font-size: 14px;"></i>
+                                <span>{{ scope.row.duration }} 天</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="180" fixed="right">
+                        <template slot-scope="scope">
+                            <div class="action-row" style="display: flex; gap: 8px;">
+                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">
+                                    <i class="el-icon-edit"></i> 编辑
+                                </el-button>
+                                <el-button type="danger" size="mini" @click="showConfirmDialog(scope.row.id)">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -236,7 +263,7 @@ export default {
                 const accountField = this.accountFields.find(f => f.id === "accountId");
                 if (accountField && response.data.status) {
                     accountField.options = response.data.data.data.map(item => ({
-                        text: `${item.name}(${item.accountType === 1 ? 'ChatGPT' : 'Claude'})`,
+                        text: `${item.name}(${item.accountType === 1 ? 'ChatGPT' : item.accountType === 2 ? 'Claude' : 'API'})`,
                         value: item.id
                     }));
                 }

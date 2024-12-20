@@ -15,28 +15,33 @@
             <!-- PC端表格视图 -->
             <div class="pc-view">
                 <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading">
-                    <el-table-column prop="uniqueName" label="用户名"></el-table-column>
-                    <el-table-column prop="gptCarName" label="ChatGPT账号" width="180">
+                    <el-table-column prop="uniqueName" label="用户名" min-width="150">
+                    </el-table-column>
+                    <el-table-column prop="gptCarName" label="ChatGPT账号" min-width="200">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
                                 :loading="scope.row.loading" @click="openChat(scope.row.gptConfigId, 1)" />
                         </template>
                     </el-table-column>
-                    <el-table-column prop="claudeCarName" label="Claude账号" width="180">
+                    <el-table-column prop="claudeCarName" label="Claude账号" min-width="200">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
                                 type="claude" :loading="scope.row.loading"
                                 @click="openChat(scope.row.claudeConfigId, 2)" />
                         </template>
                     </el-table-column>
-                    <el-table-column prop="apiCarName" label="API账号" width="180">
+                    <el-table-column prop="apiCarName" label="API账号" min-width="200">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
                                 :loading="scope.row.loading" @click="openChat(scope.row.apiConfigId, 3)" />
                         </template>
                     </el-table-column>
-                    <el-table-column prop="expiresAt" label="过期时间"></el-table-column>
-                    <el-table-column label="操作" width="250" fixed="right">
+                    <el-table-column prop="expiresAt" label="过期时间" min-width="110">
+                    </el-table-column>
+
+                    <!-- <el-table-column prop="remark" label="备注" width="120">
+                    </el-table-column> -->
+                    <el-table-column label="操作" min-width="280" fixed="right">
                         <template slot-scope="scope">
                             <div class="action-row">
                                 <el-button type="primary" size="mini"

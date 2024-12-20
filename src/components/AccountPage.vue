@@ -18,23 +18,42 @@
 
             <!-- PC端表格视图 -->
             <div v-if="!isMobile" class="pc-view">
-                <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading">
-                    <el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
-                    <el-table-column prop="type" label="账号类型" show-overflow-tooltip></el-table-column>
-                    <el-table-column prop="shared" label="共享" show-overflow-tooltip>
+                <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading" :cell-style="{padding: '12px 0'}">
+                    <el-table-column prop="email" label="电子邮箱" min-width="200" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="name" label="账号名称" min-width="140" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="type" label="账号类型" min-width="180" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <span>{{ scope.row.type }}</span>
+                            <template v-if="scope.row.type === 'ChatGPT'">
+                                <el-tag v-if="scope.row.planType === 'plus'" type="warning" effect="plain" size="mini" style="margin-left: 5px; color: #DAA520; border-color: #DAA520">Plus</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'free'" type="success" effect="plain" size="mini" style="margin-left: 5px; color: #67C23A; border-color: #67C23A">Free</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'team'" type="info" effect="plain" size="mini" style="margin-left: 5px; color: #87CEEB; border-color: #87CEEB">Team</el-tag>
+                                <el-tag v-else-if="scope.row.planType === 'pro'" type="info" effect="plain" size="mini" style="margin-left: 5px; color: #000000; border-color: #FFD700">Pro</el-tag>
+                                <el-tag v-else type="info" effect="plain" size="mini" style="margin-left: 5px; color: #808080; border-color: #808080">已失效</el-tag>
+                            </template>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="shared" label="共享" width="100" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <i class="el-icon-circle-check" v-if="scope.row.shared === 1" style="color: green;"></i>
                             <i class="el-icon-circle-close" v-else style="color: red;"></i>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="updateTime" label="更新时间"></el-table-column>
-                    <el-table-column label="操作" width="350">
+                    <el-table-column prop="updateTime" label="更新时间" min-width="180" show-overflow-tooltip>
+                        <template slot-scope="scope">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i class="el-icon-time" style="color: #909399; font-size: 14px;"></i>
+                                <span style="color: #606266; font-weight: 500;">{{ scope.row.updateTime }}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="400">
                         <template slot-scope="scope">
                             <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
-                                @click="refresh(scope.row.id)">刷新</el-button>
-                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
-                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
-                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                                @click="refresh(scope.row.id)" style="margin: 0 8px">刷新</el-button>
+                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)" style="margin: 0 8px">共享</el-button>
+                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)" style="margin: 0 8px">编辑</el-button>
+                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)" style="margin: 0 8px">删除</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
