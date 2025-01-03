@@ -11,6 +11,7 @@ import SharePage from '@/components/SharePage.vue';
 import RedemptionPage from '@/components/RedemptionPage.vue';
 import CarPage from '@/components/CarPage.vue';
 import JumpPage from '@/components/Jump.vue';
+import DrawPage from '@/components/DrawPage.vue';
 
 
 Vue.use(Router);
@@ -27,6 +28,7 @@ const routes = [
     { path: '/loading', component: LoadingPage, name: 'loading', meta: { title: 'Loading' } },
     { path: '/claude', component: ClaudePage, name: 'claude', meta: { title: 'Fuclaude' } },
     { path: '/navi', component: NaviPage, name: 'navi', meta: { title: 'Helper' } },
+    { path: '/draw', component: DrawPage, name: 'draw', meta: { title: 'AI绘图' } },
     
     // 你可以继续添加其他路由
 ];

@@ -10,10 +10,16 @@
         <i :class="typeIcon" class="type-icon"></i>
         {{ shortName }}
       </span>
-      <span class="count-section">
-        <i class="el-icon-user user-icon"></i>
-        {{ count }}
-      </span>
+      <div class="info-section">
+        <span class="count-section">
+          <i class="el-icon-user user-icon"></i>
+          {{ count }}
+        </span>
+        <span class="days-section" v-if="days !== undefined && days !== '-'">
+          <i class="el-icon-time"></i>
+          {{ days }} 天
+        </span>
+      </div>
     </button>
   </el-tooltip>
 </template>
@@ -29,6 +35,10 @@ export default {
     count: {
       type: [String, Number],
       default: 0
+    },
+    days: {
+      type: [String, Number],
+      default: undefined
     },
     type: {
       type: String,
@@ -85,11 +95,11 @@ export default {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s;
-  height: 28px;
+  height: 24px;
   font-size: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-width: 120px;
-  max-width: 160px;
+  min-width: 100px;
+  max-width: 180px;
 }
 
 .split-button:not(.disabled):hover {
@@ -101,37 +111,60 @@ export default {
 .name-section {
   background-color: #409EFF;
   color: white;
-  padding: 0 8px;
+  padding: 0 6px;
   height: 100%;
   display: flex;
   align-items: center;
   flex: 1;
-  min-width: 80px;
-  max-width: 120px;
+  min-width: 60px;
+  max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.info-section {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
 .count-section {
   background-color: #ecf5ff;
   color: #409EFF;
-  padding: 0 8px;
+  padding: 0 6px;
   height: 100%;
   display: flex;
   align-items: center;
-  min-width: 40px;
+  min-width: 32px;
   justify-content: center;
 }
 
+.days-section {
+  background-color: #f0f9eb;
+  color: #67C23A;
+  padding: 0 6px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  min-width: 42px;
+  justify-content: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.days-section i {
+  margin-right: 1px;
+  font-size: 11px;
+}
+
 .type-icon {
-  margin-right: 4px;
-  font-size: 14px;
+  margin-right: 3px;
+  font-size: 12px;
 }
 
 .user-icon {
-  margin-right: 2px;
-  font-size: 12px;
+  margin-right: 1px;
+  font-size: 11px;
 }
 
 /* 按钮类型样式 */
@@ -139,6 +172,11 @@ export default {
   background-color: #409EFF;
 }
 .gpt .count-section {
+  background-color: #ecf5ff;
+  color: #409EFF;
+}
+.gpt .days-section {
+  background-color: #ecf5ff;
   color: #409EFF;
 }
 
@@ -149,11 +187,19 @@ export default {
   background-color: #f0f9eb;
   color: #67C23A;
 }
+.claude .days-section {
+  background-color: #f0f9eb;
+  color: #67C23A;
+}
 
 .api .name-section {
   background-color: #E6A23C;
 }
 .api .count-section {
+  background-color: #fdf6ec;
+  color: #E6A23C;
+}
+.api .days-section {
   background-color: #fdf6ec;
   color: #E6A23C;
 }
@@ -168,7 +214,8 @@ export default {
   background-color: #909399;
 }
 
-.disabled .count-section {
+.disabled .count-section,
+.disabled .days-section {
   background-color: #f4f4f5;
   color: #909399;
 }

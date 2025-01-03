@@ -19,9 +19,9 @@
             <!-- PC端表格视图 -->
             <div v-if="!isMobile" class="pc-view">
                 <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading" :cell-style="{padding: '12px 0'}">
-                    <el-table-column prop="email" label="电子邮箱" min-width="200" show-overflow-tooltip></el-table-column>
-                    <el-table-column prop="name" label="账号名称" min-width="140" show-overflow-tooltip></el-table-column>
-                    <el-table-column prop="type" label="账号类型" min-width="180" show-overflow-tooltip>
+                    <el-table-column prop="email" label="电子邮箱" min-width="180" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="name" label="账号名称" min-width="120" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="type" label="账号类型" min-width="140" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <span>{{ scope.row.type }}</span>
                             <template v-if="scope.row.type === 'ChatGPT'">
@@ -33,13 +33,13 @@
                             </template>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="shared" label="共享" width="100" show-overflow-tooltip>
+                    <el-table-column prop="shared" label="共享" width="80" align="center" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <i class="el-icon-circle-check" v-if="scope.row.shared === 1" style="color: green;"></i>
                             <i class="el-icon-circle-close" v-else style="color: red;"></i>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="updateTime" label="更新时间" min-width="180" show-overflow-tooltip>
+                    <el-table-column prop="updateTime" label="更新时间" min-width="160" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <i class="el-icon-time" style="color: #909399; font-size: 14px;"></i>
@@ -47,13 +47,15 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="操作" width="400">
+                    <el-table-column label="操作" width="320" fixed="right">
                         <template slot-scope="scope">
-                            <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
-                                @click="refresh(scope.row.id)" style="margin: 0 8px">刷新</el-button>
-                            <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)" style="margin: 0 8px">共享</el-button>
-                            <el-button type="warning" size="mini" @click="editItem(scope.row.id)" style="margin: 0 8px">编辑</el-button>
-                            <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)" style="margin: 0 8px">删除</el-button>
+                            <div class="operation-column">
+                                <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
+                                    @click="refresh(scope.row.id)">刷新</el-button>
+                                <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)">共享</el-button>
+                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
+                                <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)">删除</el-button>
+                            </div>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -209,8 +211,10 @@ export default {
                 { id: 'username', label: '用户名', type: 'text', value: '', required: true },
                 { id: 'password', label: '密码', type: 'password', value: '', required: true },
                 { id: 'comment', label: '备注', type: 'text', value: '', required: true },
-                { id: 'expiresAt', label: '过期时间', type: 'date', value: '', required: true },
-            ]
+                { id: 'mjEnable', label: '启用 Midjourney', type: 'checkbox', value: '', required: true },
+                { id: 'expiresAt', label: '过期时间', type: 'date', value: '', required: true }
+            ],
+            isAdmin: false, // 新增管理员标志
         }
     },
     methods: {
@@ -381,7 +385,16 @@ export default {
             this.shareAddFlag = true;
             this.modalTitle = '新增共享';
             this.currentIndex = id;
-            this.formFields = this.shareFields
+            
+            // 根据管理员状态过滤表单字段
+            this.formFields = this.shareFields.filter(field => {
+                // 如果不是管理员且字段是 mjEnable，则不显示
+                if (!this.isAdmin && field.id === 'mjEnable') {
+                    return false;
+                }
+                return true;
+            });
+            
             this.resetFormFields();
             this.modalVisible = true;
         },
@@ -532,11 +545,26 @@ export default {
             } catch (error) {
                 message.error('刷新失败，请稍后重试');
             }
+        },
+        async checkAdminStatus() {
+            try {
+                const response = await apiClient.get(`${config.apiBaseUrl}/user/info`, {
+                    headers: {
+                        'Authorization': "Bearer " + localStorage.getItem('token')
+                    }
+                });
+                if (response.data.status) {
+                    this.isAdmin = response.data.data.id === 1;
+                }
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
+            }
         }
     },
     mounted() {
         this.fetchAccounts('');
         this.checkIsMobile();
+        this.checkAdminStatus();
         window.addEventListener('resize', this.checkIsMobile);
     },
     beforeDestroy() {
@@ -764,57 +792,290 @@ export default {
         right: 0;
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(12px);
-        padding: 12px 0;
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+        padding: 6px 0;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
         z-index: 1000;
+        height: 44px;
+    }
+
+    :deep(.el-pagination) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        padding: 0 16px;
+        height: 100%;
+    }
+
+    :deep(.el-pagination .btn-prev),
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0 4px;
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+    }
+
+    :deep(.el-pagination .number) {
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        margin: 0 4px;
+        border-radius: 16px;
+        font-weight: 500;
     }
 
     .mobile-card:last-child {
-        margin-bottom: 70px;
+        margin-bottom: 56px;
+    }
+
+    :deep(.el-pagination .active) {
+        background: linear-gradient(145deg, #0e8f6f, #0d8668);
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
     }
 
     .el-main {
-        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
     }
 }
 
-/* 暗色主题 */
+/* 暗色主题优化 */
 @media (prefers-color-scheme: dark) {
+    /* 基础布局 */
     .panel {
-        background-color: #1a1a1a;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        background: rgba(30, 30, 30, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    h2 {
+        color: #e0e0e0;
+    }
+
+    /* 搜索栏 */
+    .el-input__inner {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+    }
+
+    .el-input__inner:hover {
+        border-color: rgba(14, 143, 111, 0.5);
+    }
+
+    .el-input__inner:focus {
+        border-color: #0e8f6f;
+    }
+
+    .el-input-group__append {
+        background: rgba(14, 143, 111, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: none;
+    }
+
+    /* 表格样式 */
+    .el-table {
+        background-color: transparent;
+    }
+
+    .el-table th,
+    .el-table tr {
+        background-color: transparent;
+        color: #e0e0e0;
+    }
+
+    .el-table td,
+    .el-table th.is-leaf {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .el-table--enable-row-hover .el-table__body tr:hover > td {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* 移动端卡片样式 */
     .mobile-card {
-        background: #242424;
-        border-color: rgba(51, 51, 51, 0.6);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
+    .mobile-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 邮箱徽章 */
     .email-badge {
-        background: linear-gradient(135deg, rgba(64, 158, 255, 0.15) 0%, rgba(64, 158, 255, 0.1) 100%);
-        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.05);
+        background: linear-gradient(145deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
+        color: #7eb6ff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(64, 158, 255, 0.1);
     }
 
+    /* 状态徽章 */
     .status-badge {
-        background: linear-gradient(135deg, rgba(144, 147, 153, 0.15) 0%, rgba(144, 147, 153, 0.1) 100%);
+        background: rgba(255, 255, 255, 0.05);
+        color: #909399;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .status-shared {
-        background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.1) 100%);
+        background: linear-gradient(145deg, rgba(103, 194, 58, 0.1), rgba(103, 194, 58, 0.05));
+        color: #95d475;
+        border: 1px solid rgba(103, 194, 58, 0.1);
+    }
+
+    /* 标签样式 */
+    .el-tag {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-tag--warning {
+        background: rgba(230, 162, 60, 0.1);
+        border-color: rgba(230, 162, 60, 0.2);
+        color: #e6a23c;
+    }
+
+    .el-tag--success {
+        background: rgba(103, 194, 58, 0.1);
+        border-color: rgba(103, 194, 58, 0.2);
+        color: #67c23a;
+    }
+
+    /* 信息文本 */
+    .info-label {
+        color: #909399;
     }
 
     .info-value {
         color: #e0e0e0;
     }
 
+    /* 分割线 */
     .mobile-card-divider {
-        background: linear-gradient(90deg, #333 0%, rgba(51, 51, 51, 0.4) 100%);
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.05) 20%,
+            rgba(255, 255, 255, 0.05) 80%,
+            transparent
+        );
     }
 
-    .pagination-container {
-        background: rgba(26, 26, 26, 0.98);
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+    /* 按钮样式 */
+    .el-button--primary {
+        background: linear-gradient(145deg, #0e8f6f, #0d8668);
+        border: none;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(14, 143, 111, 0.1);
     }
+
+    .el-button--primary:hover {
+        background: linear-gradient(145deg, #10a37f, #0f9973);
+        box-shadow: 0 6px 16px rgba(14, 143, 111, 0.2);
+    }
+
+    .el-button--warning {
+        background: linear-gradient(145deg, #946c00, #855f00);
+        border: none;
+        color: #ffffff;
+    }
+
+    .el-button--warning:hover {
+        background: linear-gradient(145deg, #a37800, #946c00);
+    }
+
+    .el-button--danger {
+        background: linear-gradient(145deg, #c53030, #b52b2b);
+        border: none;
+        color: #ffffff;
+    }
+
+    .el-button--danger:hover {
+        background: linear-gradient(145deg, #d13b3b, #c53030);
+    }
+
+    /* 图表容器 */
+    .chart-overlay {
+        background: rgba(30, 30, 30, 0.95);
+    }
+
+    .chart-container {
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 移动端分页器 */
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination) {
+            color: #909399;
+        }
+
+        :deep(.el-pagination .btn-prev),
+        :deep(.el-pagination .btn-next) {
+            background: transparent;
+            color: #909399;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination .btn-prev:hover),
+        :deep(.el-pagination .btn-next:hover) {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .number) {
+            color: #909399;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination .number:hover) {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .active) {
+            background: linear-gradient(145deg, #0e8f6f, #0d8668);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
+        }
+
+        :deep(.el-pagination .active:hover) {
+            background: linear-gradient(145deg, #10a37f, #0f9973);
+        }
+    }
+}
+
+.operation-column {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+:deep(.el-table td.el-table__cell) {
+    padding: 8px 0;
+}
+
+:deep(.el-table .cell) {
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
 }
 </style>

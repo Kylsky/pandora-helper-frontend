@@ -33,26 +33,30 @@
           <i class="el-icon-truck"></i>
           <span slot="title">停车场</span>
         </el-menu-item>
+        <el-menu-item index="drawNav" v-if="showDrawModule">
+          <i class="el-icon-picture-outline"></i>
+          <span slot="title">AI绘图</span>
+        </el-menu-item>
         <el-menu-item index="freeNav">
           <i class="el-icon-medal"></i>
           <span slot="title">免费号池</span>
         </el-menu-item>
       </el-menu>
       <!-- 头像放回左下角 -->
-      <el-dropdown class="user-menu" trigger="click" popper-class="user-dropdown">
-        <span class="el-dropdown-link">
+      <el-dropdown class="user-menu" trigger="click" placement="top-start">
+        <div class="avatar-wrapper">
           <el-avatar :size="40" :src="avatar" class="user-avatar"></el-avatar>
-        </span>
+        </div>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="showModal">
+          <el-dropdown-item @click.native="showModal" class="dropdown-item">
             <i class="el-icon-key"></i>
             <span>兑换码激活</span>
           </el-dropdown-item>
-          <el-dropdown-item @click.native="showResetModal">
+          <el-dropdown-item @click.native="showResetModal" class="dropdown-item">
             <i class="el-icon-refresh"></i>
             <span>重置密码</span>
           </el-dropdown-item>
-          <el-dropdown-item @click.native="logout">
+          <el-dropdown-item @click.native="logout" class="dropdown-item">
             <i class="el-icon-switch-button"></i>
             <span>退出登录</span>
           </el-dropdown-item>
@@ -73,8 +77,10 @@
       </enhanced-dialog>
 
       <!-- 重置密码弹窗 -->
-      <enhanced-dialog :isVisible="resetModalVisible" :title="'重置密码'" @close="closeResetModal" @confirm="submitResetForm">
-        <form-input v-for="(field, index) in resetFormFields" :key="index" :field="field" @updateValue="handleResetUpdateValue" />
+      <enhanced-dialog :isVisible="resetModalVisible" :title="'重置密码'" @close="closeResetModal"
+        @confirm="submitResetForm">
+        <form-input v-for="(field, index) in resetFormFields" :key="index" :field="field"
+          @updateValue="handleResetUpdateValue" />
       </enhanced-dialog>
 
       <component :is="currentComponent"></component>
@@ -93,6 +99,7 @@ import JumpPageVue from './Jump.vue';
 import RedemptionPageVue from './RedemptionPage.vue'
 import CarPageVue from './CarPage.vue';
 import config from '../configs/config'
+import DrawPageVue from './DrawPage.vue';
 import apiClient from '../configs/axios'
 import { EventBus } from '../configs/eventBus';
 import message from '@/configs/message'
@@ -105,6 +112,7 @@ export default {
   name: 'NaviPage',
   data() {
     return {
+      mjApiSecret: null,
       isMenuVisible: false,
       touchStartX: 0,
       touchStartY: 0,
@@ -117,7 +125,8 @@ export default {
       resetModalVisible: false,
       itemData: '',
       modalTitle: '',
-      isCollapse: false,
+      isCollapse: true,
+      showDrawModule: false,
       formFields: [
         { id: 'code', label: '兑换码', type: 'text', value: '', required: true },
       ],
@@ -142,6 +151,24 @@ export default {
     }
   },
   methods: {
+    async getUserInfo() {
+      try {
+        const response = await apiClient.get(`${config.apiBaseUrl}/user/info`, {
+          headers: {
+            'Authorization': "Bearer " + localStorage.getItem('token')
+          }
+        });
+        console.log(response.data.data.apiKey)
+        if (response.data.status) {
+          this.mjApiSecret = response.data.data.apiKey;
+        } else {
+          message.error('获取用户信息失败');
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        message.handleError(error);
+      }
+    },
     toggleMenu() {
       this.isMenuVisible = !this.isMenuVisible;
     },
@@ -216,7 +243,7 @@ export default {
     },
     async submitResetForm() {
       try {
-        if(this.resetFormData.newPassword !== this.resetFormData.confirmPassword) {
+        if (this.resetFormData.newPassword !== this.resetFormData.confirmPassword) {
           message.error('两次输入的新密码不一致');
           return;
         }
@@ -256,7 +283,7 @@ export default {
     handleMenuSelect(index) {
       this.activeMenu = index;
       if (this.isMobile) {
-        this.isCollapse = true; // 选择菜单项后自动收起
+        this.isCollapse = true;
       }
       this.activeMenu = index;
       switch (index) {
@@ -275,6 +302,13 @@ export default {
         case 'freeNav':
           this.currentComponent = JumpPageVue;
           break;
+        case 'drawNav':
+          if (this.showDrawModule) {
+            this.currentComponent = DrawPageVue;
+          } else {
+            message.error('您没有AI绘图模块的访问权限');
+          }
+          break;
         default:
           this.currentComponent = SharePageVue;
       }
@@ -283,6 +317,60 @@ export default {
       this.$router.replace({ name: 'home' });
       localStorage.removeItem('token')
       localStorage.removeItem('img')
+    },
+    async checkUserPermission() {
+      try {
+        // 获取用户信息和apiKey
+        const response = await apiClient.get(`${config.apiBaseUrl}/user/info`, {
+          headers: {
+            'Authorization': "Bearer " + localStorage.getItem('token')
+          }
+        });
+        
+        if (!response.data.status) {
+          message.error('获取用户信息失败');
+          this.$router.replace({ name: 'home' });
+          return;
+        }
+
+        // 存储apiKey
+        this.mjApiSecret = response.data.data.apiKey;
+
+        // 验证用户权限
+        try {
+          const adminResponse = await apiClient.get(`${config.apiBaseUrl}/mj/users`, {
+            headers: {
+              'Authorization': "Bearer " + localStorage.getItem('token')
+            }
+          });
+          // 获取当前用户名
+          const currentUsername = response.data.data.username;
+          console.log(currentUsername)
+          // 检查用户列表是否为空或是否包含当前用户
+          const userList = adminResponse.data.data.list || [];
+          // 查询用户名相同的用户
+          const hasPermission = userList.find(user => user.name === currentUsername);
+          // 获取具体的权限
+          console.log(hasPermission)
+
+          const permission = hasPermission.status;
+          if (permission === 'DISABLED') {
+            this.showDrawModule = false;
+            return;
+          }
+          // 只有当接口返回200时才显示AI绘图模块
+          this.showDrawModule = adminResponse.status === 200;
+        } catch (error) {
+          // 如果/current接口调用失败,不显示AI绘图模块
+          console.log('AI绘图模块权限验证失败:', error);
+          this.showDrawModule = false;
+        }
+
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        message.error('获取用户信息失败');
+        // this.$router.replace({ name: 'home' });
+      }
     }
   },
   created() {
@@ -313,6 +401,7 @@ export default {
     }
   },
   mounted() {
+    this.checkUserPermission();
     document.addEventListener('click', this.handleClickOutside);
   },
   beforeDestroy() {
@@ -409,23 +498,63 @@ export default {
 
 /* 用户菜单样式 */
 .user-menu {
-  padding: 15px;
-  padding-left: 12px;
+  padding: 16px;
   margin-top: auto;
-  position: relative;
-  display: block;
+}
+
+.avatar-wrapper {
+  cursor: pointer;
 }
 
 .user-avatar {
-  cursor: pointer;
-  transition: all 0.3s ease;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* 只保留最基本的下拉菜单样式 */
+.el-dropdown-menu {
+  min-width: 120px !important;
+  padding: 4px 0 !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+}
+
+.dropdown-item {
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+}
+
+.dropdown-item i {
+  margin-right: 8px !important;
+  font-size: 14px !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .el-dropdown-menu {
+    background: #1a1a1a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .dropdown-item {
+    color: #e5eaf3 !important;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(110, 231, 183, 0.1) !important;
+  }
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .el-dropdown-menu.user-dropdown-menu {
+    position: fixed !important;
+    bottom: 80px !important;
+    left: 16px !important;
+    width: 140px !important;
+    max-width: 140px !important;
+  }
 }
 
 /* 主内容区域 */
@@ -577,97 +706,6 @@ export default {
   .mobile-overlay {
     background-color: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
-  }
-}
-
-/* 下拉菜单样式 */
-body div[role="tooltip"].el-dropdown-menu {
-  transform-origin: unset !important;
-  position: fixed !important;
-  top: unset !important;
-  left: unset !important;
-  transform: none !important;
-  margin-top: 5px;
-  left: 16px !important;
-  z-index: 9999;
-}
-
-:deep(.el-dropdown-menu__item) {
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-</style>
-
-<style>
-/* 下拉菜单全局样式 */
-.user-dropdown {
-  left: 16px !important;
-  transform: none !important;
-  transform-origin: unset !important;
-  position: absolute !important;
-  top: unset !important;
-  margin-top: -100px !important;
-}
-
-.user-dropdown .el-dropdown-menu__item {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-}
-
-.user-dropdown .el-dropdown-menu__item i {
-  margin-right: 8px !important;
-}
-
-.el-popper[x-placement^="bottom"] {
-  margin-top: 12px !important;
-  left: 16px !important;
-  position: absolute !important;
-  transform: translate(0, 0) !important;
-}
-
-body > .el-dropdown-menu,
-.el-dropdown-menu[x-placement^="bottom"] {
-  left: 16px !important;
-  margin-top: 10px !important;
-  transform: translate(0, 0) !important;
-  transform-origin: center top !important;
-}
-
-.el-dropdown-menu__item {
-  justify-content: flex-start !important;
-  padding-right: 20px !important;
-}
-
-/* 深色模式下拉菜单样式 */
-@media (prefers-color-scheme: dark) {
-  .el-dropdown-menu {
-    background-color: #1f2937 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
-    backdrop-filter: blur(12px) !important;
-  }
-
-  .el-dropdown-menu__item {
-    color: #f3f4f6 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  .el-dropdown-menu__item:hover {
-    background: linear-gradient(135deg, rgba(110, 231, 183, 0.1), rgba(52, 211, 153, 0.1)) !important;
-    color: #6ee7b7 !important;
-    transform: translateX(4px);
-  }
-
-  .el-dropdown-menu__item i {
-    color: #6ee7b7 !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .el-dropdown-menu__item:hover i {
-    transform: scale(1.1) rotate(10deg);
   }
 }
 </style>

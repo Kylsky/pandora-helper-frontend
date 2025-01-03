@@ -15,7 +15,7 @@
             <!-- PC端表格视图 -->
             <div v-show="!isMobile" class="pc-view">
                 <el-table :data="tableData" style="width: 100%" v-loading="loading" :cell-style="{padding: '12px 0'}">
-                    <el-table-column prop="email" label="账号" min-width="160" show-overflow-tooltip>
+                    <el-table-column prop="email" label="账号" min-width="180" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <i class="el-icon-message" style="color: #909399; font-size: 14px;"></i>
@@ -23,7 +23,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="type" label="账号类型" min-width="160" show-overflow-tooltip>
+                    <el-table-column prop="type" label="账号类型" min-width="140" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <span>{{ scope.row.type }}</span>
                             <template v-if="scope.row.type === 'ChatGPT'">
@@ -35,14 +35,14 @@
                             </template>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="auto" label="自动上车" min-width="160" align="center">
+                    <el-table-column prop="auto" label="自动上车" width="120" align="center">
                         <template slot-scope="scope">
                             <span :class="['status-tag', scope.row.auto === 1 ? 'status-yes' : 'status-no']">
                                 {{ scope.row.auto === 1 ? 'yes!' : 'No' }}
                             </span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="usernameDesc" label="车主" min-width="160" show-overflow-tooltip>
+                    <el-table-column prop="usernameDesc" label="车主" min-width="140" show-overflow-tooltip>
                         <template slot-scope="scope">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <i class="el-icon-user" style="color: #909399; font-size: 14px;"></i>
@@ -59,7 +59,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="操作" min-width="160" fixed="right">
+                    <el-table-column label="操作" width="280" fixed="right">
                         <template slot-scope="scope">
                             <div class="action-buttons" style="display: flex; gap: 8px;">
                                 <el-button v-if="scope.row.authorized === true" type="primary" size="mini"
@@ -482,27 +482,372 @@ export default {
     }
 }
 
-/* 暗色主题 */
+/* 暗色主题优化 */
 @media (prefers-color-scheme: dark) {
+    /* 基础布局 */
     .panel {
-        background-color: rgba(26, 26, 26, 0.8);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        background: rgba(30, 30, 30, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .mobile-card {
-        background: rgba(36, 36, 36, 0.8);
-        border-color: rgba(51, 51, 51, 0.6);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    h2 {
+        color: #e0e0e0;
+    }
+
+    /* 搜索栏 */
+    .search-bar {
+        background: transparent;
+    }
+
+    .el-input__inner {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+    }
+
+    .el-input__inner:hover {
+        border-color: rgba(14, 143, 111, 0.5);
+    }
+
+    .el-input__inner:focus {
+        border-color: #0e8f6f;
+    }
+
+    .el-input-group__append {
+        background: rgba(14, 143, 111, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: none;
+        color: #e0e0e0;
+    }
+
+    /* 表格样式 */
+    .el-table {
+        background-color: transparent;
+    }
+
+    .el-table th,
+    .el-table tr {
+        background-color: transparent;
+        color: #e0e0e0;
+    }
+
+    .el-table td,
+    .el-table th.is-leaf {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background-color: transparent;
+    }
+
+    .el-table--enable-row-hover .el-table__body tr:hover > td {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-table--border::after, 
+    .el-table--group::after, 
+    .el-table::before {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-table--border, 
+    .el-table--group {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* 状态标签 */
+    .status-tag {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .status-yes {
-        background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.1) 100%);
+        background: linear-gradient(145deg, rgba(103, 194, 58, 0.1), rgba(103, 194, 58, 0.05));
+        color: #95d475;
         box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
     }
 
     .status-no {
-        background: linear-gradient(135deg, rgba(144, 147, 153, 0.15) 0%, rgba(144, 147, 153, 0.1) 100%);
+        background: linear-gradient(145deg, rgba(144, 147, 153, 0.1), rgba(144, 147, 153, 0.05));
+        color: #a6a9ad;
         box-shadow: 0 2px 8px rgba(144, 147, 153, 0.1);
+    }
+
+    /* 移动端卡片样式 */
+    .mobile-card {
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 账号徽章 */
+    .account-badge {
+        background: linear-gradient(145deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
+        color: #7eb6ff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(64, 158, 255, 0.1);
+    }
+
+    /* 自动上车徽章 */
+    .auto-badge {
+        background: rgba(255, 255, 255, 0.05);
+        color: #909399;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .auto-yes {
+        background: linear-gradient(145deg, rgba(103, 194, 58, 0.1), rgba(103, 194, 58, 0.05));
+        color: #95d475;
+        border: 1px solid rgba(103, 194, 58, 0.1);
+    }
+
+    .auto-no {
+        background: linear-gradient(145deg, rgba(144, 147, 153, 0.1), rgba(144, 147, 153, 0.05));
+        color: #a6a9ad;
+        border: 1px solid rgba(144, 147, 153, 0.1);
+    }
+
+    /* 信息文本 */
+    .info-label {
+        color: #909399;
+    }
+
+    .info-value {
+        color: #e0e0e0;
+    }
+
+    /* 分割线 */
+    .mobile-card-divider {
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(255, 255, 255, 0.05) 20%,
+            rgba(255, 255, 255, 0.05) 80%,
+            transparent
+        );
+    }
+
+    /* 按钮样式 */
+    .el-button {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+    }
+
+    .el-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    .el-button--primary {
+        background: linear-gradient(145deg, #0e8f6f, #0d8668);
+        border: none;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(14, 143, 111, 0.1);
+    }
+
+    .el-button--primary:hover {
+        background: linear-gradient(145deg, #10a37f, #0f9973);
+        box-shadow: 0 6px 16px rgba(14, 143, 111, 0.2);
+    }
+
+    .el-button--warning {
+        background: linear-gradient(145deg, #946c00, #855f00);
+        border: none;
+        color: #ffffff;
+    }
+
+    .el-button--warning:hover {
+        background: linear-gradient(145deg, #a37800, #946c00);
+    }
+
+    .el-button--danger {
+        background: linear-gradient(145deg, #c53030, #b52b2b);
+        border: none;
+        color: #ffffff;
+    }
+
+    .el-button--danger:hover {
+        background: linear-gradient(145deg, #d13b3b, #c53030);
+    }
+
+    /* 弹窗样式 */
+    .el-dialog {
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .el-dialog__title {
+        color: #e0e0e0;
+    }
+
+    .el-dialog__body {
+        color: #e0e0e0;
+    }
+
+    /* 表单样式 */
+    .el-form-item__label {
+        color: #909399;
+    }
+
+    .el-checkbox__label {
+        color: #e0e0e0;
+    }
+
+    .el-checkbox__input.is-checked + .el-checkbox__label {
+        color: #0e8f6f;
+    }
+
+    .el-checkbox__input.is-checked .el-checkbox__inner {
+        background-color: #0e8f6f;
+        border-color: #0e8f6f;
+    }
+
+    /* 下拉菜单 */
+    .el-select-dropdown {
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .el-select-dropdown__item {
+        color: #e0e0e0;
+    }
+
+    .el-select-dropdown__item.hover,
+    .el-select-dropdown__item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-select-dropdown__item.selected {
+        color: #0e8f6f;
+        background: rgba(14, 143, 111, 0.1);
+    }
+
+    /* 日期选择器 */
+    .el-date-picker {
+        background: rgba(40, 40, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .el-date-picker__header-label {
+        color: #e0e0e0;
+    }
+
+    .el-date-table th {
+        color: #909399;
+    }
+
+    .el-date-table td {
+        color: #e0e0e0;
+    }
+
+    .el-date-table td.available:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .el-date-table td.current:not(.disabled) {
+        background: #0e8f6f;
+        color: #ffffff;
+    }
+
+    /* 移动端分页器 */
+    @media screen and (max-width: 768px) {
+        .pagination-container {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination) {
+            color: #909399;
+        }
+
+        :deep(.el-pagination .btn-prev),
+        :deep(.el-pagination .btn-next) {
+            background: transparent;
+            color: #909399;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination .btn-prev:hover),
+        :deep(.el-pagination .btn-next:hover) {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .number) {
+            color: #909399;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        :deep(.el-pagination .number:hover) {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+
+        :deep(.el-pagination .active) {
+            background: linear-gradient(145deg, #0e8f6f, #0d8668);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
+        }
+
+        :deep(.el-pagination .active:hover) {
+            background: linear-gradient(145deg, #10a37f, #0f9973);
+        }
+    }
+
+    /* Loading 遮罩 */
+    .el-loading-mask {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .el-loading-spinner .path {
+        stroke: #0e8f6f;
+    }
+
+    .el-loading-spinner .el-loading-text {
+        color: #e0e0e0;
+    }
+
+    /* 图标颜色 */
+    .el-icon-time,
+    .el-icon-message,
+    .el-icon-user {
+        color: #909399;
+    }
+
+    .el-icon-circle-check {
+        color: #95d475 !important;
+    }
+
+    .el-icon-circle-close {
+        color: #f56c6c !important;
+    }
+
+    /* 提示框 */
+    .el-tooltip__popper {
+        background: rgba(40, 40, 40, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        color: #e0e0e0 !important;
+    }
+
+    .el-tooltip__popper[x-placement^=top] .popper__arrow::after {
+        border-top-color: rgba(40, 40, 40, 0.95);
+    }
+
+    .el-tooltip__popper[x-placement^=bottom] .popper__arrow::after {
+        border-bottom-color: rgba(40, 40, 40, 0.95);
     }
 }
 
@@ -824,23 +1169,10 @@ export default {
         margin-bottom: 48px;
     }
 
-    /* 调整内容区域的下边距 */
+    /* 调整内区域的下边距 */
     .el-main {
         padding-bottom: calc(48px + env(safe-area-inset-bottom));
     }
 }
 
-/* 暗色主题支持 */
-@media (prefers-color-scheme: dark) {
-    @media screen and (max-width: 768px) {
-        .pagination-container {
-            background: rgba(30, 30, 30, 0.95);
-            box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        :deep(.el-pagination) {
-            color: #e0e0e0;
-        }
-    }
-}
 </style>

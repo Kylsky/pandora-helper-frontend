@@ -1,5 +1,8 @@
 import axios from 'axios';
 import router from '@/router';
+import config from '../configs/config'
+import message from './message';
+
 
 const apiClient = axios.create({
   baseURL: process.env.VUE_APP_API_BASE_URL, // 使用环境变量设置基础 API 地址
@@ -8,6 +11,7 @@ const apiClient = axios.create({
   },
   timeout: 10000, // 设置请求超时时间
 });
+
 
 apiClient.interceptors.response.use(
   (response) => {
@@ -27,10 +31,14 @@ apiClient.interceptors.response.use(
         }
       }
 
-      // 如果状态码是 401 或 403，跳转到登录页面
-      if (response.status === 401 || response.status === 403) {
-        router.push({ path: '/' });  // 跳转到登录页
+      // 如果状态码是 401，且不等于config.apiBaseUrl，跳转到登录页面
+      console.log(response.config.url)
+      if (response.status === 401 && response.config.url.startsWith(config.apiBaseUrl)) {
+        router.push({ path: '/' });
+      }else if (response.status === 401) {
+        message.error('您没有权限访问该功能')
       }
+
     }
 
     // 返回错误信息给调用方
