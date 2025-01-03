@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const config = {
-  apiBaseUrl: 'https://connect.yeelo.fun',
+  apiBaseUrl: '',
   mjBaseUrl: 'https://discord.com',
 };
 
