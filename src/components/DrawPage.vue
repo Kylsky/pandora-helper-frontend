@@ -1,441 +1,442 @@
 <template>
-    <el-container class="panel">
+    <el-container class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <!-- 使用 el-dialog 实现图片预览 -->
-        <el-dialog v-if="showViewer" :visible.sync="showViewer" :append-to-body="true" :modal="true" :show-close="false"
-            :close-on-click-modal="true" :close-on-press-escape="true" :fullscreen="true" custom-class="preview-dialog"
-            @close="closeViewer">
-            <div class="preview-container" @click.self="closeViewer">
+        <dialog v-if="showViewer" class="fixed inset-0 z-[9999] w-full h-full bg-black bg-opacity-75 flex items-center justify-center"
+            @click.self="closeViewer">
+            <div class="relative w-full h-full flex items-center justify-center" @click.self="closeViewer">
                 <!-- 关闭按钮 -->
-                <div class="preview-close" @click="closeViewer">
-                    <i class="el-icon-close"></i>
-                </div>
-                <el-image :src="previewUrl" fit="contain" @click.stop class="preview-full-image">
-                </el-image>
+                <button class="absolute top-4 right-4 text-white hover:text-gray-300 z-[9999]" @click="closeViewer">
+                    <i class="el-icon-close text-2xl"></i>
+                </button>
+                <img :src="previewUrl" class="max-w-full max-h-full object-contain" @click.stop>
             </div>
-        </el-dialog>
+        </dialog>
 
-        <!-- 在 template 中添加图片编辑器对话框 -->
-        <div v-if="showImageEditor" class="custom-dialog-overlay" @click.self="handleEditorClose">
-            <div class="custom-dialog">
-                <div class="custom-dialog-header">
-                    <span>图片编辑</span>
-                    <i class="el-icon-close" @click="handleEditorClose"></i>
-                </div>
-                <div class="custom-dialog-body">
-                    <div class="image-editor-container">
-                        <div class="image-canvas-container">
-                            <canvas ref="imageCanvas" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-                                @mouseup="handleMouseUp" @mouseleave="handleMouseUp"></canvas>
-                        </div>
-                        <el-input type="textarea" :rows="3" placeholder="请输入Prompt" v-model="editPrompt"></el-input>
+        <!-- 图片编辑弹窗 -->
+        <div v-if="showImageEditor" class="fixed inset-0 z-[9999] overflow-y-auto">
+            <!-- 遮罩层 -->
+            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" @click="handleEditorClose"></div>
+
+            <!-- 弹窗内容 -->
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                    <!-- 弹窗头部 -->
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">图片编辑</h3>
+                        <button 
+                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                            @click="handleEditorClose">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
-                </div>
-                <div class="custom-dialog-footer">
-                    <el-button @click="handleEditorClose">取 消</el-button>
-                    <el-button type="primary" @click="handleEditorConfirm">确 定</el-button>
+
+                    <!-- 弹窗主体 -->
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            <!-- 画布容器 -->
+                            <div class="w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-900" style="height: calc(100vh - 400px);">
+                                <canvas 
+                                    ref="imageCanvas" 
+                                    class="max-w-full max-h-full object-contain"
+                                    @mousedown="handleMouseDown" 
+                                    @mousemove="handleMouseMove"
+                                    @mouseup="handleMouseUp" 
+                                    @mouseleave="handleMouseUp">
+                                </canvas>
+                            </div>
+
+                            <!-- 提示词输入框 -->
+                            <div class="space-y-2">
+                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">提示词</div>
+                                <textarea 
+                                    v-model="editPrompt"
+                                    rows="3"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 sm:text-sm"
+                                    placeholder="请输入提示词">
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 弹窗底部 -->
+                    <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <button 
+                            class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            @click="handleEditorClose">
+                            取消
+                        </button>
+                        <button 
+                            class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            @click="handleEditorConfirm">
+                            确定
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <el-header>
-            <h2>AI绘图</h2>
-        </el-header>
-        <el-main ref="mainContainer">
-            <div class="main-container">
-                <!-- 左侧绘图设置 -->
-                <div class="left-panel">
-                    <el-card class="setting-card">
-                        <div slot="header" class="setting-header">
-                            <span>绘图设置</span>
-                        </div>
-                        <el-form ref="form" :model="formData" :rules="rules" label-width="100px">
-                            <el-form-item label="提示词" prop="prompt" width="80%" th="100%">
-                                <el-input type="textarea" v-model="formData.prompt" :rows="3" placeholder="请输入绘图提示词"
-                                    class="prompt-input">
-                                </el-input>
-                            </el-form-item>
-                            <el-form-item label="反向提示词">
-                                <el-input v-model="formData.negativePrompt" type="textarea" :rows="2"
-                                    placeholder="可选，用于描述不想要的内容"></el-input>
-                            </el-form-item>
-                            <el-form-item label="模型选择" prop="model">
-                                <el-select v-model="formData.model" placeholder="请选择模型"
-                                    popper-class="draw-select-dropdown">
-                                    <el-option v-for="item in modelOptions" :key="item.value" :label="item.text"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-
-                            <!-- 添加一个高级设置按钮 -->
-                            <el-form-item>
-                                <el-button type="text" class="advanced-settings-btn"
-                                    @click="showAdvancedSettings = true">
-                                    <i class="el-icon-setting"></i>
-                                    高级设置
-                                </el-button>
-                            </el-form-item>
-
-                            <el-form-item class="submit-container">
-                                <el-button type="primary" class="submit-btn" :loading="loading || permissionLoading"
-                                    @click="submitDrawing" :disabled="!hasPermission">
-                                    <i v-if="!loading && !permissionLoading" class="el-icon-picture-outline"></i>
-                                    <span>{{ loading ? '绘图中...' : (permissionLoading ? '验证中...' : (hasPermission ?
-                                        '开始绘图' : '无权限')) }}</span>
-                                </el-button>
-                            </el-form-item>
-                        </el-form>
-                    </el-card>
-                </div>
-
-                <!-- 右侧任务列表 -->
-                <div class="right-panel">
-                    <!-- 任务队表格(仅PC端显示) -->
-                    <div class="queue-card" v-if="!isMobile">
-                        <div class="queue-header">
-                            <span>任务队列 ({{ taskQueue.length }})</span>
-                            <el-button type="text" icon="el-icon-refresh" :loading="queueLoading"
-                                @click="fetchTaskQueue" class="refresh-btn">
-                                刷新
-                            </el-button>
-                        </div>
-                        <el-table :data="taskQueue" style="width: 100%" :max-height="500" v-loading="queueLoading"
-                            @row-click="handleRowClick" :expand-row-keys="expandedRows" :row-key="row => row.id"
-                            :row-class-name="getRowClassName" :expandable="canExpand">
-                            <!-- 只对非锁定行显示展开列 -->
-                            <el-table-column type="expand">
-                                <template v-slot="scope">
-                                    <!-- 添加click事件阻止展开 -->
-                                    <div class="expanded-row"
-                                        @click.native.stop="scope.row.userId === '🔒' && $message.warning('无权查看该任务详情')">
-                                        <div v-if="scope.row.userId !== '🔒'" class="expanded-content">
-                                            <!-- 预览图片 -->
-                                            <div class="expanded-image">
-                                                <el-image v-if="scope.row.imageUrl" :src="scope.row.imageUrl"
-                                                    fit="contain" @click="handlePreviewImage(scope.row.imageUrl)"
-                                                    class="preview-image">
-                                                    <div slot="placeholder" class="image-slot">
-                                                        <i class="el-icon-loading"></i>
+        <!-- <header class="px-4 py-3">
+            <h2 class="text-xl font-semibold">AI绘图</h2>
+        </header> -->
+        <el-main ref="mainContainer" class="p-2 md:p-6">
+            <div class="w-full h-full">
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                    <!-- 左侧绘图设置 -->
+                    <div class="xl:col-span-1 h-full">
+                        <div class="sticky top-6">
+                            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
+                                <div class="px-8 py-4 border-b border-gray-100 dark:border-gray-700/50">
+                                    <h2 class="text-xl font-medium text-gray-800 dark:text-gray-100">绘图设置</h2>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">创建你的专属 AI 艺术作品</p>
+                                </div>
+                                
+                                <div class="p-6">
+                                    <el-form ref="form" :model="formData" :rules="rules" label-position="top" class="space-y-4">
+                                        <!-- 提示词输入 -->
+                                        <el-form-item label="提示词" prop="prompt" class="mb-4">
+                                            <el-input 
+                                                type="textarea" 
+                                                v-model="formData.prompt" 
+                                                :rows="3" 
+                                                placeholder="例如：一只可爱的猫咪坐在窗台上，阳光洒在它的身上..."
+                                                class="w-full !rounded-xl !border-gray-200 dark:!border-gray-700 hover:!border-blue-500 dark:hover:!border-blue-400 transition-colors duration-300">
+                                            </el-input>
+                                        </el-form-item>
+                                        
+                                        <!-- 图片上传 -->
+                                        <el-form-item label="参考图片" class="mb-4">
+                                            <div class="space-y-3">
+                                                <div class="relative group">
+                                                    <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-3 group-hover:border-blue-500/50 dark:group-hover:border-blue-400/50 transition-all duration-300 cursor-pointer bg-gray-50/50 dark:bg-gray-800/50"
+                                                         @click="triggerFileInput" 
+                                                         @dragover.prevent 
+                                                         @drop.prevent="handleDrop">
+                                                        <input type="file" ref="fileInput" class="hidden" @change="handleFileChange" multiple accept="image/*">
+                                                        <div class="flex flex-col items-center justify-center py-1 group-hover:scale-105 transition-all duration-300">
+                                                            <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-1.5 group-hover:bg-blue-100 dark:group-hover:bg-blue-800/30 transition-colors duration-300">
+                                                                <i class="el-icon-plus text-lg text-blue-500/80 dark:text-blue-400/80 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors duration-300"></i>
+                                                            </div>
+                                                            <span class="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">点击或拖拽上传</span>
+                                                            <span class="text-xs text-gray-400 dark:text-gray-500">支持多张图片</span>
+                                                        </div>
                                                     </div>
-                                                    <div slot="error" class="image-slot">
-                                                        <i class="el-icon-picture-outline"></i>
+                                                </div>
+
+                                                <div v-if="imageList.length > 0" 
+                                                     class="grid grid-cols-4 gap-2 overflow-y-auto" 
+                                                     style="max-height: min(200px, calc(100vh - 45rem));">
+                                                    <div v-for="(image, index) in imageList" 
+                                                         :key="index" 
+                                                         class="relative group rounded-lg overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
+                                                        <img :src="image.url" 
+                                                             class="w-full h-16 object-cover transition-all duration-500 group-hover:scale-110" 
+                                                             @click="previewImage({imageUrl: image.url})">
+                                                        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                                <button class="p-2 bg-white/10 backdrop-blur-sm rounded-lg text-white/90 hover:bg-white/20 transition-all duration-300"
+                                                                       @click.stop="removeImage(index)">
+                                                                    <i class="el-icon-delete text-lg"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </el-image>
+                                                </div>
                                             </div>
-                                            <!-- 提示词 -->
-                                            <div class="expanded-prompt">
-                                                <div class="label">提示词</div>
-                                                <div class="content">{{ scope.row.prompt }}</div>
-                                            </div>
-                                            <!-- 按钮组 -->
-                                            <div class="expanded-actions">
-                                                <!-- 放大按钮组 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('upsample'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('upsample'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn upscale"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        <i class="el-icon-zoom-in"></i>
-                                                        {{ btn.label }}
-                                                    </el-button>
-                                                </template>
+                                        </el-form-item>
 
-                                                <!-- 变体按钮组 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('variation'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('variation'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn variation"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        <i class="el-icon-refresh"></i>
-                                                        {{ btn.label }}
-                                                    </el-button>
-                                                </template>
+                                        <!-- 预设风格 -->
+                                        <el-form-item label="预设风格" class="mb-4">
+                                            <el-select 
+                                                v-model="selectedStyle" 
+                                                placeholder="选择预设风格"
+                                                clearable
+                                                @change="handleStyleChange"
+                                                class="w-full !rounded-xl">
+                                                <el-option
+                                                    v-for="style in presetStyles"
+                                                    :key="style.name"
+                                                    :label="style.name"
+                                                    :value="style.name"
+                                                    class="group !h-auto">
+                                                    <div class="flex items-center justify-between py-2">
+                                                        <div class="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                                            {{ style.name }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 ml-4 text-right">
+                                                            {{ style.description }}
+                                                        </div>
+                                                    </div>
+                                                </el-option>
+                                            </el-select>
+                                        </el-form-item>
 
+                                        <!-- 高级设置按钮 -->
+                                        <el-form-item class="mb-4">
+                                            <el-button 
+                                                type="text" 
+                                                class="w-full flex items-center justify-center py-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-500 dark:hover:text-emerald-400 border border-dashed border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-500/50 dark:hover:border-emerald-400/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-300"
+                                                @click="showAdvancedSettings = true">
+                                                <i class="el-icon-setting mr-2 text-lg"></i>
+                                                <span class="text-sm font-medium">高级设置</span>
+                                            </el-button>
+                                        </el-form-item>
 
-                                                <!-- 在展开的操作区域中添加 Inpaint 按钮组 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('Inpaint'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('Inpaint'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn inpaint"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        <i class="el-icon-edit"></i>
-                                                        {{ btn.label }}
-                                                    </el-button>
-                                                </template>
-
-                                                <!-- 缩放按钮组 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('Outpaint') || btn.customId.includes('CustomZoom'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn zoom"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        <i class="el-icon-zoom-out"></i>
-                                                        {{ btn.label }}
-                                                    </el-button>
-                                                </template>
-
-                                                <!-- 平移按钮组 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('pan'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('pan'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn pan"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        {{ btn.emoji }}
-                                                    </el-button>
-                                                </template>
-
-                                                <!-- 收藏按钮 -->
-                                                <template
-                                                    v-if="scope.row.buttons && scope.row.buttons.some(btn => btn.customId.includes('BOOKMARK'))">
-                                                    <el-button
-                                                        v-for="btn in scope.row.buttons.filter(b => b.customId.includes('BOOKMARK'))"
-                                                        :key="btn.customId" type="text" size="small"
-                                                        class="action-btn bookmark"
-                                                        @click.stop="handleButtonAction(btn, scope.row)">
-                                                        {{ btn.emoji }}
-                                                    </el-button>
-                                                </template>
-
-                                                <!-- 下载按钮 -->
-                                                <el-button v-if="scope.row.imageUrl" type="text" size="small"
-                                                    class="action-btn download"
-                                                    @click.stop="downloadImage(scope.row.imageUrl)">
-                                                    <i class="el-icon-download"></i>
-                                                    下载
-                                                </el-button>
-
-                                                <!-- 取消按钮 -->
-                                                <el-button v-if="canCancel(scope.row.status)" type="text" size="small"
-                                                    class="action-btn cancel" @click.stop="handleCancel(scope.row)">
-                                                    <i class="el-icon-close"></i>
-                                                    取消
-                                                </el-button>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </el-table-column>
-                            <!-- <el-table-column prop="id" label="任务ID" width="100" align="center" show-overflow-tooltip>
-                                <template slot-scope="scope">
-                                    <el-tooltip content="点击复制" placement="top" :open-delay="500">
-                                        <span class="task-id" @click.stop="copyTaskId(scope.row.id)">{{ scope.row.id
-                                            }}</span>
-                                    </el-tooltip>
-                                </template>
-                            </el-table-column> -->
-                            <el-table-column prop="prompt" label="提示词" width="180" align="left"
-                                show-overflow-tooltip></el-table-column>
-                            <el-table-column prop="action" label="类型" width="80" align="center">
-                                <template slot-scope="scope">
-                                    <el-tag size="small" type="info">
-                                        {{ getActionText(scope.row.action) }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="status" label="状态" width="80" align="center">
-                                <template slot-scope="scope">
-                                    <el-tag :type="getStatusType(scope.row.status)">
-                                        {{ getStatusText(scope.row.status) }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="提交时间" width="160" align="center">
-                                <template slot-scope="scope">
-                                    <el-tooltip :content="scope.row.displays.submitTime" placement="top">
-                                        <span>{{ formatTime(scope.row.displays.submitTime) }}</span>
-                                    </el-tooltip>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="进度" width="220" align="center">
-                                <template slot-scope="scope">
-                                    <el-progress :percentage="getProgressPercentage(scope.row.progress)"
-                                        :status="getProgressStatus(scope.row.status)"></el-progress>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                        <!-- 分页 -->
-                        <div class="pagination-container">
-                            <el-pagination @size-change="handleSizeChange" @current-change="handlePageChange"
-                                :current-page="pagination.current" :page-sizes="[8, 16, 24]"
-                                :page-size="pagination.pageSize" layout="total, sizes, prev, pager, next, jumper"
-                                :total="pagination.total">
-                            </el-pagination>
+                                        <!-- 提交按钮 -->
+                                        <el-form-item>
+                                            <el-button 
+                                                type="primary" 
+                                                class="w-full h-10 !rounded-xl bg-[#1A9168] hover:bg-[#158055] border-0 text-base font-medium shadow-lg shadow-[#1A9168]/20 hover:shadow-xl hover:shadow-[#1A9168]/30 transform hover:-translate-y-0.5 transition-all duration-300 !flex !items-center !justify-center" 
+                                                :loading="loading || permissionLoading"
+                                                @click="submitDrawing" 
+                                                :disabled="!hasPermission">
+                                                <div class="flex items-center justify-center w-full">
+                                                    <i v-if="!loading && !permissionLoading" class="el-icon-picture-outline mr-2"></i>
+                                                    <span>{{ loading ? '绘图中...' : (permissionLoading ? '验证中...' : (hasPermission ? '开始绘图' : '无权限')) }}</span>
+                                                </div>
+                                            </el-button>
+                                        </el-form-item>
+                                    </el-form>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 移动端任务队列 -->
-                    <div class="mobile-queue" v-else>
-                        <!-- 任务队列头部 -->
-                        <div class="mobile-queue-header">
-                            <div class="header-left">
-                                <span class="queue-title">任务队列</span>
-                                <el-tag size="small" type="info">{{ taskQueue.length }}</el-tag>
+                    <!-- 右侧任务列表/图片编辑区域 -->
+                    <div class="xl:col-span-3">
+                        <!-- 任务队列表格(仅PC端显示) -->
+                        <div v-if="!showImageDetail" class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg min-h-[calc(100vh-4rem)] flex flex-col">
+                            <div class="flex items-center justify-between px-8 py-5 border-b border-gray-200/50 dark:border-gray-700/50">
+                                <span class="text-xl font-semibold text-gray-800 dark:text-gray-200">任务队列 ({{ taskQueue.length }})</span>
+                                <el-button 
+                                    type="text" 
+                                    icon="el-icon-refresh" 
+                                    :loading="queueLoading"
+                                    @click="fetchTaskQueue" 
+                                    class="text-gray-600/90 hover:text-blue-500 dark:text-gray-400/90 dark:hover:text-blue-400 transition-colors duration-300">
+                                    刷新
+                                </el-button>
                             </div>
-                            <el-button type="text" icon="el-icon-refresh" :loading="queueLoading"
-                                @click="fetchTaskQueue">
-                                刷新
-                            </el-button>
+                            <div class="flex-1 flex flex-col overflow-hidden">
+                                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                                    <el-table 
+                                        :data="taskQueue" 
+                                        class="w-full custom-table"
+                                        :height="'calc(100vh - 16rem)'"
+                                        v-loading="queueLoading"
+                                        element-loading-text="加载中..."
+                                        element-loading-spinner="el-icon-loading"
+                                        @row-click="handleRowClick">
+                                        <!-- 提示词列 -->
+                                        <el-table-column prop="prompt" label="提示词" min-width="180" align="left"
+                                            show-overflow-tooltip></el-table-column>
+                                        <el-table-column prop="action" label="类型" min-width="80" align="center">
+                                            <template slot-scope="scope">
+                                                <el-tag size="small" type="info">
+                                                    {{ getActionText(scope.row.action) }}
+                                                </el-tag>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="status" label="状态" min-width="80" align="center">
+                                            <template slot-scope="scope">
+                                                <el-tag :type="getStatusType(scope.row.status)">
+                                                    {{ getStatusText(scope.row.status) }}
+                                                </el-tag>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="提交时间" min-width="160" align="center">
+                                            <template slot-scope="scope">
+                                                <el-tooltip :content="scope.row.displays.submitTime" placement="top">
+                                                    <span>{{ formatTime(scope.row.displays.submitTime) }}</span>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="进度" width="220" align="center">
+                                            <template slot-scope="scope">
+                                                <el-progress :percentage="getProgressPercentage(scope.row.progress)"
+                                                    :status="getProgressStatus(scope.row.status)"></el-progress>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </div>
+                                <!-- 分页 -->
+                                <div class="flex justify-center p-4 border-t border-gray-100 dark:border-gray-700">
+                                    <el-pagination 
+                                        @size-change="handleSizeChange" 
+                                        @current-change="handlePageChange"
+                                        :current-page="pagination.current" 
+                                        :page-sizes="[10, 20, 30]"
+                                        :page-size="pagination.pageSize" 
+                                        layout="total, sizes, prev, pager, next, jumper"
+                                        :total="pagination.total"
+                                        class="flex items-center">
+                                    </el-pagination>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- 任务列表 -->
-                        <div class="mobile-task-list" v-loading="queueLoading">
-                            <div v-for="task in taskQueue" :key="task.id" class="mobile-task-card" :class="{
-                                'task-expanded': expandedRows.includes(task.id),
-                                'task-success': task.status === 'SUCCESS',
-                                'task-failed': task.status === 'FAILED',
-                                'task-locked': task.userId === '🔒'
-                            }" @click="handleRowClick(task)">
-
-                                <!-- 任务卡片主体 -->
-                                <div class="task-main">
-                                    <!-- 状态 -->
-                                    <div class="task-status-bar">
-                                        <div class="status-tags">
-                                            <el-tag size="mini" :type="getStatusType(task.status)">
-                                                {{ getStatusText(task.status) }}
-                                            </el-tag>
-                                            <el-tag size="mini" type="info">{{ getActionText(task.action) }}</el-tag>
+                        <!-- 图片编辑模块 -->
+                        <div v-else class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg min-h-[calc(100vh-4rem)]">
+                            <div class="flex items-center justify-between px-8 py-5 border-b border-gray-200/50 dark:border-gray-700/50">
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-xl font-semibold text-gray-800 dark:text-gray-200">图片编辑</span>
+                                    <el-button 
+                                        icon="el-icon-back" 
+                                        type="text"
+                                        @click="showImageDetail = false"
+                                        class="text-gray-600/90 hover:text-blue-500">
+                                        返回任务队列
+                                    </el-button>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="flex flex-col md:flex-row gap-6 h-[calc(100vh-12rem)]">
+                                    <!-- 左侧图片预览 -->
+                                    <div class="md:w-2/3 h-full">
+                                        <div class="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 h-full flex items-center justify-center">
+                                            <img 
+                                                v-if="currentTask && currentTask.imageUrl"
+                                                :src="currentTask.imageUrl"
+                                                @click="handlePreviewImage(currentTask.imageUrl)"
+                                                class="max-w-full max-h-full object-contain cursor-zoom-in hover:opacity-90 transition-opacity"
+                                            >
                                         </div>
-                                        <span class="task-time">{{ formatTime(task.displays.submitTime) }}</span>
                                     </div>
 
-                                    <!-- 任务内容 -->
-                                    <div class="task-content">
-                                        <div class="task-info">
-                                            <div class="task-prompt">{{ task.prompt }}</div>
-                                            <el-progress v-if="task.status !== 'SUCCESS'"
-                                                :percentage="getProgressPercentage(task.progress)"
-                                                :status="getProgressStatus(task.status)" :stroke-width="4">
-                                            </el-progress>
-                                        </div>
-                                        <div class="task-preview"
-                                            v-if="task.imageUrl && expandedRows.includes(task.id)">
-                                            <el-image :src="task.imageUrl" fit="cover"
-                                                @click.stop="handlePreviewImage(task.imageUrl)"
-                                                class="preview-thumbnail">
-                                                <div slot="placeholder" class="image-slot">
-                                                    <i class="el-icon-loading"></i>
+                                    <!-- 右侧操作区域 -->
+                                    <div class="md:w-1/3 h-full flex flex-col">
+                                        <div class="flex-1 space-y-4 overflow-y-auto custom-scrollbar">
+                                            <!-- 提示词 -->
+                                            <div class="space-y-2">
+                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">提示词</div>
+                                                <div class="relative">
+                                                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 break-words whitespace-pre-wrap max-h-32 overflow-y-auto">
+                                                        {{ currentTask ? currentTask.prompt : '' }}
+                                                    </div>
+                                                    <button 
+                                                        class="absolute top-2 right-2 p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-white dark:bg-gray-700 rounded-md shadow-sm transition-colors"
+                                                        @click="copyPrompt(currentTask?.prompt)"
+                                                        v-if="currentTask?.prompt">
+                                                        <i class="el-icon-document-copy text-sm"></i>
+                                                    </button>
                                                 </div>
-                                            </el-image>
+                                            </div>
+
+                                            <!-- 任务信息 -->
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="space-y-2">
+                                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务状态</div>
+                                                    <el-tag :type="getStatusType(currentTask?.status)">
+                                                        {{ getStatusText(currentTask?.status) }}
+                                                    </el-tag>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务类型</div>
+                                                    <el-tag type="info">{{ getActionText(currentTask?.action) }}</el-tag>
+                                                </div>
+                                            </div>
+
+                                            <!-- 操作按钮组 -->
+                                            <div class="space-y-4">
+                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">可用操作</div>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <!-- 放大按钮组 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('upsample'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('upsample'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-zoom-in mr-1.5"></i>
+                                                            <span>{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- 变体按钮组 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('variation'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('variation'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-refresh mr-1.5"></i>
+                                                            <span>{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- Inpaint 按钮组 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('Inpaint'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Inpaint'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-edit mr-1.5"></i>
+                                                            <span>{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- 缩放按钮组 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('Outpaint') || btn.customId.includes('CustomZoom'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-zoom-out mr-1.5"></i>
+                                                            <span>{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- 平移按钮组 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('pan'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('pan'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <span>{{ btn.emoji }}</span>
+                                                            <span class="ml-1.5">{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- 收藏按钮 -->
+                                                    <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('BOOKMARK'))">
+                                                        <button
+                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('BOOKMARK'))"
+                                                            :key="btn.customId"
+                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
+                                                            @click="handleButtonAction(btn, currentTask)">
+                                                            <span>{{ btn.emoji }}</span>
+                                                            <span class="ml-1.5">{{ btn.label }}</span>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- 下载按钮 -->
+                                                    <button 
+                                                        v-if="currentTask && currentTask.imageUrl" 
+                                                        class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
+                                                        @click="downloadImage(currentTask.imageUrl)">
+                                                        <i class="el-icon-download mr-1.5"></i>
+                                                        <span>下载</span>
+                                                    </button>
+
+                                                    <!-- 取消按钮 -->
+                                                    <button 
+                                                        v-if="currentTask && canCancel(currentTask.status)" 
+                                                        class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
+                                                        @click="handleCancel(currentTask)">
+                                                        <i class="el-icon-close mr-1.5"></i>
+                                                        <span>取消</span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- 展开的操作区域 -->
-                                <transition name="slide-fade">
-                                    <div class="task-actions" v-show="expandedRows.includes(task.id)">
-                                        <!-- 放大按钮组 -->
-                                        <div class="action-group"
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('upsample'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('upsample'))"
-                                                    :key="btn.customId" size="mini" :type="'primary'" plain
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    {{ btn.label }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 变体按钮组 -->
-                                        <div class="action-group"
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('variation'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('variation'))"
-                                                    :key="btn.customId" size="mini" type="info" plain
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    {{ btn.label }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 缩放按钮组 -->
-                                        <div class="action-group"
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('Outpaint') || btn.customId.includes('CustomZoom'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))"
-                                                    :key="btn.customId" size="mini" type="warning" plain
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    {{ btn.label }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 平移按钮组 -->
-                                        <div class="action-group"
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('pan'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('pan'))"
-                                                    :key="btn.customId" size="mini" type="success" plain
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    {{ btn.emoji }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 收藏按钮 -->
-                                        <div class="action-group"
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('BOOKMARK'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('BOOKMARK'))"
-                                                    :key="btn.customId" size="mini" type="danger" plain
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    {{ btn.emoji }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 下载按钮 -->
-                                        <div class="action-group">
-                                            <el-button-group>
-                                                <el-button v-if="task.imageUrl" size="mini" type="success" plain
-                                                    @click.stop="downloadImage(task.imageUrl)">
-                                                    <i class="el-icon-download"></i>
-                                                </el-button>
-                                                <el-button v-if="canCancel(task.status)" size="mini" type="danger" plain
-                                                    @click.stop="handleCancel(task)">
-                                                    <i class="el-icon-close"></i>
-                                                </el-button>
-                                            </el-button-group>
-                                        </div>
-
-                                        <!-- 在展开的操作区域中添加 Inpaint 按钮组 -->
-                                        <template
-                                            v-if="task.buttons && task.buttons.some(btn => btn.customId.includes('Inpaint'))">
-                                            <el-button-group>
-                                                <el-button
-                                                    v-for="btn in task.buttons.filter(b => b.customId.includes('Inpaint'))"
-                                                    :key="btn.customId" type="text" size="small"
-                                                    class="action-btn inpaint"
-                                                    @click.stop="handleButtonAction(btn, task)">
-                                                    <i class="el-icon-edit"></i>
-                                                    {{ btn.label }}
-                                                </el-button>
-                                            </el-button-group>
-                                        </template>
-                                    </div>
-                                </transition>
                             </div>
-                        </div>
-                        <!-- 移动端分页 -->
-                        <div class="mobile-pagination">
-                            <el-pagination @current-change="handlePageChange" :current-page="pagination.current"
-                                :page-size="pagination.pageSize" layout="prev, pager, next" :total="pagination.total">
-                            </el-pagination>
                         </div>
                     </div>
                 </div>
@@ -505,101 +506,108 @@
             </el-backtop>
 
             <!-- 在template最外层添加抽屉组件 -->
-            <el-drawer title="高级设置" :visible.sync="showAdvancedSettings" direction="rtl" size="400px"
-                :before-close="handleAdvancedSettingsClose" custom-class="advanced-settings-drawer">
-                <div class="advanced-settings-form">
-                    <div class="form-content">
-                        <!-- 基础设置组 -->
-                        <div class="settings-group">
-                            <div class="group-title">
-                                <i class="el-icon-setting"></i>
-                                <span>基础设置</span>
+            <el-drawer
+                title="高级设置"
+                :visible.sync="showAdvancedSettings"
+                direction="rtl"
+                size="600px"
+                :modal-append-to-body="false"
+                :before-close="handleAdvancedSettingsClose"
+                custom-class="advanced-settings-drawer">
+                <div class="flex flex-col h-full">
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <div class="space-y-8">
+                            <!-- 基础设置组 -->
+                            <div class="settings-group">
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <i class="el-icon-setting text-lg text-emerald-600"></i>
+                                    <span class="text-base font-medium">基础设置</span>
+                                </div>
+                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-4">
+                                    <el-form-item label="宽高比例" class="w-full">
+                                        <el-select v-model="formData.aspectRatio" placeholder="选择宽高比例" class="w-full">
+                                            <el-option label="默认" value=""></el-option>
+                                            <el-option label="16:9" value="--ar 16:9"></el-option>
+                                            <el-option label="4:3" value="--ar 4:3"></el-option>
+                                            <el-option label="1:1" value="--ar 1:1"></el-option>
+                                            <el-option label="9:16" value="--ar 9:16"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="文本权重" class="w-full">
+                                        <el-select v-model="formData.imageWeight" placeholder="设置文本权重" class="w-full">
+                                            <el-option label="默认(0.25)" value=""></el-option>
+                                            <el-option label="0.5" value="--iw 0.5"></el-option>
+                                            <el-option label="1.0" value="--iw 1"></el-option>
+                                            <el-option label="2.0" value="--iw 2"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
                             </div>
-                            <el-form :model="formData" label-position="top" label-width="auto">
-                                <el-form-item label="宽高比例">
-                                    <el-select v-model="formData.aspectRatio" placeholder="选择宽高比例">
-                                        <el-option label="默认" value=""></el-option>
-                                        <el-option label="16:9" value="--ar 16:9"></el-option>
-                                        <el-option label="4:3" value="--ar 4:3"></el-option>
-                                        <el-option label="1:1" value="--ar 1:1"></el-option>
-                                        <el-option label="9:16" value="--ar 9:16"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="文本权重">
-                                    <el-select v-model="formData.imageWeight" placeholder="设置文本权重">
-                                        <el-option label="默认(0.25)" value=""></el-option>
-                                        <el-option label="0.5" value="--iw 0.5"></el-option>
-                                        <el-option label="1.0" value="--iw 1"></el-option>
-                                        <el-option label="2.0" value="--iw 2"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                            </el-form>
-                        </div>
 
-                        <!-- 高级设置组 -->
-                        <div class="settings-group">
-                            <div class="group-title">
-                                <i class="el-icon-magic-stick"></i>
-                                <span>高级设置</span>
+                            <!-- 高级设置组 -->
+                            <div class="settings-group">
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <i class="el-icon-magic-stick text-lg text-emerald-600"></i>
+                                    <span class="text-base font-medium">高级设置</span>
+                                </div>
+                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-4">
+                                    <el-form-item label="随机种子" class="w-full">
+                                        <el-input-number v-model="formData.seed" :min="0" :max="4294967295"
+                                            placeholder="输入随机种子" class="w-full">
+                                        </el-input-number>
+                                    </el-form-item>
+                                    <el-form-item label="渲染质量" class="w-full">
+                                        <el-select v-model="formData.quality" placeholder="选择渲染质量" class="w-full">
+                                            <el-option label="默认(1.0)" value=""></el-option>
+                                            <el-option label="0.25" value="--quality 0.25"></el-option>
+                                            <el-option label="0.5" value="--quality 0.5"></el-option>
+                                            <el-option label="2.0" value="--quality 2"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="风格强度" class="w-full">
+                                        <el-slider v-model="formData.stylize" :min="0" :max="1000" :step="10">
+                                        </el-slider>
+                                    </el-form-item>
+                                    <el-form-item label="多样性" class="w-full">
+                                        <el-slider v-model="formData.chaos" :min="0" :max="100">
+                                        </el-slider>
+                                    </el-form-item>
+                                </el-form>
                             </div>
-                            <el-form :model="formData" label-position="top" label-width="auto">
-                                <el-form-item label="随机种子">
-                                    <el-input-number v-model="formData.seed" :min="0" :max="4294967295"
-                                        placeholder="输入随机种子">
-                                    </el-input-number>
-                                </el-form-item>
-                                <el-form-item label="渲染质量">
-                                    <el-select v-model="formData.quality" placeholder="选择渲染质量">
-                                        <el-option label="默认(1.0)" value=""></el-option>
-                                        <el-option label="0.25" value="--quality 0.25"></el-option>
-                                        <el-option label="0.5" value="--quality 0.5"></el-option>
-                                        <el-option label="2.0" value="--quality 2"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="风格强度">
-                                    <el-slider v-model="formData.stylize" :min="0" :max="1000" :step="10">
-                                    </el-slider>
-                                </el-form-item>
-                                <el-form-item label="多样性">
-                                    <el-slider v-model="formData.chaos" :min="0" :max="100">
-                                    </el-slider>
-                                </el-form-item>
-                            </el-form>
-                        </div>
 
-                        <!-- 特殊选项组 -->
-                        <div class="settings-group">
-                            <div class="group-title">
-                                <i class="el-icon-star-off"></i>
-                                <span>特殊选项</span>
+                            <!-- 特殊选项组 -->
+                            <div class="settings-group">
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <i class="el-icon-star-off text-lg text-emerald-600"></i>
+                                    <span class="text-base font-medium">特殊选项</span>
+                                </div>
+                                <el-form :model="formData" label-position="top" label-width="auto">
+                                    <el-form-item>
+                                        <el-checkbox-group v-model="formData.specialOptions" class="grid grid-cols-2 gap-4">
+                                            <el-checkbox label="--sameseed" class="!mr-0">使用相同种子</el-checkbox>
+                                            <el-checkbox label="--upbeta" class="!mr-0">Beta放大工具</el-checkbox>
+                                            <el-checkbox label="--uplight" class="!mr-0">轻量化处理</el-checkbox>
+                                            <el-checkbox label="--niji" class="!mr-0">动漫风格</el-checkbox>
+                                            <el-checkbox label="--hd" class="!mr-0">高清模式</el-checkbox>
+                                            <el-checkbox label="--tile" class="!mr-0">平铺模式</el-checkbox>
+                                        </el-checkbox-group>
+                                    </el-form-item>
+                                </el-form>
                             </div>
-                            <el-form :model="formData" label-position="top" label-width="auto">
-                                <el-form-item>
-                                    <el-checkbox-group v-model="formData.specialOptions">
-                                        <el-checkbox label="--sameseed">使用相同种子</el-checkbox>
-                                        <el-checkbox label="--upbeta">Beta放大工具</el-checkbox>
-                                        <el-checkbox label="--uplight">轻量化处理</el-checkbox>
-                                        <el-checkbox label="--niji">动漫风格</el-checkbox>
-                                        <el-checkbox label="--hd">高清模式</el-checkbox>
-                                        <el-checkbox label="--tile">平铺模式</el-checkbox>
-                                    </el-checkbox-group>
-                                </el-form-item>
-                            </el-form>
                         </div>
                     </div>
-
                     <!-- 底部操作栏 -->
-                    <div class="form-footer">
-                        <div class="footer-left">
-                            <span>设置将在下次绘图时生效</span>
-                        </div>
-                        <div class="footer-right">
-                            <el-button size="small" @click="clearAdvancedSettings">
-                                重置设置
-                            </el-button>
-                            <el-button size="small" type="primary" @click="showAdvancedSettings = false">
-                                确定
-                            </el-button>
+                    <div class="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">设置将在下次绘图时生效</span>
+                            <div class="space-x-2">
+                                <el-button size="small" @click="clearAdvancedSettings">
+                                    重置设置
+                                </el-button>
+                                <el-button size="small" type="primary" @click="showAdvancedSettings = false">
+                                    确定
+                                </el-button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -625,8 +633,8 @@ export default {
             expandedRows: [],
             formData: {
                 prompt: '',
-                negativePrompt: '',
-                model: 'MJ_V6',
+                bot_type: 'MID_JOURNEY',
+                state: 'midjourney-proxy-admin',
                 speed: 'FAST',
                 aspectRatio: '',
                 imageWeight: '',
@@ -664,7 +672,7 @@ export default {
             previewUrl: '',
             pagination: {
                 current: 1,
-                pageSize: 8,
+                pageSize: 10,
                 total: 0
             },
             showAdvancedSettings: false,
@@ -679,6 +687,186 @@ export default {
             originalImage: null, // 添加新的数据属性
             selectionRect: { x: 0, y: 0, width: 0, height: 0 },
             finalSelectionRect: null,
+            imageList: [], // 添加图片列表数据
+            base64Array: [], // 添加base64数组
+            // 添加预设风格数据
+            presetStyles: [
+                {
+                    name: '写实风格',
+                    description: '注重细节的写实效果',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 1',
+                        specialOptions: ['--niji'],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                {
+                    name: '动漫风格',
+                    description: '日式动漫插画风格',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 1',
+                        specialOptions: ['--niji'],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                {
+                    name: '油画风格',
+                    description: '古典油画艺术效果',
+                    params: {
+                        stylize: 250,
+                        quality: '--quality 1',
+                        specialOptions: [],
+                        aspectRatio: '--ar 4:3'
+                    }
+                },
+                {
+                    name: '水彩风格',
+                    description: '柔和的水彩画效果',
+                    params: {
+                        stylize: 200,
+                        quality: '--quality 1',
+                        specialOptions: [],
+                        aspectRatio: '--ar 4:3'
+                    }
+                },
+                {
+                    name: '概念艺术',
+                    description: '现代概念设计风格',
+                    params: {
+                        stylize: 150,
+                        quality: '--quality 1',
+                        specialOptions: [],
+                        aspectRatio: '--ar 16:9'
+                    }
+                },
+                {
+                    name: '赛博朋克',
+                    description: '未来科技感风格',
+                    params: {
+                        stylize: 300,
+                        quality: '--quality 1',
+                        specialOptions: [],
+                        aspectRatio: '--ar 16:9'
+                    }
+                },
+                {
+                    name: '极简风格',
+                    description: '简约现代设计风格',
+                    params: {
+                        stylize: 50,
+                        quality: '--quality 1',
+                        specialOptions: [],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                {
+                    name: '复古风格',
+                    description: '怀旧复古效果',
+                    params: {
+                        stylize: 200,
+                        quality: '--quality 0.5',
+                        specialOptions: [],
+                        aspectRatio: '--ar 4:3'
+                    }
+                },
+                // 添加头像相关风格
+                {
+                    name: '高清头像-写实',
+                    description: '适合制作写实风格的高清头像',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                {
+                    name: '高清头像-动漫',
+                    description: '适合制作动漫风格的高清头像',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: ['--niji'],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                {
+                    name: '高清头像-艺术',
+                    description: '适合制作艺术风格的高清头像',
+                    params: {
+                        stylize: 200,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 1:1'
+                    }
+                },
+                // 添加手机壁纸相关风格
+                {
+                    name: '手机壁纸-写实',
+                    description: '适合制作写实风格的手机壁纸',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 9:16'
+                    }
+                },
+                {
+                    name: '手机壁纸-动漫',
+                    description: '适合制作动漫风格的手机壁纸',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: ['--niji'],
+                        aspectRatio: '--ar 9:16'
+                    }
+                },
+                {
+                    name: '手机壁纸-艺术',
+                    description: '适合制作艺术风格的手机壁纸',
+                    params: {
+                        stylize: 200,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 9:16'
+                    }
+                },
+                // 添加电脑壁纸相关风格
+                {
+                    name: '电脑壁纸-写实',
+                    description: '适合制作写实风格的电脑壁纸',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 16:9'
+                    }
+                },
+                {
+                    name: '电脑壁纸-动漫',
+                    description: '适合制作动漫风格的电脑壁纸',
+                    params: {
+                        stylize: 100,
+                        quality: '--quality 2',
+                        specialOptions: ['--niji'],
+                        aspectRatio: '--ar 16:9'
+                    }
+                },
+                {
+                    name: '电脑壁纸-艺术',
+                    description: '适合制作艺术风格的电脑壁纸',
+                    params: {
+                        stylize: 200,
+                        quality: '--quality 2',
+                        specialOptions: [],
+                        aspectRatio: '--ar 16:9'
+                    }
+                }
+            ],
+            selectedStyle: null,
+            showImageDetail: false,
         }
     },
 
@@ -884,16 +1072,10 @@ export default {
 
         async submitDrawing() {
             try {
-                // 添加权限检查
-                if (!this.hasPermission) {
-                    message.error('您没有AI绘图的权限');
-                    return;
-                }
+                const valid = await this.$refs.form.validate();
+                if (!valid) return;
 
-                const valid = await this.$refs.form.validate()
-                if (!valid) return
-
-                this.loading = true
+                this.loading = true;
                 let fullPrompt = this.formData.prompt;
 
                 // 添加各种参数
@@ -909,30 +1091,43 @@ export default {
                     fullPrompt += ' ' + option;
                 });
 
-                const response = await axios.post(`${config.mjBaseUrl}/mj/submit/imagine`, {
+                const requestData = {
                     prompt: fullPrompt,
-                    negativePrompt: this.formData.negativePrompt || '',
-                    model: this.formData.model,
-                    notifyHook: '',
-                    state: ''
-                }, {
+                    // negativePrompt: this.formData.negativePrompt || '',
+                    // model: this.formData.model,
+                    bot_type: 'MID_JOURNEY',
+                    state: 'midjourney-proxy-admin',
+                    base64Array: this.base64Array,
+                    accountFilter:{}
+                };
+
+                const response = await axios.post(`${config.mjBaseUrl}/mj/submit/imagine`, requestData, {
                     headers: {
-                        'mj-api-secret': this.mjApiSecret
-                    }
-                })
+                        'Accept': 'application/json, text/plain, */*',
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                        'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+                        'sec-ch-ua-mobile': '?0',
+                        'Dnt': '1',
+                        'sec-ch-ua-platform': '"macOS"',
+                        'mj-api-secret': this.mjApiSecret,
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    withCredentials: true
+                });
 
                 if (response.data && response.data.code === 1) {
-                    this.taskId = response.data.result
-                    message.success(response.data.description || '提交成功，正在生成...')
-                    await this.fetchTaskQueue()
-                    this.startQueueTimer()
+                    this.taskId = response.data.result;
+                    message.success(response.data.description || '提交成功，正在生成...');
+                    await this.fetchTaskQueue();
+                    this.startQueueTimer();
                 } else {
-                    message.error(response.data?.description || '提交失败')
+                    message.error(response.data?.description || '提交失败');
                 }
             } catch (error) {
-                message.handleError(error)
+                message.handleError(error);
             } finally {
-                this.loading = false
+                this.loading = false;
             }
         },
 
@@ -995,7 +1190,7 @@ export default {
                     action: 'VARIATION',
                     index: 1,
                     notifyHook: '',
-                    state: ''
+                    state: 'midjourney-proxy-admin'
                 }, {
                     headers: {
                         'mj-api-secret': this.mjApiSecret
@@ -1061,12 +1256,8 @@ export default {
                 this.$message.warning('无权查看该任务详情');
                 return;
             }
-
-            if (this.expandedRows.includes(row.id)) {
-                this.expandedRows = [];
-            } else {
-                this.expandedRows = [row.id];
-            }
+            this.currentTask = row;
+            this.showImageDetail = true;
         },
 
         getButtonIcon(action) {
@@ -1101,7 +1292,7 @@ export default {
 
                         if (actionResponse.data && actionResponse.data.code === 21) {
                             this.currentTask = task;
-                            this.editPrompt = task.prompt;
+                            this.editPrompt = '';  // 设置为空字符串
                             this.showImageEditor = true;
                             this.currentTask.modalTaskId = actionResponse.data.result;
 
@@ -1139,6 +1330,11 @@ export default {
                         if (actionResponse.data && actionResponse.data.code === 1) {
                             this.$message.success('操作成功');
                             await this.fetchTaskQueue();
+                            // 启动轮询
+                            if (!button.customId.includes('BOOKMARK')) {
+                                this.startQueueTimer();
+                            }
+                            
                         } else {
                             this.$message.error(actionResponse.data?.description || '操作失败');
                         }
@@ -1236,7 +1432,7 @@ export default {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消', 
                                 inputPlaceholder: '请输入提示词',
-                                inputValue: actionResponse.data.properties?.finalPrompt || task.prompt,
+                                inputValue: '',  // 将默认值设为空字符串
                                 inputValidator: (value) => {
                                     if (!value || value.trim() === '') {
                                         return '提示词不能为空';
@@ -1281,8 +1477,6 @@ export default {
                     }
                     return;
                 }
-
-                // ... 其他代码 ...
             } catch (error) {
                 console.error('Button action error:', error);
                 this.$message.error('操作失败，请重试');
@@ -1555,16 +1749,9 @@ export default {
             }
         },
 
-        handleEditorClose(done) {
-            this.$confirm('确认关闭？未保存的更改将会丢失', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                this.resetEditor();
-                this.showImageEditor = false;  // 直接关闭弹窗
-                done();
-            }).catch(() => { });
+        handleEditorClose() {
+            this.resetEditor();
+            this.showImageEditor = false;
         },
 
         async handleEditorConfirm() {
@@ -1622,40 +1809,46 @@ export default {
             const img = new Image();
 
             img.onload = () => {
-                const containerWidth = 400;  // 容器宽度
-                const containerHeight = 300; // 容器高度
+                // 获取容器的实际尺寸
+                const container = canvas.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
 
-                // 计算图片缩放比例
+                // 计算图片缩放比例，保持原始宽高比
                 const scaleX = containerWidth / img.width;
                 const scaleY = containerHeight / img.height;
                 const scale = Math.min(scaleX, scaleY);
 
-                // 计算缩放后的尺寸
-                const width = img.width * scale;
-                const height = img.height * scale;
-
-                // 设置画布尺寸
-                canvas.width = width;
-                canvas.height = height;
+                // 使用原始尺寸，但确保不超过容器
+                canvas.width = img.width;
+                canvas.height = img.height;
 
                 const ctx = canvas.getContext('2d');
+                // 启用图像平滑
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
                 // 清空画布
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                // 绘制缩放后的图片
-                ctx.drawImage(img, 0, 0, width, height);
+                // 绘制原始尺寸的图片
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
                 // 保存原始图片
                 this.originalImage = img;
+
+                // 通过CSS控制显示尺寸，保持清晰度
+                canvas.style.width = `${img.width * scale}px`;
+                canvas.style.height = `${img.height * scale}px`;
 
                 // 立即重绘一次以显示遮罩
                 this.redrawCanvas();
 
                 console.log('Canvas initialized with dimensions:', {
-                    width,
-                    height,
-                    scale,
-                    originalWidth: img.width,
-                    originalHeight: img.height
+                    width: canvas.width,
+                    height: canvas.height,
+                    displayWidth: canvas.style.width,
+                    displayHeight: canvas.style.height,
+                    scale
                 });
             };
 
@@ -1667,17 +1860,146 @@ export default {
             // 直接加载图片
             img.src = imageUrl;
         },
+
+        // 添加图片处理方法
+        handleImageChange(file, fileList) {
+            this.imageList = fileList;
+        },
+
+        handleImageRemove(file, fileList) {
+            this.imageList = fileList;
+        },
+
+        triggerFileInput() {
+            this.$refs.fileInput.click();
+        },
+
+        // 将File对象转换为base64
+        fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    // 直接返回完整的 base64 字符串，包含前缀
+                    resolve(reader.result);
+                };
+                reader.onerror = error => reject(error);
+            });
+        },
+
+        // 处理文件改变
+        async handleFileChange(event) {
+            const files = event.target.files;
+            for (const file of files) {
+                try {
+                    const base64 = await this.fileToBase64(file);
+                    this.base64Array.push(base64);
+                    this.imageList.push({
+                        raw: file,
+                        url: URL.createObjectURL(file)
+                    });
+                } catch (error) {
+                    console.error('转换图片失败:', error);
+                    this.$message.error('图片处理失败');
+                }
+            }
+            event.target.value = '';
+        },
+
+        // 处理拖拽
+        async handleDrop(event) {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            for (const file of files) {
+                try {
+                    const base64 = await this.fileToBase64(file);
+                    this.base64Array.push(base64);
+                    this.imageList.push({
+                        raw: file,
+                        url: URL.createObjectURL(file)
+                    });
+                } catch (error) {
+                    console.error('转换图片失败:', error);
+                    this.$message.error('图片处理失败');
+                }
+            }
+        },
+
+        removeImage(index) {
+            URL.revokeObjectURL(this.imageList[index].url);
+            this.imageList.splice(index, 1);
+            this.base64Array.splice(index, 1); // 同时移除对应的base64数据
+        },
+
+        beforeDestroy() {
+            // 组件销毁前清理所有创建的 URL 对象
+            this.imageList.forEach(image => {
+                URL.revokeObjectURL(image.url);
+            });
+            this.base64Array = []; // 清空base64数组
+            this.stopCheckingProgress();
+            window.removeEventListener('resize', this.checkMobile);
+        },
+
+        // 添加应用风格的方法
+        applyStyle(style) {
+            this.selectedStyle = style.name;
+            // 应用风格参数
+            this.formData.stylize = style.params.stylize;
+            this.formData.quality = style.params.quality;
+            this.formData.specialOptions = [...style.params.specialOptions];
+            this.formData.aspectRatio = style.params.aspectRatio;
+            
+            this.$message({
+                message: `已应用${style.name}的参数设置`,
+                type: 'success'
+            });
+        },
+
+        // 修改应用风格的方法
+        handleStyleChange(styleName) {
+            if (!styleName) {
+                // 如果清空选择，重置所有参数
+                this.formData.stylize = 0;
+                this.formData.quality = '';
+                this.formData.specialOptions = [];
+                this.formData.aspectRatio = '';
+                this.$message({
+                    message: '已重置风格参数',
+                    type: 'info'
+                });
+                return;
+            }
+
+            const style = this.presetStyles.find(s => s.name === styleName);
+            if (style) {
+                // 应用风格参数
+                this.formData.stylize = style.params.stylize;
+                this.formData.quality = style.params.quality;
+                this.formData.specialOptions = [...style.params.specialOptions];
+                this.formData.aspectRatio = style.params.aspectRatio;
+                
+                this.$message({
+                    message: `已应用${style.name}的参数设置`,
+                    type: 'success'
+                });
+            }
+        },
+
+        copyPrompt(prompt) {
+            const input = document.createElement('input');
+            input.value = prompt;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            message.success('提示词已复制');
+        },
     },
 
     mounted() {
-        this.checkMobile()
-        window.addEventListener('resize', this.checkMobile)
-        this.getUserInfo()
-    },
-
-    beforeDestroy() {
-        this.stopCheckingProgress()
-        window.removeEventListener('resize', this.checkMobile)
+        this.checkMobile();
+        this.getUserInfo();
     },
 
     computed: {
@@ -1688,1902 +2010,193 @@ export default {
 }
 </script>
 
-<style scoped>
-/* 基础布局 */
-.panel {
-    background-color: #ffffff;
-    border-radius: 16px;
-    margin: 1% auto;  /* 修改为auto以实现居中 */
-    min-height: calc(100vh - 30px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
-    max-width: 2000px;  /* 添加最大宽度限制 */
-    width: 95%;  /* 添加宽度百分比 */
+<style lang="scss" scoped>
+/* 过渡动画 */
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
 }
-
-/* 主容器样式 */
-.main-container {
-    display: flex;
-    gap: clamp(20px, 2vw, 40px);  /* 使用clamp实现响应式间距 */
-    margin: clamp(20px, 2vw, 40px);  /* 使用clamp实现响应式边距 */
-    justify-content: center;  /* 居中对齐 */
-    max-width: 100%;
-}
-
-/* 左侧面板 */
-.left-panel {
-    width: clamp(360px, 25vw, 480px);  /* 使用clamp实现响应式宽度 */
-    flex-shrink: 0;
-}
-
-/* 右侧面板 */
-.right-panel {
-    flex: 1;
-    min-width: 0;
-    max-width: clamp(1200px, 70vw, 1600px);  /* 增加最大宽度 */
-}
-
-/* 设置卡片和任务队列的共同样式 */
-.setting-card,
-.queue-card {
-    border-radius: clamp(12px, 1vw, 16px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-}
-
-/* 设置卡片 */
-.setting-card {
-    margin: 28px;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-}
-
-.setting-card:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-}
-
-.setting-header {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-}
-
-.setting-header span {
-    font-size: 16px;
-    font-weight: 500;
-    color: #303133;
-}
-
-/* 表项样式 */
-.setting-card :deep(.el-form-item) {
-    margin-bottom: 22px;
-    display: flex;
-    flex-direction: column;
-}
-
-.setting-card :deep(.el-form-item__label) {
-    text-align: left;
-    padding: 0 0 8px 0 !important;
-    width: auto !important;
-    line-height: 1.4;
-    font-weight: 500;
-    color: #606266;
-}
-
-.setting-card :deep(.el-form-item__content) {
-    margin-left: 0 !important;
-    width: 100%;
-}
-
-/* 输入和选择框统一样式 */
-.prompt-input,
-.setting-card :deep(.el-select) {
-    width: 100%;
-}
-
-.setting-card :deep(.el-input__inner),
-.setting-card :deep(.el-textarea__inner) {
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.setting-card :deep(.el-textarea__inner) {
-    resize: none;
-    min-height: 80px;
-    line-height: 1.6;
-    padding: 12px;
-}
-
-/* 提交按钮容器 */
-.submit-container {
-    margin-bottom: 0 !important;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.submit-container :deep(.el-form-item__content) {
-    display: flex;
-    justify-content: center;
-    margin: 0 !important;
-}
-
-.submit-btn {
-    min-width: 140px;
-    height: 40px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    margin: 0 auto;
-    /* 添加水平居中 */
-    background-color: #3F896E !important;
-    border-color: #3F896E !important;
-}
-
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-    background-color: #4B9E82 !important;
-    border-color: #4B9E82 !important;
-}
-
-.submit-btn:active {
-    background-color: #367B63 !important;
-    border-color: #367B63 !important;
-}
-
-/* 禁用状态 */
-.submit-btn.is-disabled {
-    background-color: #909399 !important;
-    border-color: #909399 !important;
-}
-
-/* loading状态 */
-.submit-btn.is-loading {
-    background-color: #4B9E82 !important;
-    border-color: #4B9E82 !important;
-}
-
-/* 任务队列卡片 */
-.queue-card {
-    padding: 16px;
-    background: #fff;
-    border: 1px solid #EBEEF5;
-    width: 100%;  /* 确保容器占满可用宽度 */
-    box-sizing: border-box;  /* 确保padding不会增加总宽度 */
-}
-
-/* 确保表格占满容器宽度 */
-.queue-card :deep(.el-table) {
-    width: 100% !important;
-    box-sizing: border-box;
-}
-
-/* 确保表格内容区域占满容器宽度 */
-.queue-card :deep(.el-table__body),
-.queue-card :deep(.el-table__header) {
-    width: 100% !important;
-    table-layout: fixed !important;  /* 使用固定表格布局 */
-}
-
-/* 确保表格包装器占满容器宽度 */
-.queue-card :deep(.el-table__body-wrapper),
-.queue-card :deep(.el-table__header-wrapper) {
-    width: 100% !important;
-}
-
-/* 调整列宽比例 */
-.queue-card :deep(.el-table .prompt-column) {
-    min-width: 120px !important;
-    width: 35% !important;
-}
-
-.queue-card :deep(.el-table .type-column) {
-    min-width: 60px !important;
-    width: 10% !important;
-}
-
-.queue-card :deep(.el-table .status-column) {
-    min-width: 60px !important;
-    width: 10% !important;
-}
-
-.queue-card :deep(.el-table .time-column) {
-    min-width: 120px !important;
-    width: 15% !important;
-}
-
-.queue-card :deep(.el-table .progress-column) {
-    min-width: 180px !important;
-    width: 30% !important;
-}
-
-.queue-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding: 0 4px;
-}
-
-.queue-header span {
-    font-size: 16px;
-    font-weight: 500;
-    color: #303133;
-}
-
-.refresh-btn {
-    padding: 8px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-}
-
-.refresh-btn:hover {
-    color: #409EFF;
-    background-color: #ecf5ff;
-}
-
-@media (prefers-color-scheme: dark) {
-    .queue-header span {
-        color: #E5EAF3;
-    }
-
-    .refresh-btn:hover {
-        background-color: rgba(64, 158, 255, 0.1);
-    }
-}
-
-/* PC端结果展示 */
-.result-card {
-    margin-bottom: clamp(28px, 2vw, 40px);
-}
-
-.result-col {
-    margin-bottom: clamp(20px, 1.5vw, 30px);
-}
-
-.image-card {
-    transition: all 0.3s ease;
-}
-
-.image-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.result-image {
-    width: 100%;
-    height: clamp(300px, 25vw, 400px);  /* 响应式图片高度 */
-    border-radius: clamp(8px, 0.5vw, 12px);
-}
-
-.image-actions {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 12px;
-    padding: 0 10px;
-}
-
-.prompt-text {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #606266;
-    padding: 0 10px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-/* 移动端卡片 */
-.mobile-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 1px solid rgba(235, 238, 245, 0.6);
-}
-
-.mobile-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-}
-
-.mobile-image {
-    width: 100%;
-    height: 300px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 16px;
-}
-
-.prompt-badge {
-    background: linear-gradient(135deg, #ecf5ff 0%, #e6f1ff 100%);
-    color: #409eff;
-    padding: 10px 18px;
-    border-radius: 28px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    word-break: break-all;
-}
-
-.mobile-card-divider {
-    height: 1px;
-    background: linear-gradient(90deg, #ebeef5 0%, rgba(235, 238, 245, 0.4) 100%);
-    margin: 24px 0;
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.action-row {
-    display: flex;
-    gap: 14px;
-    justify-content: space-between;
-}
-
-.action-row .el-button {
-    flex: 1;
-    height: 40px;
-}
-
-/* 片位 */
-.image-slot {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    background: #f5f7fa;
-    color: #909399;
-    font-size: 30px;
-}
-
-/* 响应 */
-@media screen and (max-width: 768px) {
-    .panel {
-        margin: 12px;
-    }
-
-    .submit-btn {
-        width: 100%;
-    }
-
-    .queue-card {
-        margin-top: 24px;
-    }
-
-    .setting-card {
-        margin: 16px;
-        border-radius: 16px;
-    }
-
-    .setting-card :deep(.el-form-item__label) {
-        float: none;
-        display: block;
-        text-align: left;
-        padding-bottom: 8px;
-    }
-
-    .setting-card :deep(.el-form-item__content) {
-        margin-left: 0 !important;
-    }
-
-    .submit-btn {
-        width: 100%;
-    }
-
-    .setting-card :deep(.el-form-item) {
-        margin-bottom: 16px;
-    }
-
-    .setting-card :deep(.el-form-item__label) {
-        padding-bottom: 6px;
-    }
-
-    .main-container {
-        flex-direction: column;
-        margin: 12px;
-        gap: 12px;
-    }
-
-    .left-panel {
-        width: 100%;
-    }
-}
-
-/* 深色模式 */
-@media (prefers-color-scheme: dark) {
-    .panel {
-        background: rgba(30, 30, 30, 0.95);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .mobile-card {
-        background: rgba(40, 40, 40, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .prompt-badge {
-        background: linear-gradient(145deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
-        color: #7eb6ff;
-    }
-
-    .mobile-card-divider {
-        background: linear-gradient(90deg,
-                transparent,
-                rgba(255, 255, 255, 0.05) 20%,
-                rgba(255, 255, 255, 0.05) 80%,
-                transparent);
-    }
-
-    .image-slot {
-        background: rgba(40, 40, 40, 0.95);
-        color: #909399;
-    }
-
-    .prompt-text {
-        color: #909399;
-    }
-
-    .queue-card {
-        background: rgba(40, 40, 40, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .queue-card {
-        border-color: rgba(255, 255, 255, 0.05);
-        background: rgba(40, 40, 40, 0.95);
-    }
-
-    .queue-card :deep(.el-collapse-item__header) {
-        background: rgba(40, 40, 40, 0.95);
-        border-bottom-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .queue-card :deep(.el-collapse-item__wrap) {
-        background: rgba(40, 40, 40, 0.95);
-        border-bottom-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .setting-card {
-        background: rgba(30, 30, 30, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .setting-header span {
-        color: #E5EAF3;
-    }
-
-    .setting-card :deep(.el-form-item__label) {
-        color: #A3ADB8;
-    }
-
-    .setting-card :deep(.el-input__inner),
-    .setting-card :deep(.el-textarea__inner) {
-        background: rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: #E5EAF3;
-    }
-
-    .setting-card :deep(.el-input__inner:focus),
-    .setting-card :deep(.el-textarea__inner:focus) {
-        border-color: #409EFF;
-    }
-
-    .setting-card :deep(.el-select .el-input.is-focus .el-input__inner) {
-        border-color: #409EFF;
-    }
-
-    .setting-card :deep(.el-select .el-input__inner) {
-        background: rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: #E5EAF3;
-    }
-
-    .setting-card :deep(.el-select .el-input.is-focus .el-input__inner) {
-        border-color: #409EFF;
-    }
-}
-
-/* 任务列表操作按钮样式 */
-.queue-card :deep(.el-button-group) {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    padding: 0;
-}
-
-.queue-card :deep(.el-button-group .el-button) {
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: 13px;
-    color: #409EFF;
-    min-width: 32px;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.queue-card :deep(.el-button-group .el-button:hover) {
-    color: #66b1ff;
-    transform: translateY(-1px);
-}
-
-/* 进列样式 */
-.el-table-column--progress {
-    padding-right: 20px;
-}
-
-/* 移动端任务列样式 */
-.mobile-queue {
-    padding: 12px;
-}
-
-.mobile-queue-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 0 4px;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.queue-title {
-    font-size: 16px;
-    font-weight: 500;
-}
-
-/* 任务卡片样式 */
-.mobile-task-card {
-    background: #fff;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid #EBEEF5;
-    transition: all 0.3s ease;
-}
-
-.task-expanded {
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.1);
-    border-color: #409EFF;
-}
-
-.task-main {
-    padding: 12px;
-}
-
-/* 状态栏样式 */
-.task-status-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.status-tags {
-    display: flex;
-    gap: 4px;
-}
-
-.task-time {
-    font-size: 12px;
-    color: #909399;
-}
-
-/* 任务内容样式 */
-.task-content {
-    display: flex;
-    gap: 12px;
-    margin-top: 12px;
-}
-
-.task-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.task-prompt {
-    font-size: 14px;
-    color: #303133;
-    margin-bottom: 6px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.task-preview {
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.preview-thumbnail {
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-    background-color: #f5f7fa;
-}
-
-/* 操作区域样式 */
-.task-actions {
-    padding: 8px;
-    border-top: 1px solid #EBEEF5;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.action-group {
-    display: flex;
-    justify-content: center;
-}
-
-/* 动画效果 */
-.slide-fade-enter-active,
 .slide-fade-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-in;
 }
-
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
-    transform: translateY(-10px);
+    transform: translateY(1rem);
     opacity: 0;
 }
 
-/* 移动端深色模式适配 */
+/* 确保 Element UI 的确认弹窗显示在最上层 */
+::v-deep .el-message-box__wrapper {
+    z-index: 10000 !important;
+}
+
+::v-deep .v-modal {
+    z-index: 9999 !important;
+}
+
+/* 暗色模式适配 */
 @media (prefers-color-scheme: dark) {
-    .mobile-task-card {
-        background: rgba(40, 40, 40, 0.95);
-        border-color: rgba(255, 255, 255, 0.05);
+    ::v-deep .el-card {
+        background-color: #1f2937;
+        border-color: #374151;
     }
-
-    .task-prompt {
-        color: #E5EAF3;
+    
+    ::v-deep .el-card__header {
+        border-color: #374151;
     }
-
-    .task-actions {
-        border-top-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .preview-thumbnail {
-        background-color: rgba(40, 40, 40, 0.95);
-    }
-}
-
-/* PC端展开行样式 */
-.expanded-row {
-    padding: 20px;
-    background: #f8f9fb;
-    border-radius: 8px;
-    margin: 0 20px;
-}
-
-.expanded-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* 预览图片样式 */
-.expanded-image {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 16px;
-    height: 160px;
-}
-
-.preview-image {
-    max-width: 160px;
-    max-height: 160px;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    cursor: default;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-/* 提示词样式 */
-.expanded-prompt {
-    margin-bottom: 12px;
-}
-
-.expanded-prompt .label {
-    font-weight: 500;
-    color: #606266;
-    margin-bottom: 8px;
-}
-
-.expanded-prompt .content {
-    color: #303133;
-    line-height: 1.4;
-    word-break: break-all;
-    background: #fff;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ebeef5;
-}
-
-/* 按钮组样式 */
-.expanded-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #ebeef5;
-    justify-content: center;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.action-btn {
-    min-width: 45px !important;
-    padding: 4px 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    border-radius: 4px !important;
-    transition: all 0.3s ease !important;
-    font-weight: 500 !important;
-    height: 32px !important;
-    border: none !important;
-    font-size: 13px !important;
-    white-space: nowrap !important;
-}
-
-.action-btn i {
-    margin-right: 2px !important;
-    font-size: 16px !important;
-}
-
-/* 按钮颜色样式 */
-.expanded-actions .upscale {
-    color: #E6A23C !important;
-    background-color: rgba(230, 162, 60, 0.1) !important;
-    border: 1px solid rgba(230, 162, 60, 0.2) !important;
-}
-
-.expanded-actions .upscale:hover {
-    color: #ebb563 !important;
-    background-color: rgba(230, 162, 60, 0.2) !important;
-}
-
-.expanded-actions .variation {
-    color: #909399 !important;
-    background-color: rgba(144, 147, 153, 0.1) !important;
-    border: 1px solid rgba(144, 147, 153, 0.2) !important;
-}
-
-.expanded-actions .variation:hover {
-    color: #a6a9ad !important;
-    background-color: rgba(144, 147, 153, 0.2) !important;
-}
-
-.expanded-actions .zoom {
-    color: #409EFF !important;
-    background-color: rgba(64, 158, 255, 0.1) !important;
-    border: 1px solid rgba(64, 158, 255, 0.2) !important;
-}
-
-.expanded-actions .zoom:hover {
-    color: #66b1ff !important;
-    background-color: rgba(64, 158, 255, 0.2) !important;
-}
-
-.expanded-actions .pan {
-    color: #67C23A !important;
-    background-color: rgba(103, 194, 58, 0.1) !important;
-    border: 1px solid rgba(103, 194, 58, 0.2) !important;
-}
-
-.expanded-actions .pan:hover {
-    color: #85ce61 !important;
-    background-color: rgba(103, 194, 58, 0.2) !important;
-}
-
-.expanded-actions .bookmark {
-    color: #F56C6C !important;
-    background-color: rgba(245, 108, 108, 0.1) !important;
-    border: 1px solid rgba(245, 108, 108, 0.2) !important;
-}
-
-.expanded-actions .bookmark:hover {
-    color: #f78989 !important;
-    background-color: rgba(245, 108, 108, 0.2) !important;
-}
-
-/* 移动端按钮样式保持不变 */
-.mobile-action-btn {
-    min-width: 40px !important;
-    height: 24px !important;
-    padding: 0 8px !important;
-    font-size: 12px !important;
-    border-radius: 12px !important;
-}
-
-/* 隐藏滚动条但保持功能 */
-.expanded-actions::-webkit-scrollbar {
-    display: none;
-}
-
-.expanded-actions {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-/* 返回顶部按钮样式 */
-.mobile-backtop {
-    background-color: #3D866B !important;
-    box-shadow: 0 3px 8px rgba(61, 134, 107, 0.3) !important;
-    border: none !important;
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.3s ease !important;
-    z-index: 2000 !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-}
-
-.mobile-backtop i {
-    color: #fff !important;
-    font-size: 16px !important;
-}
-
-.mobile-backtop:hover {
-    background-color: #4a9d80 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(61, 134, 107, 0.4) !important;
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .mobile-backtop {
-        background-color: rgba(61, 134, 107, 0.95) !important;
-        box-shadow: 0 3px 8px rgba(61, 134, 107, 0.25) !important;
-    }
-
-    .mobile-backtop:hover {
-        background-color: rgba(74, 157, 128, 0.95) !important;
-        box-shadow: 0 4px 12px rgba(61, 134, 107, 0.35) !important;
-    }
-}
-
-/* 确保主容器可以滚动 */
-.el-main {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* 图片预览相关样式 */
-.preview-image {
-    cursor: pointer !important;
-    transition: transform 0.3s ease !important;
-}
-
-.preview-image:hover {
-    transform: scale(1.02) !important;
-}
-
-.preview-thumbnail {
-    cursor: pointer !important;
-    transition: transform 0.3s ease !important;
-}
-
-.preview-thumbnail:hover {
-    transform: scale(1.05) !important;
-}
-
-/* 图片预览对话框样式 */
-.preview-dialog {
-    background: rgba(0, 0, 0, 0.9) !important;
-    margin: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-}
-
-:deep(.preview-dialog .el-dialog__header) {
-    display: none;
-}
-
-:deep(.preview-dialog .el-dialog__body) {
-    padding: 0;
-    height: 100vh !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.9);
-    overflow: hidden;
-    margin: 0 !important;
-}
-
-.preview-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: zoom-out;
-    padding: 10px;
-}
-
-.preview-close {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 2002;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.preview-close i {
-    color: #fff;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.preview-close:hover {
-    background: rgba(0, 0, 0, 0.7);
-    transform: rotate(90deg);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.preview-full-image {
-    width: 400px;
-    height: 400px;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    cursor: default;
-}
-
-/* 移动端适配 */
-@media screen and (max-width: 768px) {
-    .preview-full-image {
-        width: 300px;
-        height: 300px;
-    }
-
-    .preview-container {
-        padding: 10px;
-    }
-}
-
-/* 修复 el-dialog 的全屏样式 */
-:deep(.preview-dialog.el-dialog) {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-}
-
-/* 确保内容区域占满整个高度 */
-:deep(.preview-dialog .el-dialog__wrapper) {
-    height: 100vh !important;
-    overflow: hidden !important;
-}
-
-/* 分页样式 */
-.pagination-container {
-    padding: 15px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.mobile-pagination {
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-}
-
-/* 高级设置样式 */
-.el-collapse {
-    margin-bottom: 20px;
-    border: none;
-}
-
-.el-collapse-item {
-    background: #f8f9fb;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-:deep(.el-collapse-item__header) {
-    font-size: 14px;
-    font-weight: 500;
-    color: #606266;
-    background: transparent;
-    border-bottom: none;
-    padding: 0 15px;
-}
-
-:deep(.el-collapse-item__content) {
-    padding: 10px 15px;
-}
-
-/* 滑块样式 */
-:deep(.el-slider) {
-    width: 100%;
-}
-
-/* 复选框组样式 */
-.el-checkbox-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
-}
-
-/* 高级设置按钮样式 */
-.advanced-settings-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    padding: 10px;
-    color: #3F896E;
-    font-size: 14px;
-    border: 1px dashed #3F896E;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.advanced-settings-btn:hover {
-    background-color: rgba(63, 137, 110, 0.1);
-}
-
-.advanced-settings-btn i {
-    font-size: 16px;
-}
-
-/* 高级设置抽屉样式 */
-:deep(.advanced-settings-drawer) {
-    .el-drawer__header {
-        margin: 0;
-        padding: 20px 24px;
-        border-bottom: 1px solid #EBEEF5;
-
-        .el-drawer__title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1f2329;
+    
+    ::v-deep .el-input__inner,
+    ::v-deep .el-textarea__inner {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+        
+        &::placeholder {
+            color: #9ca3af;
         }
-
-        .el-drawer__close-btn {
-            font-size: 20px;
-            color: #909399;
+    }
+    
+    ::v-deep .el-button--text {
+        color: #d1d5db;
+        
+        &:hover {
+            color: #f3f4f6;
+        }
+    }
+    
+    ::v-deep .el-table {
+        background-color: #1f2937;
+        color: #d1d5db;
+        
+        .el-table__header th {
+            background-color: #111827;
+            color: #d1d5db;
+        }
+        
+        .el-table__body td {
+            background-color: #1f2937;
+            color: #d1d5db;
+            border-color: #374151;
+        }
+        
+        .el-table__body tr.el-table__row--striped td {
+            background-color: #374151;
         }
     }
 
-    .el-drawer__body {
-        padding: 0;
-        height: calc(100% - 61px);
-        overflow: hidden;
+    /* 分页组件深色模式样式 */
+    ::v-deep .el-pagination {
+        background-color: transparent !important;
+        
+        .el-pagination__total,
+        .el-pagination__jump,
+        .el-pagination__sizes .el-input__inner,
+        .el-select .el-input .el-input__inner {
+            color: #d1d5db !important;
+            background-color: transparent !important;
+        }
+
+        .btn-prev,
+        .btn-next,
+        .el-pager li {
+            background-color: transparent !important;
+            color: #d1d5db !important;
+            border: 1px solid #4b5563 !important;
+
+            &:hover {
+                color: #1A9168 !important;
+                border-color: #1A9168 !important;
+            }
+
+            &.active {
+                background-color: #1A9168 !important;
+                color: white !important;
+                border-color: #1A9168 !important;
+            }
+        }
+
+        .el-pagination__sizes {
+            .el-input .el-input__inner {
+                border: 1px solid #4b5563;
+                background-color: transparent !important;
+            }
+        }
+
+        .el-select-dropdown__item {
+            color: #d1d5db;
+            background-color: transparent !important;
+            
+            &.selected {
+                color: #1A9168;
+            }
+            
+            &:hover {
+                background-color: rgba(55, 65, 81, 0.5) !important;
+            }
+        }
     }
 }
 
-/* 高级设置表单容器 */
-.advanced-settings-form {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-/* 表单内容区 */
-.form-content {
-    flex: 1;
-    padding: 20px 24px;
-    overflow-y: auto;
-
+/* 添加自定义滚动条样式 */
+.custom-scrollbar {
     &::-webkit-scrollbar {
-        width: 4px;
+        width: 8px;
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #E4E7ED;
-        border-radius: 2px;
-    }
-}
-
-/* 表单项分组 */
-.settings-group {
-    margin-bottom: 32px;
-
-    &:last-child {
-        margin-bottom: 0;
-    }
-}
-
-.group-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f2329;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-
-    i {
-        margin-right: 8px;
-        font-size: 16px;
-        color: #3F896E;
-    }
-}
-
-/* 表单项样式 */
-.advanced-settings-form :deep(.el-form-item) {
-    margin-bottom: 20px;
-
-    &:last-child {
-        margin-bottom: 0;
-    }
-}
-
-.advanced-settings-form :deep(.el-form-item__label) {
-    font-size: 13px;
-    color: #606266;
-    line-height: 1.4;
-    padding-bottom: 8px;
-    text-align: left !important;
-    /* 强制标签左对齐 */
-    padding-right: 0;
-    /* 移除右侧padding */
-    float: none;
-    /* 取消浮动 */
-    display: block;
-    /* 让标签独占一行 */
-}
-
-.advanced-settings-form :deep(.el-form-item__content) {
-    margin-left: 0 !important;
-    /* 移除左侧margin */
-    text-align: left;
-    /* 内容左对齐 */
-}
-
-/* 修改表单布局 */
-.advanced-settings-form :deep(.el-form) {
-    .el-form-item {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
-
-/* Select 下拉框样式 */
-.advanced-settings-form :deep(.el-select) {
-    width: 100%;
-    text-align: left;
-}
-
-/* 数字输入框样式 */
-.advanced-settings-form :deep(.el-input-number) {
-    width: 100%;
-    text-align: left;
-}
-
-/* 滑块组件样式 */
-.advanced-settings-form :deep(.el-slider) {
-    margin: 8px 0;
-    width: 100%;
-}
-
-.advanced-settings-form :deep(.el-slider__runway) {
-    height: 4px;
-    background-color: #E4E7ED;
-}
-
-.advanced-settings-form :deep(.el-slider__bar) {
-    height: 4px;
-    background-color: #3F896E;
-}
-
-.advanced-settings-form :deep(.el-slider__button) {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #3F896E;
-
-    &:hover {
-        transform: scale(1.2);
-    }
-}
-
-/* 复选框组样式 */
-.advanced-settings-form :deep(.el-checkbox-group) {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    text-align: left;
-}
-
-.advanced-settings-form :deep(.el-checkbox) {
-    margin: 0;
-
-    .el-checkbox__label {
-        font-size: 13px;
-    }
-
-    .el-checkbox__input.is-checked .el-checkbox__inner {
-        background-color: #3F896E;
-        border-color: #3F896E;
-    }
-}
-
-/* 底部操作栏 */
-.form-footer {
-    padding: 16px 24px;
-    border-top: 1px solid #EBEEF5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-}
-
-.footer-left {
-    color: #909399;
-    font-size: 13px;
-}
-
-.footer-right {
-    display: flex;
-    gap: 12px;
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    :deep(.advanced-settings-drawer) {
-        background: #1a1a1a;
-
-        .el-drawer__header {
-            border-bottom-color: rgba(255, 255, 255, 0.05);
-
-            .el-drawer__title {
-                color: #E5EAF3;
-            }
-        }
-    }
-
-    .group-title {
-        color: #E5EAF3;
-    }
-
-    .advanced-settings-form :deep(.el-form-item__label) {
-        color: #A3ADB8;
-    }
-
-    .advanced-settings-form :deep(.el-input__inner) {
-        background: #2b2b2b;
-        border-color: rgba(255, 255, 255, 0.05);
-        color: #E5EAF3;
+        background: #d1d5db;
+        border-radius: 4px;
 
         &:hover {
-            border-color: rgba(255, 255, 255, 0.1);
+            background: #9ca3af;
+        }
+    }
+}
+
+/* 暗色模式下的滚动条 */
+@media (prefers-color-scheme: dark) {
+    .custom-scrollbar {
+        &::-webkit-scrollbar-thumb {
+            background: #4b5563;
+
+            &:hover {
+                background: #6b7280;
+            }
+        }
+    }
+}
+
+/* 自定义表格样式 */
+::v-deep .custom-table {
+    .el-table__header-wrapper {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: inherit;
+    }
+
+    .el-table__body-wrapper {
+        overflow-y: auto;
+    }
+
+    /* 表格行hover效果 */
+    .el-table__row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.02);
         }
     }
 
-    .advanced-settings-form :deep(.el-slider__runway) {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .form-footer {
-        background: #232323;
-        border-top-color: rgba(255, 255, 255, 0.05);
-    }
-}
-
-/* 添加到 style 部分 */
-.locked-row {
-    cursor: not-allowed !important;
-    opacity: 0.8;
-}
-
-.locked-row:hover {
-    background-color: inherit !important;
-}
-
-/* 添加到移动端样式部分 */
-.task-locked {
-    cursor: not-allowed;
-    opacity: 0.8;
-}
-
-.task-locked:active {
-    transform: none !important;
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .task-locked {
-        opacity: 0.6;
-    }
-}
-
-/* 添加到移动端样式部分 */
-.expand-disabled {
-    cursor: not-allowed !important;
-    opacity: 0.5 !important;
-}
-
-/* 添加到移动端样式部分 */
-.expand-disabled:hover {
-    background-color: inherit !important;
-}
-
-/* 修改锁定行样式 */
-.locked-row {
-    cursor: not-allowed !important;
-    opacity: 0.8;
-}
-
-.locked-row:hover {
-    background-color: inherit !important;
-}
-
-/* 禁用展开箭头 */
-.expand-disabled :deep(.el-table__expand-icon) {
-    cursor: not-allowed !important;
-    pointer-events: none;
-    opacity: 0.5;
-}
-
-/* 确保展开箭头不会旋转 */
-.expand-disabled :deep(.el-table__expand-icon .el-icon) {
-    transform: rotate(0deg) !important;
-    transition: none !important;
-}
-
-/* 移除展开箭头的hover效果 */
-.expand-disabled :deep(.el-table__expand-icon:hover) {
-    background-color: transparent !important;
-}
-
-/* 添加样式 */
-.locked-row {
-    cursor: not-allowed !important;
-    opacity: 0.8;
-}
-
-.locked-row:hover {
-    background-color: inherit !important;
-}
-
-/* 隐藏展开箭头 */
-.hide-expand :deep(.el-table__expand-column) {
-    display: none;
-}
-
-/* 隐藏锁定行的展开图标 */
-.hide-expand :deep(.el-table__expand-icon) {
-    visibility: hidden;
-}
-
-/* 修改锁定行展开图标样式 */
-.locked-row :deep(.el-table__expand-icon) {
-    cursor: not-allowed !important;
-    pointer-events: none !important;
-    /* 禁用鼠标事件 */
-    opacity: 0.5;
-}
-
-/* 确保锁定行展开图标不会旋转 */
-.locked-row :deep(.el-table__expand-icon .el-icon) {
-    transform: rotate(0deg) !important;
-    transition: none !important;
-}
-
-/* 添加 Inpaint 按钮样式 */
-.expanded-actions .inpaint {
-    color: #9254de !important;
-    background-color: rgba(146, 84, 222, 0.1) !important;
-    border: 1px solid rgba(146, 84, 222, 0.2) !important;
-}
-
-.expanded-actions .inpaint:hover {
-    color: #ab7ae0 !important;
-    background-color: rgba(146, 84, 222, 0.2) !important;
-}
-
-/* 添加新的自定义对话框样式 */
-.custom-dialog-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.custom-dialog {
-    width: 500px;  /* 从180px改为260px */
-    height: 80vh;
-    background: #fff;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-}
-
-.custom-dialog-header {
-    padding: 10px 16px;  /* 从8px 12px改为10px 16px */
-    background: #f8f9fa;
-    border-bottom: 1px solid #EBEEF5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.custom-dialog-header span {
-    font-size: 14px;
-    font-weight: 500;
-    color: #303133;
-}
-
-.custom-dialog-header i {
-    cursor: pointer;
-    font-size: 16px;
-    color: #909399;
-}
-
-.custom-dialog-body {
-    flex: 1;
-    padding: 12px;  /* 从8px改为12px */
-    overflow: hidden;
-}
-
-.custom-dialog-footer {
-    padding: 10px 16px;  /* 从8px改为10px 16px */
-    background: #f8f9fa;
-    border-top: 1px solid #EBEEF5;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;  /* 从8px改为10px */
-}
-
-/* 修改编辑器容器样式 */
-.image-editor-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.image-canvas-container {
-    flex: 1;
-    min-height: 0;
-    border: 1px dashed #e4e7ed;
-    border-radius: 4px;
-    padding: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #fff;
-    overflow: hidden;
-}
-
-.image-canvas-container canvas {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-/* 移动端适配 */
-@media screen and (max-width: 768px) {
-    .custom-dialog {
-        width: 80%;  /* 从75%改为80% */
-        height: 90vh;
-    }
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .custom-dialog {
-        background: #1a1a1a;
-    }
-
-    .custom-dialog-header {
-        background: #232323;
-        border-bottom-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .custom-dialog-header span {
-        color: #E5EAF3;
-    }
-
-    .custom-dialog-body {
-        background: #1a1a1a;
-    }
-
-    .custom-dialog-footer {
-        background: #232323;
-        border-top-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .image-canvas-container {
-        background: #232323;
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-}
-
-/* 4K屏幕适配 */
-@media screen and (min-width: 2560px) {
-    .panel {
-        max-width: 2400px;  /* 更大屏幕下的最大宽度 */
-    }
-
-    .main-container {
-        gap: 60px;
-        margin: 40px;
-    }
-
-    .left-panel {
-        width: 520px;  /* 4K下的固定宽度 */
-    }
-
-    .right-panel {
-        max-width: 1800px;  /* 4K下的最大宽度 */
-    }
-
-    /* 调整字体大小 */
-    .setting-header span,
-    .queue-header span {
-        font-size: 1.25rem;
-    }
-
-    .el-form-item__label,
-    .el-input__inner,
-    .el-textarea__inner {
-        font-size: 1rem !important;
-    }
-
-    /* 调整按钮大小 */
-    .submit-btn {
-        min-width: 160px;
-        height: 48px;
-        font-size: 1.1rem;
-    }
-
-    /* 调整表格大小 */
-    .el-table {
-        font-size: 1rem;
-    }
-
-    /* 调整分页大小 */
-    .el-pagination {
-        font-size: 1rem;
-    }
-
-    /* 调整图片网格 */
-    .el-row {
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    }
-}
-
-/* 超宽屏幕适配 */
-@media screen and (min-width: 3440px) {
-    .panel {
-        max-width: 3000px;
-    }
-
-    .main-container {
-        gap: 80px;
-        margin: 60px;
-    }
-
-    .left-panel {
-        width: 600px;
-    }
-
-    .right-panel {
-        max-width: 2200px;
-    }
-
-    /* 调整图片网格 */
-    .el-row {
-        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-    }
-
-    .result-image {
-        height: clamp(400px, 30vw, 500px);
-    }
-}
-
-/* 任务列表样式调整 */
-.queue-card :deep(.el-table) {
-    width: 100% !important;
-}
-
-/* 任务列表列宽调整 */
-.queue-card :deep(.el-table__header-wrapper),
-.queue-card :deep(.el-table__body-wrapper) {
-    width: 100%;
-}
-
-/* ID列 */
-.queue-card :deep(.el-table .task-id-column) {
-    min-width: 80px !important;
-    max-width: 120px !important;
-    width: 8% !important;
-}
-
-/* 提示词列 */
-.queue-card :deep(.el-table .prompt-column) {
-    min-width: 120px !important;
-    max-width: 300px !important;
-    width: 25% !important;
-}
-
-/* 类型列 */
-.queue-card :deep(.el-table .type-column) {
-    min-width: 60px !important;
-    max-width: 100px !important;
-    width: 7% !important;
-}
-
-/* 状态列 */
-.queue-card :deep(.el-table .status-column) {
-    min-width: 60px !important;
-    max-width: 100px !important;
-    width: 7% !important;
-}
-
-/* 时间列 */
-.queue-card :deep(.el-table .time-column) {
-    min-width: 120px !important;
-    max-width: 160px !important;
-    width: 12% !important;
-}
-
-/* 进度列 */
-.queue-card :deep(.el-table .progress-column) {
-    min-width: 180px !important;
-    max-width: 400px !important;
-    width: 20% !important;
-}
-
-/* 小屏幕适配 (<=1366px) */
-@media screen and (max-width: 1366px) {
-    .queue-card :deep(.el-table .task-id-column) {
-        min-width: 60px !important;
-        width: 5% !important;
-    }
-
-    .queue-card :deep(.el-table .prompt-column) {
-        min-width: 80px !important;
-        width: 18% !important;
-    }
-
-    .queue-card :deep(.el-table .type-column) {
-        min-width: 45px !important;
-        width: 4% !important;
-    }
-
-    .queue-card :deep(.el-table .status-column) {
-        min-width: 45px !important;
-        width: 4% !important;
-    }
-
-    .queue-card :deep(.el-table .time-column) {
-        min-width: 85px !important;
-        width: 8% !important;
-    }
-
-    .queue-card :deep(.el-table .progress-column) {
-        min-width: 120px !important;
-        width: 12% !important;
-    }
-
-    /* 调整表格内容的内边距 */
-    .queue-card :deep(.el-table .cell) {
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-    }
-
-    /* 调整字体大小 */
-    .queue-card :deep(.el-table) {
-        font-size: 12px !important;
-    }
-
-    /* 调整表格内部元素间距 */
-    .queue-card :deep(.el-table td, .el-table th) {
-        padding: 6px 0 !important;
-    }
-}
-
-/* 超小屏幕适配 (<=1024px) */
-@media screen and (max-width: 1024px) {
-    .queue-card :deep(.el-table .task-id-column) {
-        min-width: 50px !important;
-        width: 4% !important;
-    }
-
-    .queue-card :deep(.el-table .prompt-column) {
-        min-width: 80px !important;
-        width: 20% !important;
-    }
-
-    .queue-card :deep(.el-table .type-column) {
-        min-width: 40px !important;
-        width: 3% !important;
-    }
-
-    .queue-card :deep(.el-table .status-column) {
-        min-width: 40px !important;
-        width: 3% !important;
-    }
-
-    .queue-card :deep(.el-table .time-column) {
-        min-width: 75px !important;
-        width: 6% !important;
-    }
-
-    .queue-card :deep(.el-table .progress-column) {
-        min-width: 100px !important;
-        width: 10% !important;
-    }
-
-    /* 进一步减小内边距 */
-    .queue-card :deep(.el-table .cell) {
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-    }
-
-    /* 调整表格内部元素间距 */
-    .queue-card :deep(.el-table td, .el-table th) {
-        padding: 4px 0 !important;
-    }
-
-    /* 调整进度条组件大小 */
-    .queue-card :deep(.el-progress) {
-        width: 95% !important;
-    }
-
-    .queue-card :deep(.el-progress-bar) {
-        padding-right: 20px !important;
-    }
-
-    .queue-card :deep(.el-progress__text) {
-        font-size: 11px !important;
-    }
-}
-
-/* 调整表格内的标签大小 */
-@media screen and (max-width: 1366px) {
-    .queue-card :deep(.el-tag) {
-        height: 20px !important;
-        line-height: 18px !important;
-        padding: 0 4px !important;
-        font-size: 11px !important;
-    }
-
-    .queue-card :deep(.el-button--mini) {
-        padding: 4px 8px !important;
-        font-size: 11px !important;
-    }
-}
-
-/* 大屏幕适配 (>=1920px) */
-@media screen and (min-width: 1920px) {
-    .queue-card :deep(.el-table .prompt-column) {
-        width: 30% !important;
-    }
-
-    .queue-card :deep(.el-table .progress-column) {
-        width: 25% !important;
-    }
-}
-
-/* 4K屏幕适配 (>=2560px) */
-@media screen and (min-width: 2560px) {
-    .queue-card :deep(.el-table .prompt-column) {
-        width: 35% !important;
-        max-width: 500px !important;
-    }
-
-    .queue-card :deep(.el-table .progress-column) {
-        width: 30% !important;
-        max-width: 500px !important;
-    }
-}
-
-/* 超宽屏幕适配 (>=3440px) */
-@media screen and (min-width: 3440px) {
-    .queue-card :deep(.el-table .prompt-column) {
-        width: 40% !important;
-        max-width: 600px !important;
-    }
-
-    .queue-card :deep(.el-table .progress-column) {
-        width: 35% !important;
-        max-width: 600px !important;
-    }
-}
-
-/* 修改绘制遮罩的样式 */
-.image-canvas-container canvas {
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: transparent !important;  /* 移除灰色蒙版 */
-        pointer-events: none;
-    }
-}
-
-/* 修改选择区域的样式 */
-.selection-area {
-    position: absolute;
-    border: 2px solid #9254de;
-    background: transparent !important;  /* 确保选择区域内没有蒙版 */
-    pointer-events: none;
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .image-editor-dialog {
-        .image-canvas-container {
-            background: #1a1a1a !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-
-            canvas {
-                background: #2b2b2b !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-            }
+    /* 暗色模式下的表格样式 */
+    @media (prefers-color-scheme: dark) {
+        .el-table__row:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
     }
 }

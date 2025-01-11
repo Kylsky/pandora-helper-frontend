@@ -1,36 +1,78 @@
 <template>
-    <div id="app">
-        <div class="login-container">
-            <h1 style="margin-left: 10px">
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-700 p-5">
+        <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-10 transform transition-transform duration-300 hover:-translate-y-2">
+            <h1 class="text-2xl font-semibold text-gray-800 text-center mb-8 flex items-center justify-center">
                 Panel
-                <span class="toggle-icon-container" @mouseenter="showExtraIcons = true"
-                    @mouseleave="showExtraIcons = false">
-                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToIndex()" loading="lazy">
+                <!-- <span class="relative ml-3 cursor-pointer" @mouseenter="showExtraIcons = true" @mouseleave="showExtraIcons = true">
+                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToIndex()" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
                     <transition name="fade">
-                        <div v-if="showExtraIcons" class="extra-icons">
-                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')" loading="lazy">
-                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')" loading="lazy">
+                        <div v-if="showExtraIcons" class="absolute left-full top-1/2 -translate-y-1/2 flex flex-col gap-3 pl-4">
+                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
+                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
                         </div>
                     </transition>
-                </span>
+                </span> -->
             </h1>
-            <form @submit.prevent="userlogin()">
-                <input type="text" id="username" placeholder="用户名" required>
-                <input type="password" id="password" placeholder="密码" required>
-                <button type="submit"><span class="btn-text">登录</span><span class="spinner"></span></button>
+            
+            <form @submit.prevent="userlogin()" class="space-y-4">
+                <input 
+                    type="text" 
+                    id="username" 
+                    placeholder="用户名" 
+                    required
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none transition duration-300 text-base"
+                >
+                <input 
+                    type="password" 
+                    id="password" 
+                    placeholder="密码" 
+                    required
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-green-400 focus:ring-2 focus:ring-green-100 outline-none transition duration-300 text-base"
+                >
+                <button 
+                    type="submit"
+                    class="w-full bg-orange-400 hover:bg-green-500 text-white py-3 px-4 rounded-lg transition duration-300 transform hover:-translate-y-0.5 relative"
+                >
+                    <span class="btn-text inline-block">登录</span>
+                    <span class="spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </button>
             </form>
-            <div class="divider "><span>OR</span></div>
-            <div class="alternative-login">
-                <div class="oauth-buttons">
-                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()" loading="lazy">
-                </div>
-                <button type="button" @click="reset()">重置密码</button>
+
+            <div class="relative flex items-center justify-center my-6">
+                <div class="absolute w-full border-t border-gray-200"></div>
+                <div class="relative bg-white px-4 text-sm text-gray-500">OR</div>
             </div>
-            <div class="footer" @click="index()">
-                <a href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" target="_blank">Powered by Yeelo</a>
+
+            <div class="text-center space-y-4">
+                <div class="flex justify-center">
+                    <img 
+                        src="../assets/linuxdo.webp" 
+                        alt="LINUX DO" 
+                        @click="initiateOAuth()" 
+                        class="w-9 h-9 cursor-pointer transition-transform duration-300 hover:scale-110"
+                        loading="lazy"
+                    >
+                </div>
+                <button 
+                    type="button" 
+                    @click="reset()"
+                    class="w-full bg-white text-gray-700 border-2 border-gray-200 hover:border-green-400 hover:text-green-500 py-3 px-4 rounded-lg transition duration-300"
+                >
+                    重置密码
+                </button>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a 
+                    href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
+                    target="_blank"
+                    class="text-sm text-gray-500 hover:text-green-500 transition duration-300"
+                    @click="index()"
+                >
+                    Powered by Yeelo
+                </a>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -121,172 +163,7 @@ export default {
 }
 </script>
 
-
 <style scoped>
-
-#app {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(135deg, #ffffff 0%, #185a9d 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-}
-
-.login-container {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    transition: transform 0.3s ease;
-}
-
-.login-container:hover {
-    transform: translateY(-5px);
-}
-
-h1 {
-    text-align: center;
-    color: #2c3e50;
-    margin-bottom: 30px;
-    font-size: 28px;
-    font-weight: 600;
-}
-
-input {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 2px solid #eee;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-input:focus {
-    border-color: #43cea2;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(67, 206, 162, 0.1);
-}
-
-.oauth-buttons {
-    display: flex;
-    justify-content: center;
-    margin: 15px 0;
-}
-
-.oauth-buttons img {
-    width: 35px;
-    height: 35px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.oauth-buttons img:hover {
-    transform: scale(1.1);
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #f0ad5e;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-button:hover {
-    background-color: #3bb592;
-    transform: translateY(-2px);
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 20px 0;
-    color: #6c757d;
-}
-
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 2px solid #eee;
-    margin: 0 15px;
-}
-
-.alternative-login {
-    text-align: center;
-}
-
-.alternative-login button {
-    background-color: white;
-    color: #2c3e50;
-    border: 2px solid #eee;
-    margin-top: 10px;
-}
-
-.alternative-login button:hover {
-    border-color: #43cea2;
-    color: #43cea2;
-    background-color: white;
-}
-
-.footer {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.footer a {
-    color: #6c757d;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.3s ease;
-}
-
-.footer a:hover {
-    color: #43cea2;
-}
-
-.toggle-icon-container {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.extra-icons {
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-left: 15px;
-    z-index: 10;
-}
-
-.extra-icons img {
-    width: 20px;
-    height: 20px;
-    transition: transform 0.3s ease;
-}
-
-.extra-icons img:hover {
-    transform: scale(1.2);
-}
-
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.3s, transform 0.3s;
@@ -296,24 +173,6 @@ button:hover {
 .fade-leave-to {
     opacity: 0;
     transform: translateX(-10px);
-}
-
-button[type="submit"] {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.spinner {
-    display: none;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 1s linear infinite;
-    position: absolute;
 }
 
 button[type="submit"].loading .spinner {
@@ -326,8 +185,11 @@ button[type="submit"].loading .btn-text {
 
 @keyframes spin {
     to {
-        transform: rotate(360deg);
+        transform: translate(-50%, -50%) rotate(360deg);
     }
 }
 
+.spinner {
+    animation: spin 1s linear infinite;
+}
 </style>

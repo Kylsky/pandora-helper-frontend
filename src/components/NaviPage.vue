@@ -1,93 +1,80 @@
 <template>
-  <el-container id="navi">
+  <el-container id="navi" class="h-screen font-sans relative">
     <!-- 遮罩层 -->
-    <div v-if="isMobile && !isCollapse" class="mobile-overlay" @click="toggleCollapse">
+    <div v-if="isMobile && !isCollapse" 
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1999] transition-opacity duration-300"
+      @click="toggleCollapse">
     </div>
 
     <!-- 侧边栏 -->
-    <!-- 侧边栏 -->
-    <el-aside :width="getSidebarWidth" :class="['sidebar', { 'mobile-sidebar': isMobile, 'collapsed': isCollapse }]">
+    <el-aside :width="getSidebarWidth" class="sidebar">
       <div class="sidebar-header">
         <h2 class="site-title" v-show="!isCollapse">Pandora Helper</h2>
-        <el-button v-if="!isMobile" class="collapse-btn" :icon="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
+        <el-button v-if="!isMobile" 
+          class="collapse-btn" 
+          :icon="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
           @click="toggleCollapse">
         </el-button>
       </div>
-      <el-menu @select="handleMenuSelect" default-active="accountNav" class="el-menu-vertical-demo"
-        background-color="#ffffff" text-color="#333" active-text-color="#fff" :collapse="isCollapse"
+
+      <el-menu 
+        @select="handleMenuSelect" 
+        default-active="accountNav" 
+        class="el-menu-vertical-demo"
+        :collapse="isCollapse"
         :collapse-transition="false">
-        <!-- 菜单项保持不变 -->
-        <el-menu-item index="accountNav">
-          <i class="el-icon-s-custom"></i>
-          <span slot="title">账号管理</span>
-        </el-menu-item>
-        <el-menu-item index="shareNav">
-          <i class="el-icon-share"></i>
-          <span slot="title">分享管理</span>
-        </el-menu-item>
-        <el-menu-item index="redemptionNav">
-          <i class="el-icon-shopping-cart-full"></i>
-          <span slot="title">兑换码</span>
-        </el-menu-item>
-        <el-menu-item index="carNav">
-          <i class="el-icon-truck"></i>
-          <span slot="title">停车场</span>
-        </el-menu-item>
-        <el-menu-item index="drawNav" v-if="showDrawModule">
-          <i class="el-icon-picture-outline"></i>
-          <span slot="title">AI绘图</span>
-        </el-menu-item>
-        <el-menu-item index="freeNav">
-          <i class="el-icon-medal"></i>
-          <span slot="title">免费号池</span>
+        <el-menu-item v-for="(item, index) in filteredMenuItems" 
+          :key="index" 
+          :index="item.index">
+          <i :class="item.icon"></i>
+          <span slot="title">{{ item.title }}</span>
         </el-menu-item>
       </el-menu>
-      <!-- 头像放回左下角 -->
+
+      <!-- 用户菜单 -->
       <el-dropdown class="user-menu" trigger="click" placement="top-start">
         <div class="avatar-wrapper">
           <el-avatar :size="40" :src="avatar" class="user-avatar"></el-avatar>
         </div>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="showModal" class="dropdown-item">
-            <i class="el-icon-key"></i>
-            <span>兑换码激活</span>
-          </el-dropdown-item>
-          <el-dropdown-item @click.native="showResetModal" class="dropdown-item">
-            <i class="el-icon-refresh"></i>
-            <span>重置密码</span>
-          </el-dropdown-item>
-          <el-dropdown-item @click.native="logout" class="dropdown-item">
-            <i class="el-icon-switch-button"></i>
-            <span>退出登录</span>
+          <el-dropdown-item v-for="(item, index) in dropdownItems"
+            :key="index"
+            @click.native="item.action"
+            class="dropdown-item">
+            <i :class="[item.icon]"></i>
+            <span>{{ item.title }}</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </el-aside>
 
-
     <el-main :class="['main-content', { 'mobile-main': isMobile }]">
-      <!-- 点击提示条，只在移动端显示 -->
+      <!-- 移动端菜单触发器 -->
       <div v-if="isMobile && isCollapse" class="menu-trigger" @click="toggleCollapse">
         <i class="el-icon-s-operation"></i>
       </div>
 
-      <!-- 主要内容 -->
-      <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
-        <form-input v-for="(field, index) in formFields" :key="index" :field="field" @updateValue="handleUpdateValue" />
+      <!-- 对话框组件 -->
+      <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" 
+        @close="closeModal" @confirm="submitForm">
+        <form-input v-for="(field, index) in formFields" 
+          :key="index" 
+          :field="field" 
+          @updateValue="handleUpdateValue" />
       </enhanced-dialog>
 
-      <!-- 重置密码弹窗 -->
-      <enhanced-dialog :isVisible="resetModalVisible" :title="'重置密码'" @close="closeResetModal"
-        @confirm="submitResetForm">
-        <form-input v-for="(field, index) in resetFormFields" :key="index" :field="field"
+      <!-- 重置密码对话框 -->
+      <enhanced-dialog :isVisible="resetModalVisible" :title="'重置密码'"
+        @close="closeResetModal" @confirm="submitResetForm">
+        <form-input v-for="(field, index) in resetFormFields"
+          :key="index"
+          :field="field"
           @updateValue="handleResetUpdateValue" />
       </enhanced-dialog>
 
       <component :is="currentComponent"></component>
     </el-main>
-
   </el-container>
-
 </template>
 
 <script>
@@ -139,7 +126,20 @@ export default {
         oldPassword: '',
         newPassword: '',
         confirmPassword: ''
-      }
+      },
+      menuItems: [
+        { index: 'accountNav', icon: 'el-icon-s-custom', title: '账号管理' },
+        { index: 'shareNav', icon: 'el-icon-share', title: '分享管理' },
+        { index: 'redemptionNav', icon: 'el-icon-shopping-cart-full', title: '兑换码' },
+        { index: 'carNav', icon: 'el-icon-truck', title: '停车场' },
+        { index: 'drawNav', icon: 'el-icon-picture-outline', title: 'AI绘图', condition: 'showDrawModule' },
+        { index: 'freeNav', icon: 'el-icon-medal', title: '免费号池' }
+      ],
+      dropdownItems: [
+        { icon: 'el-icon-key', title: '兑换码激活', action: this.showModal },
+        { icon: 'el-icon-refresh', title: '重置密码', action: this.showResetModal },
+        { icon: 'el-icon-switch-button', title: '退出登录', action: this.logout }
+      ]
     };
   },
   computed: {
@@ -148,6 +148,9 @@ export default {
         return this.isCollapse ? '0' : '240px';
       }
       return this.isCollapse ? '66px' : '240px';
+    },
+    filteredMenuItems() {
+      return this.menuItems.filter(item => !item.condition || this[item.condition]);
     }
   },
   methods: {
@@ -413,299 +416,131 @@ export default {
 <style scoped>
 /* 基础样式 */
 #navi {
-  height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  position: relative;
 }
 
 /* 侧边栏样式 */
 .sidebar {
-  background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 20px 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
+  @apply bg-white dark:bg-gray-800 shadow-md dark:shadow-none py-5;
+  @apply transition-all duration-300 ease-in-out relative flex flex-col;
+  @apply dark:border-r dark:border-gray-700/50;
+  @apply z-[2000];
 }
 
 .sidebar-header {
-  padding: 0 16px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  @apply px-4 mb-6 flex items-center justify-between;
 }
 
 .site-title {
-  color: #0e8f6f;
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  overflow: hidden;
+  @apply text-emerald-600 dark:text-emerald-300 text-xl font-semibold tracking-wide m-0 truncate;
+  @apply dark:drop-shadow-[0_0_12px_rgba(110,231,183,0.2)];
 }
 
 .collapse-btn {
-  padding: 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #0e8f6f;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  @apply p-2 text-emerald-600 dark:text-emerald-300;
+  @apply hover:bg-emerald-50 dark:hover:bg-emerald-400/10;
+  @apply rounded-lg transition-all duration-200 hover:-translate-y-0.5;
+  @apply border-none bg-transparent cursor-pointer;
 }
 
-.collapse-btn:hover {
-  background: rgba(14, 143, 111, 0.1);
-}
-
-/* 菜单样式优化 */
+/* 菜单样式 */
 .el-menu {
-  border: none;
-  flex: 1;
+  @apply border-none flex-1 dark:bg-gray-800;
 }
 
 .el-menu-item {
-  margin: 4px 12px;
-  height: 48px;
-  line-height: 48px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  @apply mx-3 h-12 rounded-lg font-medium text-sm;
+  @apply transition-all duration-300;
+  @apply hover:bg-gradient-to-r hover:from-emerald-600 hover:to-emerald-700;
+  @apply dark:hover:from-emerald-500 dark:hover:to-emerald-600;
+  @apply hover:shadow-emerald-500/25 dark:hover:shadow-emerald-400/20 hover:shadow-lg;
+  @apply hover:-translate-y-0.5 hover:text-white dark:text-gray-300;
+  @apply flex items-center;
+  line-height: 3rem !important;
+  padding: 0 1rem !important;
 }
 
 .el-menu--collapse .el-menu-item {
-  margin: 4px 2px;
-}
-
-.el-menu-item:hover,
-.el-menu-item.is-active {
-  background: linear-gradient(135deg, #0e8f6f 0%, #0d8668 100%) !important;
-  color: #fff !important;
-  box-shadow: 0 2px 8px rgba(14, 143, 111, 0.25);
+  @apply mx-0.5;
+  padding: 0 0.75rem !important;
 }
 
 .el-menu-item i {
-  font-size: 18px;
-  margin-right: 8px;
-  width: 24px;
-  text-align: center;
+  @apply text-lg text-center dark:text-gray-400;
+  margin-right: 0.75rem !important;
 }
 
-/* 用户菜单样式 */
+.el-menu-item span {
+  @apply inline-flex items-center;
+  line-height: inherit;
+}
+
+/* 用户菜单 */
 .user-menu {
-  padding: 16px;
-  margin-top: auto;
+  @apply px-4 mt-auto;
 }
 
 .avatar-wrapper {
-  cursor: pointer;
+  @apply cursor-pointer;
 }
 
 .user-avatar {
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @apply border-2 border-white dark:border-gray-700 shadow-lg dark:shadow-black/40;
+  @apply transition-all duration-300;
+  @apply hover:border-emerald-500 dark:hover:border-emerald-400;
+  @apply hover:shadow-xl hover:-translate-y-0.5 hover:scale-105;
 }
 
-/* 只保留最基本的下拉菜单样式 */
+/* 下拉菜单 */
 .el-dropdown-menu {
-  min-width: 120px !important;
-  padding: 4px 0 !important;
-  margin: 0 !important;
-  border-radius: 8px !important;
+  @apply min-w-[120px] rounded-lg overflow-hidden;
+  @apply dark:bg-gray-800 dark:border dark:border-gray-700/50;
+  @apply dark:shadow-lg dark:shadow-black/20;
 }
 
 .dropdown-item {
-  height: 36px !important;
-  line-height: 36px !important;
-  padding: 0 12px !important;
-  font-size: 13px !important;
+  @apply h-9 leading-9 px-3 text-sm;
+  @apply hover:bg-emerald-50 dark:hover:bg-emerald-500/10;
+  @apply dark:text-gray-300;
 }
 
 .dropdown-item i {
-  margin-right: 8px !important;
-  font-size: 14px !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .el-dropdown-menu {
-    background: #1a1a1a !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
-
-  .dropdown-item {
-    color: #e5eaf3 !important;
-  }
-
-  .dropdown-item:hover {
-    background: rgba(110, 231, 183, 0.1) !important;
-  }
-}
-
-/* 移动端适配 */
-@media screen and (max-width: 768px) {
-  .el-dropdown-menu.user-dropdown-menu {
-    position: fixed !important;
-    bottom: 80px !important;
-    left: 16px !important;
-    width: 140px !important;
-    max-width: 140px !important;
-  }
+  @apply mr-2 text-sm dark:text-gray-400;
 }
 
 /* 主内容区域 */
 .main-content {
-  background-color: #f8f9fa;
-  padding: 0;
-  min-height: 100vh;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  @apply bg-gray-50 dark:bg-gray-900 min-h-screen;
+  @apply transition-all duration-300 p-0 relative;
 }
 
 /* 移动端触发器 */
 .menu-trigger {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 48px;
-  background: linear-gradient(135deg, #0e8f6f 0%, #0d8668 100%);
-  border-radius: 0 8px 8px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  z-index: 1000;
-}
-
-.menu-trigger:hover {
-  width: 36px;
-  box-shadow: 3px 0 16px rgba(0, 0, 0, 0.2);
+  @apply fixed left-0 top-1/2 -translate-y-1/2 w-8 h-12;
+  @apply bg-gradient-to-r from-emerald-600 to-emerald-700;
+  @apply dark:from-emerald-500 dark:to-emerald-600;
+  @apply rounded-r-lg shadow-lg dark:shadow-emerald-400/20;
+  @apply flex items-center justify-center cursor-pointer;
+  @apply transition-all duration-300 hover:w-9 hover:shadow-xl z-[1000];
 }
 
 .menu-trigger i {
-  color: #fff;
-  font-size: 18px;
+  @apply text-white text-lg;
 }
 
 /* 移动端适配 */
 @media screen and (max-width: 768px) {
-  .mobile-sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 2001;
-    transform: translateX(0);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .mobile-sidebar.collapsed {
-    transform: translateX(-100%);
-  }
-
-  .mobile-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-    z-index: 2000;
-    opacity: 1;
-    transition: all 0.3s ease;
-  }
-
-  .main-content {
-    padding: 0;
-  }
-}
-
-/* 深色主题优化 */
-@media (prefers-color-scheme: dark) {
   .sidebar {
-    background-color: #1a1a1a;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    @apply fixed inset-y-0 left-0 transform;
   }
 
-  .site-title {
-    color: #6ee7b7;
-    text-shadow: 0 0 10px rgba(110, 231, 183, 0.3);
-  }
-
-  .collapse-btn {
-    color: #6ee7b7;
-    transition: all 0.3s ease;
-  }
-
-  .collapse-btn:hover {
-    background: rgba(110, 231, 183, 0.15);
-    transform: translateY(-1px);
-  }
-
-  .el-menu {
-    background-color: #1a1a1a !important;
-  }
-
-  .el-menu-item {
-    color: #f3f4f6 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .el-menu-item:hover,
-  .el-menu-item.is-active {
-    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%) !important;
-    box-shadow: 0 4px 15px rgba(110, 231, 183, 0.3) !important;
-    transform: translateY(-1px);
-  }
-
-  .el-menu-item i {
-    color: #6ee7b7 !important;
-    transition: all 0.3s ease;
-  }
-
-  .el-menu-item:hover i,
-  .el-menu-item.is-active i {
-    transform: scale(1.1);
-    color: #ffffff !important;
-  }
-
-  .user-avatar {
-    border: 2px solid #2d3748;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .user-avatar:hover {
-    border-color: #6ee7b7;
-    box-shadow: 0 6px 20px rgba(110, 231, 183, 0.25);
-    transform: translateY(-2px) scale(1.05);
-  }
-
-  .main-content {
-    background-color: #111827;
-  }
-
-  .menu-trigger {
-    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
-    box-shadow: 0 4px 15px rgba(110, 231, 183, 0.25);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .menu-trigger:hover {
-    box-shadow: 0 6px 20px rgba(110, 231, 183, 0.3);
-    transform: translateY(-50%) scale(1.05);
+  .sidebar.collapsed {
+    @apply -translate-x-full;
   }
 
   .mobile-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    @apply fixed inset-0 bg-black/40 backdrop-blur-sm;
+    @apply z-[2000] opacity-100 transition-all duration-300;
   }
 }
 </style>

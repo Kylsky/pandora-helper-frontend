@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* 表格基础样式 */
+    .el-table {
+        @apply relative w-full bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden;
+    }
+
+    /* 移除所有默认边框 */
+    .el-table::before,
+    .el-table::after,
+    .el-table__inner-wrapper::before,
+    .el-table__inner-wrapper::after,
+    .el-table__fixed::before,
+    .el-table__fixed::after,
+    .el-table__fixed-right::before,
+    .el-table__fixed-right::after {
+        @apply hidden;
+    }
+
+    /* 固定列样式修复 */
+    .el-table__fixed-right,
+    .el-table__fixed-left {
+        @apply shadow-lg dark:shadow-gray-900/30 bg-white dark:bg-gray-900;
+        height: 100% !important;
+    }
+
+    .el-table__fixed-right-patch {
+        @apply bg-transparent;
+    }
+
+    /* 固定列的单元格样式 */
+    .el-table__fixed-right td.el-table__cell,
+    .el-table__fixed-left td.el-table__cell {
+        @apply bg-white dark:bg-gray-900;
+    }
+
+    /* 固定列最后一行去除底部边框 */
+    .el-table__fixed-right tr:last-child td.el-table__cell,
+    .el-table__fixed-left tr:last-child td.el-table__cell {
+        @apply border-b-0;
+    }
+
+    /* 表头样式 */
+    .el-table thead {
+        @apply bg-gray-50 dark:bg-gray-800;
+    }
+
+    .el-table th.el-table__cell {
+        @apply px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400 tracking-wider border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800;
+    }
+
+    /* 表格内容 */
+    .el-table td.el-table__cell {
+        @apply px-6 py-4 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900;
+    }
+
+    /* 最后一行去除底部边框 */
+    .el-table tr:last-child td.el-table__cell {
+        @apply border-b-0;
+    }
+
+    /* 斑马纹 */
+    .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+        @apply bg-gray-50 dark:bg-gray-800/50;
+    }
+
+    /* 鼠标悬停效果 */
+    .el-table__body tr:hover td.el-table__cell {
+        @apply bg-gray-50 dark:bg-gray-800/70 transition-colors duration-150;
+    }
+
+    /* 表格加载状态 */
+    .el-loading-mask {
+        @apply fixed inset-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm z-50 flex items-center justify-center;
+    }
+
+    .el-loading-spinner {
+        @apply flex flex-col items-center justify-center;
+    }
+
+    .el-loading-spinner .circular {
+        @apply w-12 h-12 animate-spin;
+    }
+
+    .el-loading-spinner .path {
+        @apply stroke-emerald-600 dark:stroke-emerald-400;
+        stroke-dasharray: 90,150;
+        stroke-dashoffset: 0;
+        stroke-width: 2;
+        stroke-linecap: round;
+    }
+
+    .el-loading-text {
+        @apply mt-4 text-sm font-medium text-gray-600 dark:text-gray-300;
+    }
+
+    /* 表格加载样式 */
+    .el-table .el-loading-mask {
+        @apply absolute;
+    }
+
+    /* 全屏加载样式 */
+    .el-loading-mask.is-fullscreen {
+        @apply fixed inset-0 z-[9999] bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm;
+    }
+
+    .el-loading-mask.is-fullscreen .el-loading-spinner {
+        @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
+    }
+
+    .el-loading-mask.is-fullscreen .el-loading-spinner .circular {
+        @apply w-16 h-16;
+    }
+
+    .el-loading-mask.is-fullscreen .el-loading-text {
+        @apply text-base font-medium mt-6;
+    }
+
+    /* 相对定位容器 */
+    .el-loading-parent--relative {
+        @apply relative overflow-hidden;
+    }
+
+    /* 空状态 */
+    .el-table__empty-block {
+        @apply min-h-[200px] flex items-center justify-center bg-white dark:bg-gray-900;
+    }
+
+    .el-table__empty-text {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    /* 分页器 */
+    .el-pagination {
+        @apply flex items-center justify-end gap-2 px-6 py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700;
+    }
+
+    .el-pagination button {
+        @apply inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150;
+    }
+
+    .el-pagination button:disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    .el-pagination .el-pager li {
+        @apply inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150;
+    }
+
+    .el-pagination .el-pager li.active {
+        @apply text-white bg-emerald-500 dark:bg-emerald-600 border-emerald-500 dark:border-emerald-600 hover:bg-emerald-600 dark:hover:bg-emerald-700;
+    }
+
+    /* 表格内按钮 */
+    .el-table .el-button {
+        @apply inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    }
+
+    .el-table .el-button--primary {
+        @apply text-white bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-700;
+    }
+
+    .el-table .el-button--warning {
+        @apply text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500 dark:bg-yellow-600 dark:hover:bg-yellow-700;
+    }
+
+    .el-table .el-button--danger {
+        @apply text-white bg-red-500 hover:bg-red-600 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700;
+    }
+
+    /* 表格内标签 */
+    .el-table .el-tag {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors duration-150;
+} 

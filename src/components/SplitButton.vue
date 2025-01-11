@@ -97,20 +97,116 @@ export default {
   transition: all 0.3s;
   height: 24px;
   font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   min-width: 100px;
   max-width: 180px;
+}
+
+.dark .split-button {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 .split-button:not(.disabled):hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .split-button:not(.disabled):hover {
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* GPT 样式 */
+.gpt .name-section {
+  background-color: #3b82f6;
+}
+
+.dark .gpt .name-section {
+  background-color: #2563eb;
+}
+
+.gpt .count-section,
+.gpt .days-section {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.dark .gpt .count-section,
+.dark .gpt .days-section {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+}
+
+/* Claude 样式 */
+.claude .name-section {
+  background-color: #10b981;
+}
+
+.dark .claude .name-section {
+  background-color: #059669;
+}
+
+.claude .count-section,
+.claude .days-section {
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.dark .claude .count-section,
+.dark .claude .days-section {
+  background-color: rgba(5, 150, 105, 0.2);
+  color: #34d399;
+}
+
+/* API 样式 */
+.api .name-section {
+  background-color: #f59e0b;
+}
+
+.dark .api .name-section {
+  background-color: #d97706;
+}
+
+.api .count-section,
+.api .days-section {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.dark .api .count-section,
+.dark .api .days-section {
+  background-color: rgba(217, 119, 6, 0.2);
+  color: #fbbf24;
+}
+
+/* 禁用状态样式 */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabled .name-section {
+  background-color: #6b7280;
+}
+
+.dark .disabled .name-section {
+  background-color: #4b5563;
+}
+
+.disabled .count-section,
+.disabled .days-section {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.dark .disabled .count-section,
+.dark .disabled .days-section {
+  background-color: #1f2937;
+  color: #d1d5db;
 }
 
 .name-section {
-  background-color: #409EFF;
-  color: white;
+  color: #ffffff;
   padding: 0 6px;
   height: 100%;
   display: flex;
@@ -121,6 +217,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
+}
+
+.dark .name-section {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .info-section {
@@ -130,8 +231,6 @@ export default {
 }
 
 .count-section {
-  background-color: #ecf5ff;
-  color: #409EFF;
   padding: 0 6px;
   height: 100%;
   display: flex;
@@ -141,8 +240,6 @@ export default {
 }
 
 .days-section {
-  background-color: #f0f9eb;
-  color: #67C23A;
   padding: 0 6px;
   height: 100%;
   display: flex;
@@ -150,6 +247,10 @@ export default {
   min-width: 42px;
   justify-content: center;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .days-section {
+  border-left-color: rgba(0, 0, 0, 0.2);
 }
 
 .days-section i {
@@ -165,58 +266,5 @@ export default {
 .user-icon {
   margin-right: 1px;
   font-size: 11px;
-}
-
-/* 按钮类型样式 */
-.gpt .name-section {
-  background-color: #409EFF;
-}
-.gpt .count-section {
-  background-color: #ecf5ff;
-  color: #409EFF;
-}
-.gpt .days-section {
-  background-color: #ecf5ff;
-  color: #409EFF;
-}
-
-.claude .name-section {
-  background-color: #67C23A;
-}
-.claude .count-section {
-  background-color: #f0f9eb;
-  color: #67C23A;
-}
-.claude .days-section {
-  background-color: #f0f9eb;
-  color: #67C23A;
-}
-
-.api .name-section {
-  background-color: #E6A23C;
-}
-.api .count-section {
-  background-color: #fdf6ec;
-  color: #E6A23C;
-}
-.api .days-section {
-  background-color: #fdf6ec;
-  color: #E6A23C;
-}
-
-/* 禁用状态样式 */
-.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.disabled .name-section {
-  background-color: #909399;
-}
-
-.disabled .count-section,
-.disabled .days-section {
-  background-color: #f4f4f5;
-  color: #909399;
 }
 </style>

@@ -1,39 +1,46 @@
 <template>
-    <el-container id="sharePanel" class="panel">
-        <el-header>
-            <h2>分享管理</h2>
-        </el-header>
-        <el-main>
-            <el-row class="search-bar">
+    <el-container id="sharePanel" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg m-5 min-h-[calc(100vh-40px)] flex flex-col border dark:border-gray-800">
+        <header class="px-4 py-3">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">分享管理</h2>
+        </header>
+        <el-main class="flex-1">
+            <el-row class="mb-7">
                 <el-col :xs="24" :sm="18" :md="18">
-                    <el-input id="email-query" placeholder="请输入邮箱或用户名" v-model="email">
-                        <el-button slot="append" @click="emailQuery">查询</el-button>
+                    <el-input id="email-query" placeholder="请输入邮箱或用户名" v-model="email" class="w-full dark-input">
+                        <template v-slot:input>
+                            <input class="el-input__inner dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-500" :value="email" @input="e => email = e.target.value" placeholder="请输入邮箱或用户名">
+                        </template>
+                        <el-button slot="append" @click="emailQuery" class="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">查询</el-button>
                     </el-input>
                 </el-col>
             </el-row>
 
             <!-- PC端表格视图 -->
-            <div class="pc-view">
-                <el-table :data="tableData" style="width: 100%" :fit="true" v-loading="loading">
+            <div v-if="!isMobile" class="hidden md:block">
+                <el-table :data="tableData" style="width: 100%" :fit="true" 
+                    v-loading="loading"
+                    element-loading-text="加载中..."
+                    element-loading-spinner="el-icon-loading"
+                    class="adaptive-table">
                     <el-table-column prop="uniqueName" label="用户名" min-width="200">
                         <template slot-scope="scope">
                             <el-popover placement="right" width="220" trigger="hover">
-                                <div class="expires-info">
-                                    <div v-if="scope.row.gptExpiresAt">
-                                        <span class="info-label">ChatGPT过期时间：</span>
-                                        <span>{{ scope.row.gptExpiresAt }}</span>
+                                <div class="space-y-2 text-sm">
+                                    <div v-if="scope.row.gptExpiresAt" class="flex items-center justify-between">
+                                        <span class="text-gray-500 dark:text-gray-400">ChatGPT过期时间：</span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.gptExpiresAt }}</span>
                                     </div>
-                                    <div v-if="scope.row.claudeExpiresAt">
-                                        <span class="info-label">Claude过期时间：</span>
-                                        <span>{{ scope.row.claudeExpiresAt }}</span>
+                                    <div v-if="scope.row.claudeExpiresAt" class="flex items-center justify-between">
+                                        <span class="text-gray-500 dark:text-gray-400">Claude过期时间：</span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.claudeExpiresAt }}</span>
                                     </div>
-                                    <div v-if="scope.row.apiExpiresAt">
-                                        <span class="info-label">API过期时间：</span>
-                                        <span>{{ scope.row.apiExpiresAt }}</span>
+                                    <div v-if="scope.row.apiExpiresAt" class="flex items-center justify-between">
+                                        <span class="text-gray-500 dark:text-gray-400">API过期时间：</span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.apiExpiresAt }}</span>
                                     </div>
                                 </div>
-                                <div slot="reference" class="username-cell">
-                                    <span>{{ scope.row.uniqueName }}</span>
+                                <div slot="reference" class="flex items-center space-x-2 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <span class="text-gray-700 dark:text-gray-300">{{ scope.row.uniqueName }}</span>
                                 </div>
                             </el-popover>
                         </template>
@@ -41,14 +48,15 @@
                     <el-table-column prop="gptCarName" label="ChatGPT账号" min-width="220">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
-                                :loading="scope.row.loading" @click="openChat(scope.row.gptConfigId, 1)" 
-                                :days="scope.row.gptExpiresAt ? calculateDays(scope.row.gptExpiresAt) : 0"/>
+                                @click="openChat(scope.row.gptConfigId, 1)" 
+                                :days="scope.row.gptExpiresAt ? calculateDays(scope.row.gptExpiresAt) : 0"
+                                v-loading.fullscreen.lock="scope.row.loading"/>
                         </template>
                     </el-table-column>
                     <el-table-column prop="claudeCarName" label="Claude账号" min-width="220">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
-                                type="claude" :loading="scope.row.loading"
+                                type="claude"
                                 @click="openChat(scope.row.claudeConfigId, 2)" 
                                 :days="scope.row.claudeExpiresAt ? calculateDays(scope.row.claudeExpiresAt) : 0"/>
                         </template>
@@ -56,19 +64,19 @@
                     <el-table-column prop="apiCarName" label="API账号" min-width="220">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
-                                :loading="scope.row.loading" @click="openChat(scope.row.apiConfigId, 3)" 
+                                @click="openChat(scope.row.apiConfigId, 3)" 
                                 :days="scope.row.apiExpiresAt ? calculateDays(scope.row.apiExpiresAt) : 0"/>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" min-width="280" fixed="right">
                         <template slot-scope="scope">
-                            <div class="action-row">
-                                <el-button type="primary" size="mini"
-                                    @click="showShareModal(scope.row.id)">激活</el-button>
-                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">编辑</el-button>
-                                <el-button type="danger" size="mini"
-                                    @click="showConfirmDialog(scope.row.id)">删除</el-button>
-                                
+                            <div class="flex space-x-2">
+                                <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)"
+                                    class="hover:-translate-y-0.5 transition-transform duration-200">激活</el-button>
+                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)"
+                                    class="hover:-translate-y-0.5 transition-transform duration-200">编辑</el-button>
+                                <el-button type="danger" size="mini" @click="showConfirmDialog(scope.row.id)"
+                                    class="hover:-translate-y-0.5 transition-transform duration-200">删除</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -76,68 +84,84 @@
             </div>
 
             <!-- 移动端卡片视图 -->
-            <div class="mobile-view">
-                <div v-for="(item, index) in tableData" :key="index" class="mobile-card" v-loading="item.loading">
-                    <div class="mobile-card-header">
-                        <div class="username-badge">
+            <div v-else class="space-y-4 md:hidden" v-loading="loading" 
+                element-loading-text="加载中..."
+                element-loading-spinner="el-icon-loading">
+                <div v-for="(item, index) in tableData" :key="index" 
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full flex items-center space-x-2 max-w-[70%] overflow-hidden">
                             <i class="el-icon-user"></i>
-                            {{ item.uniqueName }}
+                            <span class="truncate">{{ item.uniqueName }}</span>
                         </div>
-                        <div class="expires-badge">
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">
                             {{ item.comment }}
                         </div>
                     </div>
 
-                    <div class="mobile-card-content">
-                        <div class="account-item" v-if="item.gptCarName">
-                            <div class="account-label">ChatGPT账号</div>
-                            <div class="account-value">
+                    <div class="space-y-4">
+                        <div v-if="item.gptCarName" class="space-y-2">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">ChatGPT账号</div>
+                            <div class="w-full">
                                 <split-button :name="item.gptCarName" :count="item.gptUserCount || 0" type="gpt"
-                                    :loading="item.loading" @click="openChat(item.gptConfigId, 1)" 
+                                    @click="openChat(item.gptConfigId, 1)" 
                                     :days="item.gptExpiresAt ? calculateDays(item.gptExpiresAt) : 0"/>
                             </div>
                         </div>
 
-                        <div class="account-item" v-if="item.claudeCarName">
-                            <div class="account-label">Claude账号</div>
-                            <div class="account-value">
+                        <div v-if="item.claudeCarName" class="space-y-2">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">Claude账号</div>
+                            <div class="w-full">
                                 <split-button :name="item.claudeCarName" :count="item.claudeUserCount || 0"
-                                    type="claude" :loading="item.loading" @click="openChat(item.claudeConfigId, 2)" 
+                                    type="claude"
+                                    @click="openChat(item.claudeConfigId, 2)" 
                                     :days="item.claudeExpiresAt ? calculateDays(item.claudeExpiresAt) : 0"/>
                             </div>
                         </div>
 
-                        <div class="account-item" v-if="item.apiCarName">
-                            <div class="account-label">API账号</div>
-                            <div class="account-value">
+                        <div v-if="item.apiCarName" class="space-y-2">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">API账号</div>
+                            <div class="w-full">
                                 <split-button :name="item.apiCarName" :count="item.apiUserCount || 0" type="api"
-                                    :loading="item.loading" @click="openChat(item.apiConfigId, 3)" 
+                                    @click="openChat(item.apiConfigId, 3)" 
                                     :days="item.apiExpiresAt ? calculateDays(item.apiExpiresAt) : 0"/>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mobile-card-divider"></div>
+                    <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
 
-                    <div class="mobile-card-actions">
-                        <div class="action-row">
+                    <div class="space-y-3">
+                        <div class="flex space-x-2">
                             <el-button type="primary" size="mini" :loading="item.actionLoading"
-                                @click="showShareModal(item.id)">激活</el-button>
+                                @click="showShareModal(item.id)" class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
+                                <i class="el-icon-check mr-1"></i> 激活
+                            </el-button>
                             <el-button type="warning" size="mini" :loading="item.actionLoading"
-                                @click="editItem(item.id)">编辑</el-button>
+                                @click="editItem(item.id)" class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
+                                <i class="el-icon-edit mr-1"></i> 编辑
+                            </el-button>
                             <el-button type="danger" size="mini" :loading="item.actionLoading"
-                                @click="showConfirmDialog(item.id)">删除</el-button>
+                                @click="showConfirmDialog(item.id)" class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
+                                <i class="el-icon-delete mr-1"></i> 删除
+                            </el-button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="pagination-container">
-                <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage"
-                    :page-size="pageSize" :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
-                    :pager-count="isMobile ? 5 : 7" :total="total" class="pagination-wrapper">
-                </el-pagination>
-            </div>
+            <!-- 分页器 -->
+            <el-pagination 
+                @current-change="handleCurrentChange" 
+                :current-page.sync="currentPage" 
+                :page-size="pageSize"
+                :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
+                :pager-count="isMobile ? 5 : 7"
+                :total="total"
+                :class="[
+                    isMobile ? 'w-full flex justify-center py-4' : 'fixed bottom-8 right-8 z-10'
+                ]">
+            </el-pagination>
 
             <!-- 弹窗组件 -->
             <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
@@ -159,7 +183,7 @@ import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
 import SplitButton from './SplitButton.vue'  // 确保路径正确
 import message from '@/configs/message'
-import { Loading } from 'element-ui';
+// import { Loading } from 'element-ui';
 
 export default {
     name: 'SharePage',
@@ -213,14 +237,21 @@ export default {
                 return
             }
 
-            const loadingInstance = Loading.service({
-                fullscreen: true,
-                text: '加载中...',
-                background: 'rgba(0, 0, 0, 0.7)'
+            // 找到对应的行
+            const item = this.tableData.find(item => {
+                switch (type) {
+                    case 1: return item.gptConfigId === id;
+                    case 2: return item.claudeConfigId === id;
+                    case 3: return item.apiConfigId === id;
+                }
             });
 
+            if (!item) return;
+            
+            // 设置加载状态
+            this.$set(item, 'loading', true);
+
             try {
-                let response;
                 const body = {
                     withCredentials: true,
                     headers: {
@@ -228,6 +259,7 @@ export default {
                     }
                 };
 
+                let response;
                 switch (type) {
                     case 1:
                         response = await apiClient.get(`${config.apiBaseUrl}/share/getGptShare?gptConfigId=${id}`, body);
@@ -247,7 +279,8 @@ export default {
                 console.error('请求失败:', error);
                 this.$message.error('操作失败，请重试');
             } finally {
-                loadingInstance.close();
+                // 清除加载状态
+                this.$set(item, 'loading', false);
             }
         },
         showConfirmDialog(id) {
@@ -266,8 +299,7 @@ export default {
                 if (response.data.status) {
                     this.tableData = response.data.data.data.map(item => ({
                         ...item,
-                        loading: false,
-                        actionLoading: false
+                        loading: false
                     }));
                     this.total = response.data.data.total;
                 }
@@ -512,613 +544,45 @@ export default {
     }
 }
 </script>
+
 <style scoped>
-/* 基础布局 */
-.panel {
-    background-color: #ffffff;
-    border-radius: 16px;
-    margin: 1.5% 20px;
-    min-height: calc(100vh - 40px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
+.dark-input :deep(.el-input__inner) {
+    @apply dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;
 }
 
-/* 搜索栏样式 */
-.search-bar {
-    margin-bottom: 28px;
+.dark-input :deep(.el-input-group__append) {
+    @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
 }
 
-/* PC端表格相关样式 */
-.pc-view {
-    display: none;
+.dark-input :deep(.el-input__inner:hover),
+.dark-input :deep(.el-input__inner:focus) {
+    @apply dark:border-gray-500;
 }
 
-.action-row {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-start;
+.dark-input :deep(.el-input__inner::placeholder) {
+    @apply dark:text-gray-500;
 }
 
-/* 移动端卡片样式 */
-.mobile-view {
-    display: none;
+/* 添加表格自适应样式 */
+.adaptive-table :deep(.el-table__row) {
+    height: auto !important;
+    min-height: 40px;
 }
 
-.mobile-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(235, 238, 245, 0.2);
+.adaptive-table :deep(.el-table__cell) {
+    padding: clamp(4px, 1vh, 12px) 0;
 }
 
-.mobile-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.mobile-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.username-badge {
-    background: linear-gradient(145deg, #f0f7ff, #e6f1ff);
-    color: #409eff;
-    padding: 8px 16px;
-    border-radius: 24px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    max-width: 70%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
-}
-
-.expires-badge {
-    color: #909399;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.mobile-card-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.account-item {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.account-label {
-    color: #909399;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.account-value {
-    width: 100%;
-}
-
-.mobile-card-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #ebeef5, transparent);
-    margin: 20px 0;
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.mobile-card-actions .action-row {
-    justify-content: space-between;
-}
-
-.mobile-card-actions .el-button {
-    flex: 1;
-    transition: all 0.3s ease;
-}
-
-/* 分页器样式 */
-.pagination-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 16px;
-    backdrop-filter: blur(8px);
-    border-radius: 8px;
-    z-index: 1000;
-}
-
-.pagination-wrapper {
-    text-align: center;
-}
-
-/* Element UI 按钮样式优化 */
-.el-button--primary {
-    background: linear-gradient(145deg, #0e8f6f, #0d8668);
-    border: none;
-    box-shadow: 0 4px 12px rgba(14, 143, 111, 0.2);
-}
-
-.el-button--primary:hover,
-.el-button--primary:focus {
-    background: linear-gradient(145deg, #0fa67f, #0e9272);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(14, 143, 111, 0.3);
-}
-
-/* 响应式布局优化 */
-@media screen and (max-width: 768px) {
-    .panel {
-        margin: 12px;
-        padding: 16px;
-        border-radius: 20px;
-    }
-
-    .pc-view {
-        display: none;
-    }
-
-    .mobile-view {
-        display: block;
-    }
-
-    .search-bar {
-        margin-bottom: 20px;
-    }
-
-    .pagination-wrapper {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
-        padding: 12px 0;
-        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-        z-index: 1000;
-    }
-}
-
-@media screen and (min-width: 769px) {
-    .pc-view {
-        display: block;
-    }
-
-    .mobile-view {
-        display: none;
-    }
-}
-
-.pagination-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 16px;
-    backdrop-filter: blur(8px);
-    border-radius: 8px;
-    z-index: 1000;
-}
-
-.pagination-wrapper {
-    text-align: center;
-}
-
-/* 移动端分页器样式优化 */
-@media screen and (max-width: 768px) {
-    .pagination-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
-        padding: 6px 0;
-        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
-        z-index: 1000;
-        height: 44px;
-    }
-
-    :deep(.el-pagination) {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        padding: 0 16px;
-        height: 100%;
-    }
-
-    :deep(.el-pagination .btn-prev),
-    :deep(.el-pagination .btn-next) {
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0 4px;
-        min-width: 32px;
-        height: 32px;
-        line-height: 32px;
-        border-radius: 16px;
-    }
-
-    :deep(.el-pagination .number) {
-        min-width: 32px;
-        height: 32px;
-        line-height: 32px;
-        margin: 0 4px;
-        border-radius: 16px;
-        font-weight: 500;
-    }
-
-    .mobile-card:last-child {
-        margin-bottom: 56px;
-    }
-
-    :deep(.el-pagination .active) {
-        background: linear-gradient(145deg, #0e8f6f, #0d8668);
-        color: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
-    }
-
-    .el-main {
-        padding-bottom: calc(56px + env(safe-area-inset-bottom));
-    }
-}
-
-/* 暗色主题优化 */
-@media (prefers-color-scheme: dark) {
-    /* 基础布局 */
-    .panel {
-        background: rgba(30, 30, 30, 0.95);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    h2 {
-        color: #e0e0e0;
-    }
-
-    /* 搜索栏 */
-    .el-input__inner {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        color: #e0e0e0;
-    }
-
-    .el-input__inner:hover {
-        border-color: rgba(14, 143, 111, 0.5);
-    }
-
-    .el-input__inner:focus {
-        border-color: #0e8f6f;
-    }
-
-    .el-input-group__append {
-        background: rgba(14, 143, 111, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: none;
-    }
-
-    /* 表格样式 */
-    .el-table {
-        background-color: transparent;
-    }
-
-    .el-table th,
-    .el-table tr {
-        background-color: transparent;
-        color: #e0e0e0;
-    }
-
-    .el-table td,
-    .el-table th.is-leaf {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .el-table--enable-row-hover .el-table__body tr:hover > td {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* 移动端卡片样式 */
-    .mobile-card {
-        background: rgba(40, 40, 40, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .mobile-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* 用户名徽章 */
-    .username-badge {
-        background: linear-gradient(145deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
-        color: #7eb6ff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(64, 158, 255, 0.1);
-    }
-
-    /* 过期信息 */
-    .expires-badge {
-        color: #909399;
-    }
-
-    .expires-info {
-        color: #e0e0e0;
-    }
-
-    .expires-info > div:not(:last-child)::after {
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.05) 80%, transparent);
-    }
-
-    .info-label {
-        color: #909399;
-    }
-
-    /* 分割线 */
-    .mobile-card-divider {
-        background: linear-gradient(90deg, 
-            transparent,
-            rgba(255, 255, 255, 0.05) 20%,
-            rgba(255, 255, 255, 0.05) 80%,
-            transparent
-        );
-    }
-
-    /* 按钮样式 */
-    .el-button--primary {
-        background: linear-gradient(145deg, #0e8f6f, #0d8668);
-        border: none;
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(14, 143, 111, 0.1);
-    }
-
-    .el-button--primary:hover {
-        background: linear-gradient(145deg, #10a37f, #0f9973);
-        box-shadow: 0 6px 16px rgba(14, 143, 111, 0.2);
-    }
-
-    .el-button--warning {
-        background: linear-gradient(145deg, #946c00, #855f00);
-        border: none;
-        color: #ffffff;
-    }
-
-    .el-button--warning:hover {
-        background: linear-gradient(145deg, #a37800, #946c00);
-    }
-
-    .el-button--danger {
-        background: linear-gradient(145deg, #c53030, #b52b2b);
-        border: none;
-        color: #ffffff;
-    }
-
-    .el-button--danger:hover {
-        background: linear-gradient(145deg, #d13b3b, #c53030);
-    }
-
-    /* 弹出框样式 */
-    .el-popover {
-        background: rgba(40, 40, 40, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        color: #e0e0e0;
-    }
-
-    /* 移动端分页器 */
-    @media screen and (max-width: 768px) {
-        .pagination-container {
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination) {
-            color: #909399;
-        }
-
-        :deep(.el-pagination .btn-prev),
-        :deep(.el-pagination .btn-next) {
-            background: transparent;
-            color: #909399;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination .btn-prev:hover),
-        :deep(.el-pagination .btn-next:hover) {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e0e0e0;
-        }
-
-        :deep(.el-pagination .number) {
-            color: #909399;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination .number:hover) {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e0e0e0;
-        }
-
-        :deep(.el-pagination .active) {
-            background: linear-gradient(145deg, #0e8f6f, #0d8668);
-            color: white;
-            border: none;
-            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
-        }
-
-        :deep(.el-pagination .active:hover) {
-            background: linear-gradient(145deg, #10a37f, #0f9973);
-        }
-    }
-
-    /* 图标样式 */
-    .el-icon-info {
-        color: #909399;
-    }
-
-    .el-icon-info:hover {
-        color: #0e8f6f;
-        background: rgba(14, 143, 111, 0.1);
-    }
-}
-
-.expires-info {
-    font-size: 13px;
-    line-height: 1.6;
-}
-
-.expires-info > div {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    position: relative;
-}
-
-.expires-info > div:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -16px;
-    right: -16px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #ebeef5 20%, #ebeef5 80%, transparent);
-}
-
-.info-label {
-    color: #8c8c8c;
-    font-size: 12px;
-    margin-right: 12px;
-    font-weight: normal;
-    min-width: 85px;
-}
-
-/* 图标样式优化 */
-.el-icon-info {
-    font-size: 13px;
-    color: #a0a0a0;
-    transition: all 0.25s ease;
-    margin-left: 4px;
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: transparent;
-}
-
-.el-icon-info:hover {
-    color: #409EFF;
-    background: rgba(64, 158, 255, 0.1);
-    transform: translateY(-1px);
-}
-
-/* 弹出样式优化 */
-:deep(.el-popover) {
-    padding: 14px 16px;
-    min-width: 180px;
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    transform-origin: center;
-    animation: popoverFadeIn 0.2s ease-out;
-}
-
-@keyframes popoverFadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* 暗色主题适配 */
-@media (prefers-color-scheme: dark) {
-    .el-icon-info {
-        color: #909399;
-    }
-
-    .expires-info > div:not(:last-child)::after {
-        background: linear-gradient(90deg, transparent, #363636 20%, #363636 80%, transparent);
-    }
-
-    .info-label {
-        color: #909399;
-    }
-
-    :deep(.el-popover) {
-        background: #2b2b2b;
-        border: 1px solid #363636;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-}
-
-.action-row .el-icon-info {
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.action-row .el-icon-info:hover {
-    color: #409EFF;
-}
-
-.username-cell {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: #f5f7fa;
-}
-
-.username-cell:hover {
-    background: #ecf5ff;
-    transform: translateY(-1px);
-}
-
-.username-cell span {
-    color: #303133;
-    font-weight: 500;
-    font-size: 13px;
+.adaptive-table :deep(.cell) {
     line-height: 1.4;
+    white-space: normal;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
 }
 
-/* 暗色主题适配 */
-@media (prefers-color-scheme: dark) {
-    .username-cell {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .username-cell span {
-        color: #e0e0e0;
-    }
-    
-    .username-cell:hover {
-        background: rgba(64, 158, 255, 0.15);
-    }
+/* 移除分页器的边框 */
+:deep(.el-pagination) {
+    @apply border-none;
 }
 </style>

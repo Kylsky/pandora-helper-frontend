@@ -1,158 +1,170 @@
 <template>
-    <el-container id="redemptionPanel" class="panel">
-        <el-header>
-            <h2>兑换码管理</h2>
-        </el-header>
-        <el-main>
+    <el-container id="redemptionPanel" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg m-5 min-h-[calc(100vh-40px)] flex flex-col border dark:border-gray-800">
+        <header class="px-4 py-3">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">兑换码管理</h2>
+        </header>
+        <el-main class="flex-1">
             <!-- 响应式搜索栏 -->
-            <el-row class="search-bar">
+            <el-row class="mb-7">
                 <el-col :xs="24" :sm="18" :md="18">
-                    <el-input id="email-query" placeholder="请输入邮箱" v-model="email" @keyup.enter.native="emailQuery">
-                        <el-button slot="append" @click="emailQuery">查询</el-button>
+                    <el-input id="email-query" placeholder="请输入邮箱" v-model="email" @keyup.enter.native="emailQuery" class="w-full dark-input">
+                        <template v-slot:input>
+                            <input class="el-input__inner dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-500" :value="email" @input="e => email = e.target.value" placeholder="请输入邮箱">
+                        </template>
+                        <el-button slot="append" @click="emailQuery" class="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">查询</el-button>
                     </el-input>
                 </el-col>
-                <el-col :xs="24" :sm="6" :md="6" class="btn-col">
-                    <el-button class="create-new" type="primary" @click="showModal()">新增</el-button>
+                <el-col :xs="24" :sm="6" :md="6" class="flex justify-end sm:mt-4 md:mt-0">
+                    <el-button class="w-full md:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white transition-all duration-300 transform hover:-translate-y-0.5" type="primary" @click="showModal()">新增</el-button>
                 </el-col>
             </el-row>
 
-            <!-- PC端表格视图 -->
-            <div v-if="!isMobile" class="pc-view">
-                <el-table :data="tableData" style="width: 100%" v-loading="loading" :cell-style="{padding: '12px 0'}">
-                    <el-table-column prop="email" label="名称" min-width="200" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <i class="el-icon-user" style="color: #909399; font-size: 14px;"></i>
-                                <span>{{ scope.row.email }}</span>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="accountType" label="账号类型" width="140" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <el-tag size="mini" effect="plain" :type="scope.row.accountType === 'ChatGPT' ? 'success' : scope.row.accountType === 'Claude' ? 'warning' : 'info'">
-                                {{ scope.row.accountType }}
-                            </el-tag>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="code" label="兑换码" min-width="180" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <el-tooltip :content="scope.row.code" placement="top" effect="light">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <i class="el-icon-key" style="color: #909399; font-size: 14px;"></i>
-                                    <span>{{ scope.row.code }}</span>
+            <!-- 主要内容区域 -->
+            <div class="flex-1">
+                <!-- PC端表格视图 -->
+                <div v-if="!isMobile" class="hidden md:block">
+                    <el-table :data="tableData" style="width: 100%" :fit="true" 
+                        v-loading="loading"
+                        element-loading-text="加载中..."
+                        element-loading-spinner="el-icon-loading"
+                        class="adaptive-table">
+                        <el-table-column prop="email" label="名称" min-width="200" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <div class="flex items-center space-x-2">
+                                    <i class="el-icon-user text-gray-400 text-sm"></i>
+                                    <span class="text-gray-700 dark:text-gray-300">{{ scope.row.email }}</span>
                                 </div>
-                            </el-tooltip>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="duration" label="兑换时长" width="140" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <i class="el-icon-time" style="color: #909399; font-size: 14px;"></i>
-                                <span>{{ scope.row.duration }} 天</span>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="180" fixed="right">
-                        <template slot-scope="scope">
-                            <div class="action-row" style="display: flex; gap: 8px;">
-                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)">
-                                    <i class="el-icon-edit"></i> 编辑
-                                </el-button>
-                                <el-button type="danger" size="mini" @click="showConfirmDialog(scope.row.id)">
-                                    <i class="el-icon-delete"></i> 删除
-                                </el-button>
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="accountType" label="账号类型" min-width="150" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <el-tag size="mini" effect="plain" 
+                                    :class="{
+                                        'bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800': scope.row.accountType === 'ChatGPT',
+                                        'bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800': scope.row.accountType === 'Claude',
+                                        'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800': scope.row.accountType === 'API'
+                                    }">
+                                    {{ scope.row.accountType }}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="code" label="兑换码" min-width="200" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <el-tooltip :content="scope.row.code" placement="top" effect="light">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="el-icon-key text-gray-400 text-sm"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.code }}</span>
+                                    </div>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="duration" label="兑换时长" min-width="150" show-overflow-tooltip>
+                            <template slot-scope="scope">
+                                <div class="flex items-center space-x-2">
+                                    <i class="el-icon-time text-gray-400 text-sm"></i>
+                                    <span class="text-gray-700 dark:text-gray-300">{{ scope.row.duration }} 天</span>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" min-width="200">
+                            <template slot-scope="scope">
+                                <div class="flex space-x-2">
+                                    <el-button type="warning" size="mini" @click="editItem(scope.row.id)"
+                                        class="hover:-translate-y-0.5 transition-transform duration-200">
+                                        <i class="el-icon-edit mr-1"></i> 编辑
+                                    </el-button>
+                                    <el-button type="danger" size="mini" @click="showConfirmDialog(scope.row.id)"
+                                        class="hover:-translate-y-0.5 transition-transform duration-200">
+                                        <i class="el-icon-delete mr-1"></i> 删除
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
 
-            <!-- 移动端卡片视图 -->
-            <div v-else class="mobile-view">
-                <div v-loading="loading">
-                    <div v-for="(item, index) in tableData" :key="index" class="mobile-card">
-                        <div class="mobile-card-header">
-                            <div class="email-badge">
+                <!-- 移动端卡片视图 -->
+                <div v-else class="space-y-4 md:hidden" v-loading="loading" 
+                    element-loading-text="加载中..."
+                    element-loading-spinner="el-icon-loading">
+                    <div v-for="(item, index) in tableData" :key="index" 
+                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full flex items-center space-x-2 max-w-[70%] overflow-hidden">
                                 <i class="el-icon-message"></i>
                                 <el-tooltip :content="item.email" placement="top" effect="light">
-                                    <span>{{ item.email }}</span>
+                                    <span class="truncate">{{ item.email }}</span>
                                 </el-tooltip>
                             </div>
-                            <div class="type-badge">
+                            <div class="px-3 py-1 rounded-full text-sm font-medium"
+                                :class="{
+                                    'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400': item.accountType === 'ChatGPT',
+                                    'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400': item.accountType === 'Claude',
+                                    'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400': item.accountType === 'API'
+                                }">
                                 {{ item.accountType }}
                             </div>
                         </div>
 
-                        <div class="mobile-card-content">
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <div class="info-label">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
                                         <i class="el-icon-key"></i>
-                                        兑换码
+                                        <span>兑换码</span>
                                     </div>
-                                    <div class="info-value">
+                                    <div class="text-gray-900 dark:text-gray-100 font-semibold">
                                         <el-tooltip :content="item.code" placement="top" effect="light">
                                             <span>{{ item.code }}</span>
                                         </el-tooltip>
                                     </div>
                                 </div>
-                                <div class="info-item">
-                                    <div class="info-label">
+                                <div class="space-y-1">
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
                                         <i class="el-icon-time"></i>
-                                        兑换时长
+                                        <span>兑换时长</span>
                                     </div>
-                                    <div class="info-value">{{ item.duration }} 天</div>
+                                    <div class="text-gray-900 dark:text-gray-100 font-semibold">{{ item.duration }} 天</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mobile-card-divider"></div>
+                        <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
 
-                        <div class="mobile-card-actions">
-                            <div class="action-row">
-                                <el-button type="warning" size="mini" @click="editItem(item.id)">
-                                    <i class="el-icon-edit"></i> 编辑
-                                </el-button>
-                                <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)">
-                                    <i class="el-icon-delete"></i> 删除
-                                </el-button>
-                            </div>
+                        <div class="flex space-x-2">
+                            <el-button type="warning" size="mini" @click="editItem(item.id)"
+                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
+                                <i class="el-icon-edit mr-1"></i> 编辑
+                            </el-button>
+                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)"
+                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
+                                <i class="el-icon-delete mr-1"></i> 删除
+                            </el-button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 响应式分页器 -->
-            <div class="pagination-container">
-                <el-pagination 
-                    @current-change="handleCurrentChange" 
-                    :current-page.sync="currentPage" 
-                    :page-size="pageSize"
-                    :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
-                    :pager-count="isMobile ? 5 : 7"
-                    :total="total"
-                    class="pagination-wrapper">
-                </el-pagination>
-            </div>
+            <!-- 分页器 -->
+            <el-pagination 
+                @current-change="handleCurrentChange" 
+                :current-page.sync="currentPage" 
+                :page-size="pageSize"
+                :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
+                :pager-count="isMobile ? 5 : 7"
+                :total="total"
+                :class="[
+                    isMobile ? 'w-full flex justify-center py-4' : 'fixed bottom-8 right-8 z-10'
+                ]">
+            </el-pagination>
 
             <!-- 弹窗组件 -->
-            <enhanced-dialog 
-                :isVisible="modalVisible" 
-                :title="modalTitle" 
-                @close="closeModal"
-                @confirm="submitForm">
-                <form-input 
-                    v-for="(field, index) in formFields" 
-                    :key="index" 
-                    :field="field"
-                    @updateValue="handleUpdateValue" 
-                    @handleSelectChange="handleSelectChange" />
+            <enhanced-dialog :isVisible="modalVisible" :title="modalTitle" @close="closeModal" @confirm="submitForm">
+                <form-input v-for="(field, index) in formFields" :key="index" :field="field"
+                    @updateValue="handleUpdateValue" @handleSelectChange="handleSelectChange" />
             </enhanced-dialog>
 
-            <confirm-dialog 
-                :visible.sync="isDialogVisible" 
-                title="确认删除" 
-                message="你确定要删除这个兑换码吗？"
+            <confirm-dialog :visible.sync="isDialogVisible" title="确认删除" message="你确定要删除这个兑换码吗？"
                 @confirm="handleDelete" />
         </el-main>
     </el-container>
@@ -203,10 +215,15 @@ export default {
             ]
         }
     },
+    computed: {
+        tableHeight() {
+            return `calc(100vh - ${this.headerHeight + this.searchHeight + this.paginationHeight + this.padding}px)`;
+        }
+    },
     methods: {
-        checkIsMobile: debounce(function() {
+        checkIsMobile() {
             this.isMobile = window.innerWidth <= 768;
-        }, 200),
+        },
 
         showConfirmDialog(id) {
             this.currentIndex = id;
@@ -393,7 +410,7 @@ export default {
 
         handleSelectChange({ type, field, value }) {
             console.log('Select changed:', { type, field, value });
-        },
+        }
     },
     mounted() {
         this.fetchItems('');
@@ -407,486 +424,43 @@ export default {
 </script>
 
 <style scoped>
-/* 基础布局 */
-.panel {
-    background-color: #ffffff;
-    border-radius: 16px;
-    margin: 1.5% 20px;
-    min-height: calc(100vh - 40px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
+.dark-input :deep(.el-input__inner) {
+    @apply dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;
 }
 
-/* 搜索栏 */
-.search-bar {
-    margin-bottom: 28px;
+.dark-input :deep(.el-input-group__append) {
+    @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
 }
 
-.btn-col {
-    display: flex;
-    justify-content: flex-end;
+.dark-input :deep(.el-input__inner:hover),
+.dark-input :deep(.el-input__inner:focus) {
+    @apply dark:border-gray-500;
 }
 
-.create-new {
-    margin-top: 0;
-    transition: all 0.3s ease;
+.dark-input :deep(.el-input__inner::placeholder) {
+    @apply dark:text-gray-500;
 }
 
-.create-new:hover {
-    transform: translateY(-2px);
+/* 添加表格自适应样式 */
+.adaptive-table :deep(.el-table__row) {
+    height: auto !important;
+    min-height: 40px;
 }
 
-/* PC端表格样式 */
-.action-row {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-start;
+.adaptive-table :deep(.el-table__cell) {
+    padding: clamp(4px, 1vh, 12px) 0;
 }
 
-/* 移动端卡片样式 */
-.mobile-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 1px solid rgba(235, 238, 245, 0.6);
-}
-
-.mobile-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-}
-
-.mobile-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.email-badge {
-    background: linear-gradient(145deg, #f0f7ff, #e6f1ff);
-    color: #409eff;
-    padding: 8px 16px;
-    border-radius: 24px;
-    font-size: 14px;
+.adaptive-table :deep(.cell) {
+    line-height: 1.4;
+    white-space: normal;
+    min-height: 24px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    max-width: 70%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
 }
 
-.type-badge {
-    background: linear-gradient(145deg, #f0f9eb, #e7f6e1);
-    color: #67c23a;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
-}
-
-.info-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.info-label {
-    color: #909399;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    opacity: 0.85;
-}
-
-.info-value {
-    color: #303133;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.mobile-card-divider {
-    height: 1px;
-    background: linear-gradient(to right, transparent, #ebeef5, transparent);
-    margin: 20px 0;
-}
-
-.mobile-card-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.mobile-card-actions .action-row {
-    justify-content: space-between;
-}
-
-.mobile-card-actions .el-button {
-    flex: 1;
-    transition: all 0.3s ease;
-}
-
-.mobile-card-actions .el-button:hover {
-    transform: translateY(-2px);
-}
-
-/* 分页器样式 */
-.pagination-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 16px;
-    backdrop-filter: blur(8px);
-    border-radius: 8px;
-    z-index: 1000;
-}
-
-.pagination-wrapper {
-    text-align: center;
-}
-
-/* Element UI 按钮样式优化 */
-.el-button--primary {
-    background: linear-gradient(145deg, #0e8f6f, #0d8668);
-    border: none;
-    transition: all 0.3s ease;
-}
-
-.el-button--primary:hover,
-.el-button--primary:focus {
-    background: linear-gradient(145deg, #2980b9, #2574ab);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(41, 128, 185, 0.2);
-}
-
-/* 响应式布局优化 */
-@media screen and (max-width: 768px) {
-    .panel {
-        margin: 12px;
-        padding: 16px;
-        border-radius: 24px;
-    }
-
-    .search-bar {
-        margin-bottom: 20px;
-    }
-
-    .btn-col {
-        margin-top: 12px;
-    }
-
-    .create-new {
-        width: 100%;
-    }
-
-    .pagination-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
-        padding: 12px;
-        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
-        z-index: 1000;
-        margin: 0;
-    }
-
-    .panel {
-        padding-bottom: 72px;
-    }
-
-    .mobile-card-actions .el-button {
-        padding: 12px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        border-radius: 12px;
-    }
-}
-
-@media screen and (min-width: 769px) {
-    .btn-col {
-        justify-content: flex-end;
-    }
-
-    .create-new {
-        width: auto;
-    }
-}
-
-/* 移动端分页器样式优化 */
-@media screen and (max-width: 768px) {
-    .pagination-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
-        padding: 6px 0;
-        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
-        z-index: 1000;
-        height: 44px;
-    }
-
-    :deep(.el-pagination) {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        padding: 0 16px;
-        height: 100%;
-    }
-
-    :deep(.el-pagination .btn-prev),
-    :deep(.el-pagination .btn-next) {
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0 4px;
-        min-width: 32px;
-        height: 32px;
-        line-height: 32px;
-        border-radius: 16px;
-    }
-
-    :deep(.el-pagination .number) {
-        min-width: 32px;
-        height: 32px;
-        line-height: 32px;
-        margin: 0 4px;
-        border-radius: 16px;
-        font-weight: 500;
-    }
-
-    .mobile-card:last-child {
-        margin-bottom: 56px;
-    }
-
-    :deep(.el-pagination .active) {
-        background: linear-gradient(145deg, #0e8f6f, #0d8668);
-        color: white;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(14, 143, 111, 0.2);
-    }
-
-    .el-main {
-        padding-bottom: calc(56px + env(safe-area-inset-bottom));
-    }
-}
-
-/* 暗色主题优化 */
-@media (prefers-color-scheme: dark) {
-    /* 基础布局 */
-    .panel {
-        background: rgba(30, 30, 30, 0.95);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    h2 {
-        color: #e0e0e0;
-    }
-
-    /* 搜索栏 */
-    .el-input__inner {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        color: #e0e0e0;
-    }
-
-    .el-input__inner:hover {
-        border-color: rgba(14, 143, 111, 0.5);
-    }
-
-    .el-input__inner:focus {
-        border-color: #0e8f6f;
-    }
-
-    .el-input-group__append {
-        background: rgba(14, 143, 111, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-left: none;
-    }
-
-    /* 表格样式 */
-    .el-table {
-        background-color: transparent;
-    }
-
-    .el-table th,
-    .el-table tr {
-        background-color: transparent;
-        color: #e0e0e0;
-    }
-
-    .el-table td,
-    .el-table th.is-leaf {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .el-table--enable-row-hover .el-table__body tr:hover > td {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* 状态标签 */
-    .status-tag {
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .status-yes {
-        background: linear-gradient(145deg, rgba(103, 194, 58, 0.1), rgba(103, 194, 58, 0.05));
-        color: #95d475;
-        box-shadow: 0 2px 8px rgba(103, 194, 58, 0.1);
-    }
-
-    .status-no {
-        background: linear-gradient(145deg, rgba(144, 147, 153, 0.1), rgba(144, 147, 153, 0.05));
-        color: #a6a9ad;
-        box-shadow: 0 2px 8px rgba(144, 147, 153, 0.1);
-    }
-
-    /* 移动端卡片样式 */
-    .mobile-card {
-        background: rgba(40, 40, 40, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .mobile-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* 兑换码徽章 */
-    .code-badge {
-        background: linear-gradient(145deg, rgba(64, 158, 255, 0.1), rgba(64, 158, 255, 0.05));
-        color: #7eb6ff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(64, 158, 255, 0.1);
-    }
-
-    /* 信息文本 */
-    .info-label {
-        color: #909399;
-    }
-
-    .info-value {
-        color: #e0e0e0;
-    }
-
-    /* 分割线 */
-    .mobile-card-divider {
-        background: linear-gradient(90deg, 
-            transparent,
-            rgba(255, 255, 255, 0.05) 20%,
-            rgba(255, 255, 255, 0.05) 80%,
-            transparent
-        );
-    }
-
-    /* 按钮样式 */
-    .el-button--primary {
-        background: linear-gradient(145deg, #0e8f6f, #0d8668);
-        border: none;
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(14, 143, 111, 0.1);
-    }
-
-    .el-button--primary:hover {
-        background: linear-gradient(145deg, #10a37f, #0f9973);
-        box-shadow: 0 6px 16px rgba(14, 143, 111, 0.2);
-    }
-
-    .el-button--warning {
-        background: linear-gradient(145deg, #946c00, #855f00);
-        border: none;
-        color: #ffffff;
-    }
-
-    .el-button--warning:hover {
-        background: linear-gradient(145deg, #a37800, #946c00);
-    }
-
-    .el-button--success {
-        background: linear-gradient(145deg, #67c23a, #5daf34);
-        border: none;
-        color: #ffffff;
-    }
-
-    .el-button--success:hover {
-        background: linear-gradient(145deg, #71d442, #67c23a);
-    }
-
-    /* 移动端分页器 */
-    @media screen and (max-width: 768px) {
-        .pagination-container {
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination) {
-            color: #909399;
-        }
-
-        :deep(.el-pagination .btn-prev),
-        :deep(.el-pagination .btn-next) {
-            background: transparent;
-            color: #909399;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination .btn-prev:hover),
-        :deep(.el-pagination .btn-next:hover) {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e0e0e0;
-        }
-
-        :deep(.el-pagination .number) {
-            color: #909399;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        :deep(.el-pagination .number:hover) {
-            background: rgba(255, 255, 255, 0.05);
-            color: #e0e0e0;
-        }
-
-        :deep(.el-pagination .active) {
-            background: linear-gradient(145deg, #0e8f6f, #0d8668);
-            color: white;
-            border: none;
-            box-shadow: 0 2px 8px rgba(14, 143, 111, 0.3);
-        }
-
-        :deep(.el-pagination .active:hover) {
-            background: linear-gradient(145deg, #10a37f, #0f9973);
-        }
-    }
+/* 移除分页器的边框 */
+:deep(.el-pagination) {
+    @apply border-none;
 }
 </style>

@@ -70,98 +70,94 @@ export default {
 }
 
 .form-label {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #333;
+    @apply block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300;
 }
 
 .form-input,
 .form-select {
-    width: 100%;
-    padding: 8px 12px;
-    font-size: 14px;
-    line-height: 1.4;
-    color: #333;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-}
-
-.form-input:focus,
-.form-select:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+    @apply w-full px-3 py-2 text-sm leading-5 rounded-md transition-all duration-200;
+    @apply text-gray-900 dark:text-gray-100;
+    @apply bg-white dark:bg-gray-700;
+    @apply border border-gray-300 dark:border-gray-600;
+    @apply focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20;
+    @apply focus:border-emerald-500 dark:focus:border-emerald-400;
+    @apply placeholder-gray-400 dark:placeholder-gray-500;
 }
 
 .form-select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    padding-right: 28px;
+    @apply appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* 深色模式下的下拉箭头 */
+@media (prefers-color-scheme: dark) {
+    .form-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239CA3AF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    }
 }
 
 .switch-wrapper {
-    display: flex;
-    align-items: center;
+    @apply flex items-center space-x-3;
 }
 
 .switch-input {
-    display: none;
+    @apply hidden;
 }
 
 .switch-label {
-    display: inline-block;
-    width: 40px;
-    height: 20px;
-    background-color: #ccc;
-    border-radius: 20px;
-    position: relative;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    @apply relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out;
+    @apply bg-gray-200 dark:bg-gray-700;
 }
 
 .switch-button {
-    width: 18px;
-    height: 18px;
-    background-color: #fff;
-    border-radius: 50%;
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    transition: transform 0.3s;
+    @apply pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out;
+    @apply translate-x-0;
 }
 
-.switch-input:checked+.switch-label {
-    background-color: #43cea2;
+.switch-input:checked + .switch-label {
+    @apply bg-emerald-500 dark:bg-emerald-600;
 }
 
-.switch-input:checked+.switch-label .switch-button {
-    transform: translateX(20px);
+.switch-input:checked + .switch-label .switch-button {
+    @apply translate-x-5;
 }
 
 .switch-text {
-    margin-left: 8px;
-    font-size: 14px;
-    color: #333;
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300;
 }
 
+/* 移动端适配 */
 @media (max-width: 480px) {
-
     .form-input,
     .form-select {
-        font-size: 13px;
-        padding: 6px 10px;
+        @apply text-sm py-1.5;
     }
 
     .form-label,
     .switch-text {
-        font-size: 11px;
+        @apply text-xs;
     }
+
+    .switch-label {
+        @apply h-5 w-9;
+    }
+
+    .switch-button {
+        @apply h-4 w-4;
+    }
+
+    .switch-input:checked + .switch-label .switch-button {
+        @apply translate-x-4;
+    }
+}
+
+/* 禁用状态 */
+.form-input:disabled,
+.form-select:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    @apply bg-gray-100 dark:bg-gray-800;
 }
 </style>
