@@ -101,7 +101,7 @@
                                                 v-model="formData.prompt" 
                                                 :rows="3" 
                                                 placeholder="例如：一只可爱的猫咪坐在窗台上，阳光洒在它的身上..."
-                                                class="w-full !rounded-xl !border-gray-200 dark:!border-gray-700 hover:!border-blue-500 dark:hover:!border-blue-400 transition-colors duration-300">
+                                                class="w-full !rounded-xl !border-gray-200 dark:!border-gray-700 dark:!bg-gray-800 dark:!text-gray-100 hover:!border-blue-500 dark:hover:!border-blue-400 focus:!border-blue-500 dark:focus:!border-blue-400 !shadow-sm dark:!shadow-gray-900/30 transition-colors duration-300">
                                             </el-input>
                                         </el-form-item>
                                         
@@ -153,13 +153,13 @@
                                                 placeholder="选择预设风格"
                                                 clearable
                                                 @change="handleStyleChange"
-                                                class="w-full !rounded-xl">
+                                                class="w-full !rounded-xl dark:!bg-gray-800 dark:!border-gray-700">
                                                 <el-option
                                                     v-for="style in presetStyles"
                                                     :key="style.name"
                                                     :label="style.name"
                                                     :value="style.name"
-                                                    class="group !h-auto">
+                                                    class="group !h-auto dark:!bg-gray-800 dark:hover:!bg-gray-700">
                                                     <div class="flex items-center justify-between py-2">
                                                         <div class="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                                                             {{ style.name }}
@@ -207,8 +207,9 @@
                     <div class="xl:col-span-3">
                         <!-- 任务队列表格(仅PC端显示) -->
                         <div v-if="!showImageDetail" class="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg min-h-[calc(100vh-4rem)] flex flex-col">
-                            <div class="flex items-center justify-between px-8 py-5 border-b border-gray-200/50 dark:border-gray-700/50">
-                                <span class="text-xl font-semibold text-gray-800 dark:text-gray-200">任务队列 ({{ taskQueue.length }})</span>
+                            <!-- 标题栏 -->
+                            <div class="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-200/50 dark:border-gray-700/50">
+                                <span class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200">任务队列 ({{ taskQueue.length }})</span>
                                 <el-button 
                                     type="text" 
                                     icon="el-icon-refresh" 
@@ -218,8 +219,27 @@
                                     刷新
                                 </el-button>
                             </div>
+
+                            <!-- 内容区域 -->
                             <div class="flex-1 flex flex-col overflow-hidden">
-                                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                                <!-- 移动端列表视图 -->
+                                <div class="block sm:hidden flex-1 overflow-y-auto custom-scrollbar px-4 py-2">
+                                    <div v-for="task in taskQueue" :key="task.id" 
+                                        class="mb-4 p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm"
+                                        @click="handleRowClick(task)">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <el-tag size="small" type="info">{{ getActionText(task.action) }}</el-tag>
+                                            <el-tag :type="getStatusType(task.status)">{{ getStatusText(task.status) }}</el-tag>
+                                        </div>
+                                        <div class="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">{{ task.prompt }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ formatTime(task.displays.submitTime) }}</div>
+                                        <el-progress :percentage="getProgressPercentage(task.progress)"
+                                            :status="getProgressStatus(task.status)"></el-progress>
+                                    </div>
+                                </div>
+
+                                <!-- 桌面端表格视图 -->
+                                <div class="hidden sm:block flex-1 overflow-y-auto custom-scrollbar">
                                     <el-table 
                                         :data="taskQueue" 
                                         class="w-full custom-table"
@@ -228,7 +248,6 @@
                                         element-loading-text="加载中..."
                                         element-loading-spinner="el-icon-loading"
                                         @row-click="handleRowClick">
-                                        <!-- 提示词列 -->
                                         <el-table-column prop="prompt" label="提示词" min-width="180" align="left"
                                             show-overflow-tooltip></el-table-column>
                                         <el-table-column prop="action" label="类型" min-width="80" align="center">
@@ -260,6 +279,7 @@
                                         </el-table-column>
                                     </el-table>
                                 </div>
+
                                 <!-- 分页 -->
                                 <div class="flex justify-center p-4 border-t border-gray-100 dark:border-gray-700">
                                     <el-pagination 
@@ -510,20 +530,21 @@
                 title="高级设置"
                 :visible.sync="showAdvancedSettings"
                 direction="rtl"
-                size="600px"
+                :size="isMobile ? '75%' : '400px'"
                 :modal-append-to-body="false"
-                :before-close="handleAdvancedSettingsClose"
-                custom-class="advanced-settings-drawer">
+                :wrapperClosable="true"
+                :modal="true"
+                custom-class="advanced-settings-drawer dark:bg-gray-800">
                 <div class="flex flex-col h-full">
-                    <div class="flex-1 overflow-y-auto p-6">
-                        <div class="space-y-8">
+                    <div class="flex-1 overflow-y-auto p-4 md:p-6">
+                        <div class="space-y-6 md:space-y-8">
                             <!-- 基础设置组 -->
                             <div class="settings-group">
-                                <div class="flex items-center space-x-2 mb-4">
-                                    <i class="el-icon-setting text-lg text-emerald-600"></i>
-                                    <span class="text-base font-medium">基础设置</span>
+                                <div class="flex items-center space-x-2 mb-3 md:mb-4">
+                                    <i class="el-icon-setting text-base md:text-lg text-emerald-600"></i>
+                                    <span class="text-sm md:text-base font-medium">基础设置</span>
                                 </div>
-                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-4">
+                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-3 md:space-y-4">
                                     <el-form-item label="宽高比例" class="w-full">
                                         <el-select v-model="formData.aspectRatio" placeholder="选择宽高比例" class="w-full">
                                             <el-option label="默认" value=""></el-option>
@@ -546,11 +567,11 @@
 
                             <!-- 高级设置组 -->
                             <div class="settings-group">
-                                <div class="flex items-center space-x-2 mb-4">
-                                    <i class="el-icon-magic-stick text-lg text-emerald-600"></i>
-                                    <span class="text-base font-medium">高级设置</span>
+                                <div class="flex items-center space-x-2 mb-3 md:mb-4">
+                                    <i class="el-icon-magic-stick text-base md:text-lg text-emerald-600"></i>
+                                    <span class="text-sm md:text-base font-medium">高级设置</span>
                                 </div>
-                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-4">
+                                <el-form :model="formData" label-position="top" label-width="auto" class="space-y-3 md:space-y-4">
                                     <el-form-item label="随机种子" class="w-full">
                                         <el-input-number v-model="formData.seed" :min="0" :max="4294967295"
                                             placeholder="输入随机种子" class="w-full">
@@ -577,13 +598,13 @@
 
                             <!-- 特殊选项组 -->
                             <div class="settings-group">
-                                <div class="flex items-center space-x-2 mb-4">
-                                    <i class="el-icon-star-off text-lg text-emerald-600"></i>
-                                    <span class="text-base font-medium">特殊选项</span>
+                                <div class="flex items-center space-x-2 mb-3 md:mb-4">
+                                    <i class="el-icon-star-off text-base md:text-lg text-emerald-600"></i>
+                                    <span class="text-sm md:text-base font-medium">特殊选项</span>
                                 </div>
                                 <el-form :model="formData" label-position="top" label-width="auto">
                                     <el-form-item>
-                                        <el-checkbox-group v-model="formData.specialOptions" class="grid grid-cols-2 gap-4">
+                                        <el-checkbox-group v-model="formData.specialOptions" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                             <el-checkbox label="--sameseed" class="!mr-0">使用相同种子</el-checkbox>
                                             <el-checkbox label="--upbeta" class="!mr-0">Beta放大工具</el-checkbox>
                                             <el-checkbox label="--uplight" class="!mr-0">轻量化处理</el-checkbox>
@@ -597,14 +618,14 @@
                         </div>
                     </div>
                     <!-- 底部操作栏 -->
-                    <div class="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                    <div class="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 md:p-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500 dark:text-gray-400">设置将在下次绘图时生效</span>
+                            <span class="text-xs md:text-sm text-gray-500 dark:text-gray-400">设置将在下次绘图时生效</span>
                             <div class="space-x-2">
-                                <el-button size="small" @click="clearAdvancedSettings">
+                                <el-button size="mini" md:size="small" @click="clearAdvancedSettings">
                                     重置设置
                                 </el-button>
-                                <el-button size="small" type="primary" @click="showAdvancedSettings = false">
+                                <el-button size="mini" md:size="small" type="primary" @click="showAdvancedSettings = false">
                                     确定
                                 </el-button>
                             </div>
@@ -2024,13 +2045,25 @@ export default {
     opacity: 0;
 }
 
-/* 确保 Element UI 的确认弹窗显示在最上层 */
-::v-deep .el-message-box__wrapper {
-    z-index: 10000 !important;
+/* 调整抽屉组件的层级 */
+::v-deep .advanced-settings-drawer {
+    .el-drawer__wrapper {
+        z-index: 2000 !important;
+    }
+    
+    .el-drawer__container {
+        z-index: 2001 !important;
+    }
 }
 
+/* 调整抽屉的遮罩层 */
 ::v-deep .v-modal {
-    z-index: 9999 !important;
+    z-index: 1999 !important;
+}
+
+/* 确保 Element UI 的确认弹窗显示在最上层 */
+::v-deep .el-message-box__wrapper {
+    z-index: 2100 !important;
 }
 
 /* 暗色模式适配 */
@@ -2131,6 +2164,138 @@ export default {
             
             &:hover {
                 background-color: rgba(55, 65, 81, 0.5) !important;
+            }
+        }
+    }
+
+    /* 高级设置抽屉深色模式样式 */
+    ::v-deep .advanced-settings-drawer {
+        .el-drawer__header {
+            background-color: #1f2937;
+            border-bottom: 1px solid #374151;
+            margin-bottom: 0;
+            padding: 16px 20px;
+            
+            span {
+                color: #f3f4f6;
+                font-weight: 500;
+            }
+            
+            .el-drawer__close-btn {
+                color: #9ca3af;
+                &:hover {
+                    color: #f3f4f6;
+                }
+            }
+        }
+
+        .settings-group {
+            span {
+                color: #f3f4f6;
+            }
+            
+            .el-form-item__label {
+                color: #d1d5db !important;
+            }
+        }
+
+        .el-select {
+            .el-input__inner {
+                background-color: #374151 !important;
+                border-color: #4b5563 !important;
+                color: #f3f4f6 !important;
+            }
+        }
+
+        .el-input-number {
+            .el-input__inner {
+                background-color: #374151 !important;
+                border-color: #4b5563 !important;
+                color: #f3f4f6 !important;
+            }
+            
+            .el-input-number__decrease,
+            .el-input-number__increase {
+                background-color: #1f2937 !important;
+                border-color: #4b5563 !important;
+                color: #d1d5db !important;
+                
+                &:hover {
+                    color: #f3f4f6 !important;
+                }
+            }
+        }
+
+        .el-slider {
+            .el-slider__runway {
+                background-color: #4b5563;
+            }
+            
+            .el-slider__bar {
+                background-color: #1A9168;
+            }
+            
+            .el-slider__button {
+                border-color: #1A9168;
+                background-color: #1A9168;
+            }
+        }
+
+        .el-checkbox {
+            .el-checkbox__label {
+                color: #d1d5db;
+            }
+            
+            .el-checkbox__input.is-checked .el-checkbox__inner {
+                background-color: #1A9168;
+                border-color: #1A9168;
+            }
+        }
+
+        /* 底部操作栏样式 */
+        .flex-shrink-0 {
+            background-color: #1f2937 !important;
+            border-top: 1px solid #374151 !important;
+            
+            .el-button {
+                &:not(.el-button--primary) {
+                    background-color: #374151;
+                    border-color: #4b5563;
+                    color: #d1d5db;
+                    
+                    &:hover {
+                        background-color: #4b5563;
+                        border-color: #6b7280;
+                        color: #f3f4f6;
+                    }
+                }
+            }
+        }
+    }
+
+    /* 下拉菜单深色模式 */
+    ::v-deep .el-select-dropdown {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+
+        .el-select-dropdown__item {
+            color: #d1d5db !important;
+
+            &:hover {
+                background-color: #374151 !important;
+            }
+
+            &.selected {
+                background-color: #1A9168 !important;
+                color: #ffffff !important;
+            }
+        }
+
+        .popper__arrow {
+            border-bottom-color: #374151 !important;
+            
+            &::after {
+                border-bottom-color: #1f2937 !important;
             }
         }
     }
