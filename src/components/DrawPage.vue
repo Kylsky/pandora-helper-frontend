@@ -89,7 +89,7 @@
                             <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
                                 <div class="px-8 py-4 border-b border-gray-100 dark:border-gray-700/50">
                                     <h2 class="text-xl font-medium text-gray-800 dark:text-gray-100">绘图设置</h2>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">创建你的专属 AI 艺术作品</p>
+                                    <!-- <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">创建你的专属 AI 艺术作品</p> -->
                                 </div>
                                 
                                 <div class="p-6">
@@ -103,6 +103,43 @@
                                                 placeholder="例如：一只可爱的猫咪坐在窗台上，阳光洒在它的身上..."
                                                 class="w-full !rounded-xl !border-gray-200 dark:!border-gray-700 dark:!bg-gray-800 dark:!text-gray-100 hover:!border-blue-500 dark:hover:!border-blue-400 focus:!border-blue-500 dark:focus:!border-blue-400 !shadow-sm dark:!shadow-gray-900/30 transition-colors duration-300">
                                             </el-input>
+                                        </el-form-item>
+                                        
+                                        <!-- 宽高比例选择 -->
+                                        <el-form-item label="宽高比例" class="mb-4">
+                                            <el-select v-model="formData.aspectRatio" placeholder="选择宽高比例" class="w-full">
+                                                <el-option label="默认" value=""></el-option>
+                                                <el-option label="16:9" value="--ar 16:9"></el-option>
+                                                <el-option label="4:3" value="--ar 4:3"></el-option>
+                                                <el-option label="1:1" value="--ar 1:1"></el-option>
+                                                <el-option label="9:16" value="--ar 9:16"></el-option>
+                                            </el-select>
+                                        </el-form-item>
+
+                                        <!-- 预设风格 -->
+                                        <el-form-item label="预设风格" class="mb-4">
+                                            <el-select 
+                                                v-model="selectedStyle" 
+                                                placeholder="选择预设风格"
+                                                clearable
+                                                @change="handleStyleChange"
+                                                class="w-full !rounded-xl dark:!bg-gray-800 dark:!border-gray-700">
+                                                <el-option
+                                                    v-for="style in presetStyles"
+                                                    :key="style.name"
+                                                    :label="style.name"
+                                                    :value="style.name"
+                                                    class="group !h-auto dark:!bg-gray-800 dark:hover:!bg-gray-700">
+                                                    <div class="flex items-center justify-between py-2">
+                                                        <div class="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                                            {{ style.name }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 ml-4 text-right">
+                                                            {{ style.description }}
+                                                        </div>
+                                                    </div>
+                                                </el-option>
+                                            </el-select>
                                         </el-form-item>
                                         
                                         <!-- 图片上传 -->
@@ -144,32 +181,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </el-form-item>
-
-                                        <!-- 预设风格 -->
-                                        <el-form-item label="预设风格" class="mb-4">
-                                            <el-select 
-                                                v-model="selectedStyle" 
-                                                placeholder="选择预设风格"
-                                                clearable
-                                                @change="handleStyleChange"
-                                                class="w-full !rounded-xl dark:!bg-gray-800 dark:!border-gray-700">
-                                                <el-option
-                                                    v-for="style in presetStyles"
-                                                    :key="style.name"
-                                                    :label="style.name"
-                                                    :value="style.name"
-                                                    class="group !h-auto dark:!bg-gray-800 dark:hover:!bg-gray-700">
-                                                    <div class="flex items-center justify-between py-2">
-                                                        <div class="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                                                            {{ style.name }}
-                                                        </div>
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400 ml-4 text-right">
-                                                            {{ style.description }}
-                                                        </div>
-                                                    </div>
-                                                </el-option>
-                                            </el-select>
                                         </el-form-item>
 
                                         <!-- 高级设置按钮 -->
@@ -229,7 +240,10 @@
                                         @click="handleRowClick(task)">
                                         <div class="flex items-center justify-between mb-2">
                                             <el-tag size="small" type="info">{{ getActionText(task.action) }}</el-tag>
-                                            <el-tag :type="getStatusType(task.status)">{{ getStatusText(task.status) }}</el-tag>
+                                            <el-tooltip v-if="task.status === 'FAILURE'" :content="task.failReason || '未知错误'" placement="top">
+                                                <el-tag :type="getStatusType(task.status)">{{ getStatusText(task.status) }}</el-tag>
+                                            </el-tooltip>
+                                            <el-tag v-else :type="getStatusType(task.status)">{{ getStatusText(task.status) }}</el-tag>
                                         </div>
                                         <div class="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">{{ task.prompt }}</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ formatTime(task.displays.submitTime) }}</div>
@@ -259,7 +273,12 @@
                                         </el-table-column>
                                         <el-table-column prop="status" label="状态" min-width="80" align="center">
                                             <template slot-scope="scope">
-                                                <el-tag :type="getStatusType(scope.row.status)">
+                                                <el-tooltip v-if="scope.row.status === 'FAILURE'" :content="scope.row.failReason || '未知错误'" placement="top">
+                                                    <el-tag :type="getStatusType(scope.row.status)">
+                                                        {{ getStatusText(scope.row.status) }}
+                                                    </el-tag>
+                                                </el-tooltip>
+                                                <el-tag v-else :type="getStatusType(scope.row.status)">
                                                     {{ getStatusText(scope.row.status) }}
                                                 </el-tag>
                                             </template>
@@ -329,47 +348,40 @@
                                     <div class="md:w-1/3 h-full flex flex-col">
                                         <div class="flex-1 space-y-4 overflow-y-auto custom-scrollbar">
                                             <!-- 提示词 -->
-                                            <div class="space-y-2">
+                                            <div class="space-y-4">
                                                 <div class="text-sm font-medium text-gray-600 dark:text-gray-400">提示词</div>
-                                                <div class="relative">
-                                                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 break-words whitespace-pre-wrap max-h-32 overflow-y-auto">
-                                                        {{ currentTask ? currentTask.prompt : '' }}
-                                                    </div>
-                                                    <button 
-                                                        class="absolute top-2 right-2 p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-white dark:bg-gray-700 rounded-md shadow-sm transition-colors"
-                                                        @click="copyPrompt(currentTask?.prompt)"
-                                                        v-if="currentTask?.prompt">
-                                                        <i class="el-icon-document-copy text-sm"></i>
-                                                    </button>
+                                                <div class="relative group">
+                                                    <div class="p-5 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 break-words whitespace-pre-wrap max-h-32 overflow-y-auto">{{ currentTask ? currentTask.prompt : '' }}</div>
+                                                    <button class="absolute top-3 right-3 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-white dark:bg-gray-700 rounded-md shadow-sm transition-colors opacity-0 group-hover:opacity-100" @click="copyPrompt(currentTask?.prompt)" v-if="currentTask?.prompt"><i class="el-icon-document-copy text-sm"></i></button>
                                                 </div>
                                             </div>
 
                                             <!-- 任务信息 -->
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <div class="space-y-2">
+                                            <div class="grid grid-cols-2 gap-5">
+                                                <div class="space-y-4">
                                                     <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务状态</div>
                                                     <el-tag :type="getStatusType(currentTask?.status)">
                                                         {{ getStatusText(currentTask?.status) }}
                                                     </el-tag>
                                                 </div>
-                                                <div class="space-y-2">
+                                                <div class="space-y-4">
                                                     <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务类型</div>
                                                     <el-tag type="info">{{ getActionText(currentTask?.action) }}</el-tag>
                                                 </div>
                                             </div>
 
                                             <!-- 操作按钮组 -->
-                                            <div class="space-y-4">
+                                            <div class="space-y-6">
                                                 <div class="text-sm font-medium text-gray-600 dark:text-gray-400">可用操作</div>
-                                                <div class="grid grid-cols-2 gap-2">
+                                                <div class="grid grid-cols-2 gap-3">
                                                     <!-- 放大按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('upsample'))">
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('upsample'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-zoom-in mr-1.5"></i>
+                                                            <i class="el-icon-zoom-in mr-2"></i>
                                                             <span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
@@ -379,9 +391,9 @@
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('variation'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-refresh mr-1.5"></i>
+                                                            <i class="el-icon-refresh mr-2"></i>
                                                             <span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
@@ -391,9 +403,9 @@
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Inpaint'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-edit mr-1.5"></i>
+                                                            <i class="el-icon-edit mr-2"></i>
                                                             <span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
@@ -403,9 +415,9 @@
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-zoom-out mr-1.5"></i>
+                                                            <i class="el-icon-zoom-out mr-2"></i>
                                                             <span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
@@ -415,10 +427,10 @@
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('pan'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
                                                             <span>{{ btn.emoji }}</span>
-                                                            <span class="ml-1.5">{{ btn.label }}</span>
+                                                            <span class="ml-2">{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
@@ -427,28 +439,28 @@
                                                         <button
                                                             v-for="btn in currentTask.buttons.filter(b => b.customId.includes('BOOKMARK'))"
                                                             :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
+                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
                                                             @click="handleButtonAction(btn, currentTask)">
                                                             <span>{{ btn.emoji }}</span>
-                                                            <span class="ml-1.5">{{ btn.label }}</span>
+                                                            <span class="ml-2">{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 下载按钮 -->
                                                     <button 
                                                         v-if="currentTask && currentTask.imageUrl" 
-                                                        class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
+                                                        class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
                                                         @click="downloadImage(currentTask.imageUrl)">
-                                                        <i class="el-icon-download mr-1.5"></i>
+                                                        <i class="el-icon-download mr-2"></i>
                                                         <span>下载</span>
                                                     </button>
 
                                                     <!-- 取消按钮 -->
                                                     <button 
                                                         v-if="currentTask && canCancel(currentTask.status)" 
-                                                        class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
+                                                        class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
                                                         @click="handleCancel(currentTask)">
-                                                        <i class="el-icon-close mr-1.5"></i>
+                                                        <i class="el-icon-close mr-2"></i>
                                                         <span>取消</span>
                                                     </button>
                                                 </div>
@@ -545,15 +557,16 @@
                                     <span class="text-sm md:text-base font-medium">基础设置</span>
                                 </div>
                                 <el-form :model="formData" label-position="top" label-width="auto" class="space-y-3 md:space-y-4">
-                                    <el-form-item label="宽高比例" class="w-full">
-                                        <el-select v-model="formData.aspectRatio" placeholder="选择宽高比例" class="w-full">
-                                            <el-option label="默认" value=""></el-option>
-                                            <el-option label="16:9" value="--ar 16:9"></el-option>
-                                            <el-option label="4:3" value="--ar 4:3"></el-option>
-                                            <el-option label="1:1" value="--ar 1:1"></el-option>
-                                            <el-option label="9:16" value="--ar 9:16"></el-option>
+                                    <!-- 版本选择 -->
+                                    <el-form-item label="版本选择" class="w-full">
+                                        <el-select v-model="formData.version" placeholder="选择版本" class="w-full">
+                                            <el-option label="MJ V6.1" value="--v 6.1"></el-option>
+                                            <el-option label="MJ V6" value="--v 6"></el-option>
+                                            <el-option label="MJ V5.2" value="--v 5.2"></el-option>
+                                            <el-option label="MJ V5.1" value="--v 5.1"></el-option>
                                         </el-select>
                                     </el-form-item>
+
                                     <el-form-item label="文本权重" class="w-full">
                                         <el-select v-model="formData.imageWeight" placeholder="设置文本权重" class="w-full">
                                             <el-option label="默认(0.25)" value=""></el-option>
@@ -572,6 +585,47 @@
                                     <span class="text-sm md:text-base font-medium">高级设置</span>
                                 </div>
                                 <el-form :model="formData" label-position="top" label-width="auto" class="space-y-3 md:space-y-4">
+                                    <!-- 视角设置 -->
+                                    <el-form-item label="视角" class="w-full">
+                                        <el-select v-model="formData.perspective" placeholder="选择视角" class="w-full">
+                                            <el-option label="默认" value=""></el-option>
+                                            <el-option label="第一人称视角" value="first person"></el-option>
+                                            <el-option label="第三人称视角" value="third person"></el-option>
+                                            <el-option label="俯视角" value="top view"></el-option>
+                                            <el-option label="仰视角" value="bottom view"></el-option>
+                                            <el-option label="侧视角" value="side view"></el-option>
+                                            <el-option label="远景" value="long shot"></el-option>
+                                            <el-option label="近景" value="close-up"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+
+                                    <!-- 人物镜头 -->
+                                    <el-form-item label="人物镜头" class="w-full">
+                                        <el-select v-model="formData.shot" placeholder="选择人物镜头" class="w-full">
+                                            <el-option label="默认" value=""></el-option>
+                                            <el-option label="全身镜头" value="full body"></el-option>
+                                            <el-option label="半身镜头" value="half body"></el-option>
+                                            <el-option label="特写镜头" value="close-up shot"></el-option>
+                                            <el-option label="超近特写" value="extreme close-up"></el-option>
+                                            <el-option label="全景镜头" value="wide shot"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+
+                                    <!-- 灯光设置 -->
+                                    <el-form-item label="灯光" class="w-full">
+                                        <el-select v-model="formData.lighting" placeholder="选择灯光效果" class="w-full">
+                                            <el-option label="默认" value=""></el-option>
+                                            <el-option label="自然光" value="natural light"></el-option>
+                                            <el-option label="柔和光" value="soft light"></el-option>
+                                            <el-option label="强光" value="hard light"></el-option>
+                                            <el-option label="逆光" value="backlight"></el-option>
+                                            <el-option label="环境光" value="ambient light"></el-option>
+                                            <el-option label="聚光灯" value="spotlight"></el-option>
+                                            <el-option label="霓虹灯" value="neon light"></el-option>
+                                            <el-option label="电影灯光" value="cinematic light"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+
                                     <el-form-item label="随机种子" class="w-full">
                                         <el-input-number v-model="formData.seed" :min="0" :max="4294967295"
                                             placeholder="输入随机种子" class="w-full">
@@ -609,8 +663,8 @@
                                             <el-checkbox label="--upbeta" class="!mr-0">Beta放大工具</el-checkbox>
                                             <el-checkbox label="--uplight" class="!mr-0">轻量化处理</el-checkbox>
                                             <el-checkbox label="--niji" class="!mr-0">动漫风格</el-checkbox>
-                                            <el-checkbox label="--hd" class="!mr-0">高清模式</el-checkbox>
-                                            <el-checkbox label="--tile" class="!mr-0">平铺模式</el-checkbox>
+                                            <!-- <el-checkbox label="--hd" class="!mr-0">高清模式</el-checkbox> -->
+                                            <!-- <el-checkbox label="--tile" class="!mr-0">平铺模式</el-checkbox> -->
                                         </el-checkbox-group>
                                     </el-form-item>
                                 </el-form>
@@ -659,11 +713,15 @@ export default {
                 speed: 'FAST',
                 aspectRatio: '',
                 imageWeight: '',
+                version: '--v 6.1',  // 默认使用 V6.1 版本
                 seed: '',
                 quality: '',
                 stylize: 0,
                 chaos: 0,
-                specialOptions: []
+                specialOptions: [],
+                perspective: '',  // 视角
+                shot: '',        // 人物镜头
+                lighting: ''     // 灯光
             },
             rules: {
                 prompt: [
@@ -1097,11 +1155,25 @@ export default {
                 if (!valid) return;
 
                 this.loading = true;
-                let fullPrompt = this.formData.prompt;
+                let fullPrompt = '';
 
-                // 添加各种参数
+                // 添加视角、人物镜头和灯光参数到最前面
+                const prefixParams = [
+                    this.formData.perspective,
+                    this.formData.shot,
+                    this.formData.lighting
+                ].filter(param => param).join(', ');
+
+                if (prefixParams) {
+                    fullPrompt = prefixParams + ', ' + this.formData.prompt;
+                } else {
+                    fullPrompt = this.formData.prompt;
+                }
+
+                // 添加其他参数
                 if (this.formData.aspectRatio) fullPrompt += ' ' + this.formData.aspectRatio;
                 if (this.formData.imageWeight) fullPrompt += ' ' + this.formData.imageWeight;
+                if (this.formData.version) fullPrompt += ' ' + this.formData.version;
                 if (this.formData.seed) fullPrompt += ` --seed ${this.formData.seed}`;
                 if (this.formData.quality) fullPrompt += ' ' + this.formData.quality;
                 if (this.formData.stylize > 0) fullPrompt += ` --stylize ${this.formData.stylize}`;
@@ -1558,11 +1630,15 @@ export default {
             // 重置所有高级设置
             this.formData.aspectRatio = '';
             this.formData.imageWeight = '';
+            this.formData.version = '--v 6.1';  // 重置为默认版本 V6.1
             this.formData.seed = '';
             this.formData.quality = '';
             this.formData.stylize = 0;
             this.formData.chaos = 0;
             this.formData.specialOptions = [];
+            this.formData.perspective = '';  // 重置视角
+            this.formData.shot = '';         // 重置人物镜头
+            this.formData.lighting = '';     // 重置灯光
 
             this.$message.success('已清空所有高级设置');
         },
@@ -2045,25 +2121,37 @@ export default {
     opacity: 0;
 }
 
+/* 分页组件样式覆盖 */
+::v-deep .el-pagination {
+    border-top: none !important;
+    padding: 1rem !important;
+    background-color: transparent !important;
+}
+
 /* 调整抽屉组件的层级 */
 ::v-deep .advanced-settings-drawer {
     .el-drawer__wrapper {
-        z-index: 2000 !important;
+        z-index: 3000 !important;
     }
     
     .el-drawer__container {
-        z-index: 2001 !important;
+        z-index: 3001 !important;
+    }
+
+    /* 调整抽屉内部遮罩层 */
+    .el-drawer__mask {
+        z-index: 2999 !important;
     }
 }
 
-/* 调整抽屉的遮罩层 */
+/* 调整全局遮罩层 */
 ::v-deep .v-modal {
-    z-index: 1999 !important;
+    z-index: 2000 !important;
 }
 
 /* 确保 Element UI 的确认弹窗显示在最上层 */
 ::v-deep .el-message-box__wrapper {
-    z-index: 2100 !important;
+    z-index: 3100 !important;
 }
 
 /* 暗色模式适配 */

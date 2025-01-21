@@ -50,7 +50,7 @@
                             <split-button :name="scope.row.gptCarName" :count="scope.row.gptUserCount || 0" type="gpt"
                                 @click="openChat(scope.row.gptConfigId, 1)" 
                                 :days="scope.row.gptExpiresAt ? calculateDays(scope.row.gptExpiresAt) : 0"
-                                v-loading.fullscreen.lock="scope.row.loading"/>
+                                :loading="scope.row.loading"/>
                         </template>
                     </el-table-column>
                     <el-table-column prop="claudeCarName" label="Claude账号" min-width="220">
@@ -58,14 +58,16 @@
                             <split-button :name="scope.row.claudeCarName" :count="scope.row.claudeUserCount || 0"
                                 type="claude"
                                 @click="openChat(scope.row.claudeConfigId, 2)" 
-                                :days="scope.row.claudeExpiresAt ? calculateDays(scope.row.claudeExpiresAt) : 0"/>
+                                :days="scope.row.claudeExpiresAt ? calculateDays(scope.row.claudeExpiresAt) : 0"
+                                :loading="scope.row.loading"/>
                         </template>
                     </el-table-column>
                     <el-table-column prop="apiCarName" label="API账号" min-width="220">
                         <template slot-scope="scope">
                             <split-button :name="scope.row.apiCarName" :count="scope.row.apiUserCount || 0" type="api"
                                 @click="openChat(scope.row.apiConfigId, 3)" 
-                                :days="scope.row.apiExpiresAt ? calculateDays(scope.row.apiExpiresAt) : 0"/>
+                                :days="scope.row.apiExpiresAt ? calculateDays(scope.row.apiExpiresAt) : 0"
+                                :loading="scope.row.loading"/>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" min-width="280" fixed="right">
@@ -105,7 +107,8 @@
                             <div class="w-full">
                                 <split-button :name="item.gptCarName" :count="item.gptUserCount || 0" type="gpt"
                                     @click="openChat(item.gptConfigId, 1)" 
-                                    :days="item.gptExpiresAt ? calculateDays(item.gptExpiresAt) : 0"/>
+                                    :days="item.gptExpiresAt ? calculateDays(item.gptExpiresAt) : 0"
+                                    :loading="item.loading"/>
                             </div>
                         </div>
 
@@ -115,7 +118,8 @@
                                 <split-button :name="item.claudeCarName" :count="item.claudeUserCount || 0"
                                     type="claude"
                                     @click="openChat(item.claudeConfigId, 2)" 
-                                    :days="item.claudeExpiresAt ? calculateDays(item.claudeExpiresAt) : 0"/>
+                                    :days="item.claudeExpiresAt ? calculateDays(item.claudeExpiresAt) : 0"
+                                    :loading="item.loading"/>
                             </div>
                         </div>
 
@@ -124,7 +128,8 @@
                             <div class="w-full">
                                 <split-button :name="item.apiCarName" :count="item.apiUserCount || 0" type="api"
                                     @click="openChat(item.apiConfigId, 3)" 
-                                    :days="item.apiExpiresAt ? calculateDays(item.apiExpiresAt) : 0"/>
+                                    :days="item.apiExpiresAt ? calculateDays(item.apiExpiresAt) : 0"
+                                    :loading="item.loading"/>
                             </div>
                         </div>
                     </div>

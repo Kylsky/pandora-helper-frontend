@@ -5,9 +5,10 @@
     placement="top"
     effect="light"
   >
-    <button class="split-button" :class="[type, {'disabled': count === 0}]" @click="handleClick">
+    <button class="split-button" :class="[type, {'disabled': count === 0 || loading}]" @click="handleClick">
       <span class="name-section">
-        <i :class="typeIcon" class="type-icon"></i>
+        <i v-if="!loading" :class="typeIcon" class="type-icon"></i>
+        <i v-else class="el-icon-loading type-icon"></i>
         {{ shortName }}
       </span>
       <div class="info-section">
@@ -50,6 +51,10 @@ export default {
     maxLength: {
       type: Number,
       default: 10
+    },
+    loading: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -69,7 +74,6 @@ export default {
     },
     tooltipContent() {
       if (Number(this.count) === 0) {
-        
         return `用户暂未拥有该类型账号`
       }
       return `点击开始对话`
@@ -77,7 +81,7 @@ export default {
   },
   methods: {
     handleClick() {
-      if (Number(this.count) > 0) {
+      if (Number(this.count) > 0 && !this.loading) {
         this.$emit('click');
       }
     }
@@ -181,7 +185,7 @@ export default {
 
 /* 禁用状态样式 */
 .disabled {
-  opacity: 0.5;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -266,5 +270,19 @@ export default {
 .user-icon {
   margin-right: 1px;
   font-size: 11px;
+}
+
+/* 加载状态样式 */
+.el-icon-loading {
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
