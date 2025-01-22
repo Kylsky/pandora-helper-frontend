@@ -357,111 +357,71 @@
                                             </div>
 
                                             <!-- 任务信息 -->
-                                            <div class="grid grid-cols-2 gap-5">
-                                                <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div class="space-y-3">
                                                     <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务状态</div>
-                                                    <el-tag :type="getStatusType(currentTask?.status)">
-                                                        {{ getStatusText(currentTask?.status) }}
-                                                    </el-tag>
+                                                    <el-tag :type="getStatusType(currentTask?.status)">{{ getStatusText(currentTask?.status) }}</el-tag>
                                                 </div>
-                                                <div class="space-y-4">
+                                                <div class="space-y-3">
                                                     <div class="text-sm font-medium text-gray-600 dark:text-gray-400">任务类型</div>
                                                     <el-tag type="info">{{ getActionText(currentTask?.action) }}</el-tag>
                                                 </div>
                                             </div>
 
                                             <!-- 操作按钮组 -->
-                                            <div class="space-y-6">
+                                            <div class="space-y-4">
                                                 <div class="text-sm font-medium text-gray-600 dark:text-gray-400">可用操作</div>
-                                                <div class="grid grid-cols-2 gap-3">
+                                                <div class="grid grid-cols-2 gap-2">
                                                     <!-- 放大按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('upsample'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('upsample'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-zoom-in mr-2"></i>
-                                                            <span>{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('upsample'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-zoom-in mr-2"></i><span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 变体按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('variation'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('variation'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-refresh mr-2"></i>
-                                                            <span>{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('variation'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-refresh mr-2"></i><span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- Inpaint 按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('Inpaint'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Inpaint'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-edit mr-2"></i>
-                                                            <span>{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Inpaint'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-edit mr-2"></i><span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 缩放按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('Outpaint') || btn.customId.includes('CustomZoom'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <i class="el-icon-zoom-out mr-2"></i>
-                                                            <span>{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('Outpaint') || b.customId.includes('CustomZoom'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100 hover:border-yellow-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <i class="el-icon-zoom-out mr-2"></i><span>{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 平移按钮组 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('pan'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('pan'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <span>{{ btn.emoji }}</span>
-                                                            <span class="ml-2">{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('pan'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <span>{{ btn.emoji }}</span><span class="ml-2">{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 收藏按钮 -->
                                                     <template v-if="currentTask && currentTask.buttons && currentTask.buttons.some(btn => btn.customId.includes('BOOKMARK'))">
-                                                        <button
-                                                            v-for="btn in currentTask.buttons.filter(b => b.customId.includes('BOOKMARK'))"
-                                                            :key="btn.customId"
-                                                            class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
-                                                            @click="handleButtonAction(btn, currentTask)">
-                                                            <span>{{ btn.emoji }}</span>
-                                                            <span class="ml-2">{{ btn.label }}</span>
+                                                        <button v-for="btn in currentTask.buttons.filter(b => b.customId.includes('BOOKMARK'))" :key="btn.customId" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200" @click="handleButtonAction(btn, currentTask)">
+                                                            <span>{{ btn.emoji }}</span><span class="ml-2">{{ btn.label }}</span>
                                                         </button>
                                                     </template>
 
                                                     <!-- 下载按钮 -->
-                                                    <button 
-                                                        v-if="currentTask && currentTask.imageUrl" 
-                                                        class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
-                                                        @click="downloadImage(currentTask.imageUrl)">
-                                                        <i class="el-icon-download mr-2"></i>
-                                                        <span>下载</span>
+                                                    <button v-if="currentTask && currentTask.imageUrl" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:border-green-300 transition-colors duration-200" @click="downloadImage(currentTask.imageUrl)">
+                                                        <i class="el-icon-download mr-2"></i><span>下载</span>
                                                     </button>
 
                                                     <!-- 取消按钮 -->
-                                                    <button 
-                                                        v-if="currentTask && canCancel(currentTask.status)" 
-                                                        class="flex items-center justify-center w-full h-10 px-4 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
-                                                        @click="handleCancel(currentTask)">
-                                                        <i class="el-icon-close mr-2"></i>
-                                                        <span>取消</span>
+                                                    <button v-if="currentTask && canCancel(currentTask.status)" class="flex items-center justify-center w-full h-9 px-3 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors duration-200" @click="handleCancel(currentTask)">
+                                                        <i class="el-icon-close mr-2"></i><span>取消</span>
                                                     </button>
                                                 </div>
                                             </div>
