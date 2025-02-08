@@ -76,6 +76,8 @@
                             <div class="flex space-x-2">
                                 <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
                                     @click="refresh(scope.row.id)" class="hover:-translate-y-0.5 transition-transform duration-200">刷新</el-button>
+                                <!-- <el-button type="success" size="mini" v-if="scope.row.type === 'ChatGPT'"
+                                    @click="statistic(scope.row.id)" class="hover:-translate-y-0.5 transition-transform duration-200">统计</el-button> -->
                                 <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)" 
                                     class="hover:-translate-y-0.5 transition-transform duration-200">共享</el-button>
                                 <el-button type="warning" size="mini" @click="editItem(scope.row.id)"
@@ -175,13 +177,16 @@
                 @confirm="handleDelete" />
 
             <!-- 图表组件 -->
-            <div v-if="chartsVisible" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-full mx-4 shadow-2xl">
-                    <div ref="chart" class="w-full h-[400px]"></div>
-                    <div class="mt-4 flex justify-center">
-                        <el-button @click="closeChart" type="primary" size="small"
-                            class="hover:-translate-y-0.5 transition-transform duration-200">关闭</el-button>
+            <div v-if="chartsVisible" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999]">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-[90%] mx-4 shadow-2xl relative">
+                    <div class="absolute -top-2 -right-2 z-10">
+                        <button @click="closeChart" 
+                            class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 shadow-lg flex items-center justify-center 
+                            hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-200 dark:border-gray-600">
+                            <i class="el-icon-close text-gray-600 dark:text-gray-300"></i>
+                        </button>
                     </div>
+                    <div ref="chart" class="w-full h-[400px]"></div>
                 </div>
             </div>
         </el-main>
@@ -266,60 +271,174 @@ export default {
                 this.chart = echarts.init(this.$refs.chart);
                 const option = {
                     title: {
-                        text: 'GPT使用情况',
-                        left: 'center'
+                        text: 'GPT使用情况统计',
+                        subtext: '各用户模型使用次数统计',
+                        left: 'center',
+                        top: 10,
+                        textStyle: {
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            color: '#333'
+                        },
+                        subtextStyle: {
+                            fontSize: 12,
+                            color: '#666'
+                        }
                     },
                     tooltip: {
                         trigger: 'axis',
                         axisPointer: {
                             type: 'shadow'
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderColor: '#ccc',
+                        borderWidth: 1,
+                        textStyle: {
+                            color: '#333'
+                        },
+                        formatter: function(params) {
+                            let result = `<div class="font-semibold">${params[0].axisValue}</div>`;
+                            params.forEach(param => {
+                                if (param.value > 0) {
+                                    result += `<div style="display: flex; justify-content: space-between; min-width: 150px; padding: 3px 0;">
+                                        <span>${param.seriesName}:</span>
+                                        <span class="font-semibold">${param.value}</span>
+                                    </div>`;
+                                }
+                            });
+                            return result;
                         }
                     },
                     legend: {
                         data: ['GPT-4o', 'GPT-4', 'GPT-4o-mini', 'o1-preview', 'o1-mini'],
-                        top: 'bottom'
+                        bottom: 10,
+                        icon: 'roundRect',
+                        itemWidth: 12,
+                        itemHeight: 12,
+                        textStyle: {
+                            fontSize: 12,
+                            color: '#666'
+                        }
+                    },
+                    grid: {
+                        top: 100,
+                        bottom: 80,
+                        left: '5%',
+                        right: '5%',
+                        containLabel: true
                     },
                     xAxis: {
                         type: 'category',
                         data: this.chartData.map(item => item.uniqueName),
                         axisLabel: {
-                            rotate: 45
+                            rotate: 45,
+                            fontSize: 12,
+                            color: '#666',
+                            interval: 0
+                        },
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#ddd'
+                            }
                         }
                     },
                     yAxis: {
                         type: 'value',
-                        name: '使用次数'
+                        name: '使用次数',
+                        nameTextStyle: {
+                            color: '#666',
+                            fontSize: 12,
+                            padding: [0, 0, 0, 40]
+                        },
+                        axisLabel: {
+                            color: '#666',
+                            fontSize: 12
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: '#eee',
+                                type: 'dashed'
+                            }
+                        }
                     },
                     series: [
                         {
                             name: 'GPT-4o',
                             type: 'bar',
-                            data: this.chartData.map(item => item.usage.gpt4o),
-                            itemStyle: { color: '#91cc75' }
+                            data: this.chartData.map(item => item.usage.gpt_4o || 0),
+                            itemStyle: { 
+                                color: '#67C23A',
+                                borderRadius: [4, 4, 0, 0]
+                            },
+                            barMaxWidth: 30,
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#85CE61'
+                                }
+                            }
                         },
                         {
                             name: 'GPT-4',
                             type: 'bar',
-                            data: this.chartData.map(item => item.usage.gpt4),
-                            itemStyle: { color: '#5470c6' }
+                            data: this.chartData.map(item => item.usage.gpt_4 || 0),
+                            itemStyle: { 
+                                color: '#409EFF',
+                                borderRadius: [4, 4, 0, 0]
+                            },
+                            barMaxWidth: 30,
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#66B1FF'
+                                }
+                            }
                         },
                         {
                             name: 'GPT-4o-mini',
                             type: 'bar',
-                            data: this.chartData.map(item => item.usage.gpt4omini),
-                            itemStyle: { color: '#fac858' }
+                            data: this.chartData.map(item => item.usage.gpt_4o_mini || 0),
+                            itemStyle: { 
+                                color: '#E6A23C',
+                                borderRadius: [4, 4, 0, 0]
+                            },
+                            barMaxWidth: 30,
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#EBB563'
+                                }
+                            }
                         },
                         {
                             name: 'o1-preview',
                             type: 'bar',
-                            data: this.chartData.map(item => item.usage.o1Preview),
-                            itemStyle: { color: '#2980b9' }
+                            data: this.chartData.map(item => item.usage.o1 || 0),
+                            itemStyle: { 
+                                color: '#3498db',
+                                borderRadius: [4, 4, 0, 0]
+                            },
+                            barMaxWidth: 30,
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#5DADE2'
+                                }
+                            }
                         },
                         {
                             name: 'o1-mini',
                             type: 'bar',
-                            data: this.chartData.map(item => item.usage.o1Mini),
-                            itemStyle: { color: '#f0ad5e' }
+                            data: this.chartData.map(item => item.usage.o1_mini || 0),
+                            itemStyle: { 
+                                color: '#F56C6C',
+                                borderRadius: [4, 4, 0, 0]
+                            },
+                            barMaxWidth: 30,
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#F78989'
+                                }
+                            }
                         }
                     ]
                 };

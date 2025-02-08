@@ -1,18 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-700 p-5">
         <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-10 transform transition-transform duration-300 hover:-translate-y-2">
-            <h1 class="text-2xl font-semibold text-gray-800 text-center mb-8 flex items-center justify-center">
-                Panel
-                <!-- <span class="relative ml-3 cursor-pointer" @mouseenter="showExtraIcons = true" @mouseleave="showExtraIcons = true">
-                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToIndex()" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
-                    <transition name="fade">
-                        <div v-if="showExtraIcons" class="absolute left-full top-1/2 -translate-y-1/2 flex flex-col gap-3 pl-4">
-                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
-                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
-                        </div>
-                    </transition>
-                </span> -->
-            </h1>
+            <h1 class="text-2xl font-semibold text-gray-800 text-center mb-8">Panel</h1>
             
             <form @submit.prevent="userlogin()" class="space-y-4">
                 <input 
@@ -67,7 +56,6 @@
                     href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
                     target="_blank"
                     class="text-sm text-gray-500 hover:text-green-500 transition duration-300"
-                    @click="index()"
                 >
                     Powered by Yeelo
                 </a>
@@ -83,18 +71,9 @@ import message from '@/configs/message';
 
 export default {
     name: 'IndexPage',
-    props: {
-
-    },
-    data() {
-        return {
-            showExtraIcons: false
-        };
-    },
     methods: {
-
         reset() {
-            this.$router.replace({ name: 'reset' });
+            this.$emit('navigate', { name: 'reset' });
         },
 
         async userlogin() {
@@ -126,55 +105,31 @@ export default {
                 }
                 button.classList.remove('loading');
 
-                this.$router.replace({ name: 'navi' });
+                this.$emit('navigate', { name: 'navi' });
             } catch (error) {
                 button.classList.remove('loading');
-
-                var response = response
-                message.error(response);
+                message.error(error);
             }
         },
 
         async initiateOAuth() {
             try {
                 const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=panel`);
-
                 var data = response;
-                console.log(data)
                 if (data.data) {
-                    window.location = data.data;  // 进行重定向
+                    window.location = data.data;
                 } else {
                     console.error('No redirect URL provided');
                 }
             } catch (error) {
                 console.error('Request failed with status:', error);
             }
-        },
-
-        switchToIndex() {
-            // this.$router.replace({ name: 'pandora' });
-        },
-        navigateTo(pageName) {
-            this.$router.replace({ name: pageName });
         }
     }
-
-
 }
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s, transform 0.3s;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateX(-10px);
-}
-
 button[type="submit"].loading .spinner {
     display: block;
 }

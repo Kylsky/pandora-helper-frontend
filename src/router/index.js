@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import IndexPage from '@/components/IndexPage.vue';
+import CardContainer from '@/components/CardContainer.vue';
 import ResetPage from '@/components/ResetPage.vue';
 import PandoraPage from '@/components/PandoraPage.vue';
 import LoadingPage from '@/components/LoadingPage.vue';
@@ -17,7 +17,7 @@ import DrawPage from '@/components/DrawPage.vue';
 Vue.use(Router);
 
 const routes = [
-    { path: '/', component: IndexPage, name: 'home', meta: { title: '首页' } },
+    { path: '/', component: CardContainer, name: 'home', meta: { title: '首页' } },
     { path: '/account', component: AccountPage, name: 'account', meta: { title: '账号管理' }  },
     { path: '/share', component: SharePage, name: 'share', meta: { title: '分享管理' } },
     { path: '/redemption', component: RedemptionPage, name: 'redemption', meta: { title: '兑换码' } },

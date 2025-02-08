@@ -1,18 +1,7 @@
 <template>
-    <div id="claude" class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-red-500 to-blue-800 font-sans">
+    <div class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-red-500 to-blue-800 font-sans">
         <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md transform transition-transform duration-300 hover:-translate-y-2">
-            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8 ml-2.5">
-                Fuclaude
-                <!-- <span class="relative inline-block ml-2.5 cursor-pointer" @mouseenter="showExtraIcons = true" @mouseleave="showExtraIcons = false">
-                    <img src="../assets/ph--user-switch.svg" alt="switch" @click="switchToPandora()" class="w-5 h-5" loading="lazy">
-                    <transition name="fade">
-                        <div v-if="showExtraIcons" class="absolute left-full top-1/2 -translate-y-1/2 flex flex-col gap-2.5 pl-4 z-10">
-                            <img src="../assets/chatgpt.svg" alt="Icon 2" @click="navigateTo('pandora')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
-                            <img src="../assets/claude.svg" alt="Icon 1" @click="navigateTo('claude')" class="w-5 h-5 transition-transform duration-300 hover:scale-110" loading="lazy">
-                        </div>
-                    </transition>
-                </span> -->
-            </h1>
+            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Fuclaude</h1>
 
             <form @submit.prevent="userlogin()" class="space-y-4">
                 <input type="text" id="username" placeholder="用户名" required
@@ -57,14 +46,9 @@ import apiClient from '../configs/axios'
 
 export default {
     name: 'ClaudePage',
-    data() {
-        return {
-            showExtraIcons: false
-        };
-    },
     methods: {
         reset() {
-            this.$router.replace({ name: 'reset' });
+            this.$emit('navigate', { name: 'reset' });
         },
 
         async userlogin() {
@@ -97,46 +81,27 @@ export default {
 
         async initiateOAuth() {
             try {
-                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=Claude`)
+                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=claude`);
                 var data = response;
-                console.log(data)
                 if (data.data) {
-                    window.location = data.data;  // 进行重定向
+                    window.location = data.data;
                 } else {
                     console.error('No redirect URL provided');
                 }
             } catch (error) {
-                alert(error)
+                console.error('Request failed with status:', error);
             }
-        },
-
-        switchToPandora() {
-            this.$router.replace({ name: 'home' });
-        },
-        
-        navigateTo(pageName) {
-            this.$router.replace({ name: pageName });
         }
     }
 }
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    @apply transition-all duration-300;
-}
-
-.fade-enter,
-.fade-leave-to {
-    @apply opacity-0 -translate-x-2.5;
-}
-
 button[type="submit"].loading .spinner {
-    @apply block;
+    display: block;
 }
 
 button[type="submit"].loading .btn-text {
-    @apply invisible;
+    visibility: hidden;
 }
 </style>
