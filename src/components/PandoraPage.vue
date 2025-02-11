@@ -4,15 +4,16 @@
             <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Pandora</h1>
 
             <form @submit.prevent="userlogin()" class="space-y-4">
-                <input type="text" id="username" placeholder="用户名" required
+                <input type="text" v-model="formData.username" placeholder="用户名" required
                     class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300">
-                <input type="password" id="password" placeholder="密码" required
+                <input type="password" v-model="formData.password" placeholder="密码" required
                     class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300">
                 <button type="submit"
                     class="w-full py-3 bg-[#43cea2] hover:bg-[#3bb592] text-white rounded-lg font-medium transition duration-300 hover:-translate-y-0.5 relative flex justify-center items-center">
-                    <span class="btn-text [.loading_&]:invisible">登录</span>
-                    <span
-                        class="absolute w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin opacity-0 [.loading_&]:opacity-100"></span>
+                    <span :class="{ 'invisible': loading }">登录</span>
+                    <span v-if="loading"
+                        class="absolute w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+                    </span>
                 </button>
             </form>
 
@@ -49,35 +50,40 @@ import message from '@/configs/message'
 
 export default {
     name: 'PandoraPage',
+    data() {
+        return {
+            loading: false,
+            formData: {
+                username: '',
+                password: ''
+            }
+        }
+    },
     methods: {
         reset() {
             this.$emit('navigate', { name: 'reset' });
         },
 
         async userlogin() {
-            const button = document.querySelector('button[type="submit"]');
-            button.classList.add('loading');
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
+            this.loading = true;
 
             try {
                 const response = await apiClient.post(`${config.apiBaseUrl}/pandora/login`, {
-                    username: username,
-                    password: password
+                    username: this.formData.username,
+                    password: this.formData.password
                 })
 
                 const status = response.data.status
                 if (status) {
-                    button.classList.remove('loading');
                     window.open(response.data.data);
                 } else {
                     var res = response.data.message
-                    button.classList.remove('loading');
                     message.error(res);
                 }
             } catch (error) {
-                button.classList.remove('loading');
                 message.error(error)
+            } finally {
+                this.loading = false;
             }
         },
 

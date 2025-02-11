@@ -3,12 +3,13 @@
         <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md transform transition-transform duration-300 hover:-translate-y-2">
             <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Fuclaude</h1>
 
-            <form @submit.prevent="userlogin()" class="space-y-4">
+            <form @submit.prevent="userlogin" class="space-y-4">
                 <input type="text" id="username" placeholder="用户名" required
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300">
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300" v-model="username">
                 <input type="password" id="password" placeholder="密码" required
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300">
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300" v-model="password">
                 <button type="submit" 
+                    :class="{'loading': isLoading}"
                     class="relative w-full py-3 bg-red-500 text-white rounded-lg text-base font-medium transition-all duration-300 hover:bg-red-600 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50">
                     <span class="btn-text">登录</span>
                     <div class="spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden">
@@ -43,39 +44,43 @@
 <script>
 import config from '../configs/config'
 import apiClient from '../configs/axios'
+import message from '@/configs/message'
+
 
 export default {
     name: 'ClaudePage',
+    data() {
+        return {
+            isLoading: false,
+            username: '',
+            password: ''
+        }
+    },
     methods: {
         reset() {
             this.$emit('navigate', { name: 'reset' });
         },
 
         async userlogin() {
-            const button = document.querySelector('button[type="submit"]');
-            button.classList.add('loading');
+            this.isLoading = true;
             
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
-
             try {
                 const response = await apiClient.post(`${config.apiBaseUrl}/fuclaude/login`, {
-                    username: username,
-                    password: password
+                    username: this.username,
+                    password: this.password
                 })
 
                 const status = response.data.status
                 if (status) {
-                    button.classList.remove('loading');
                     window.open(response.data.data);
                 } else {
-                    button.classList.remove('loading');
                     var res = response.data.message
-                    alert(res);
+                    message.error(res)
                 }
             } catch (error) {
-                button.classList.remove('loading');
-                alert(error)
+                message.error(error)
+            } finally {
+                this.isLoading = false;
             }
         },
 
