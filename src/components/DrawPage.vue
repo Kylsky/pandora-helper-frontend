@@ -19,12 +19,15 @@
 
             <!-- 弹窗内容 -->
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-gray-100 dark:border-gray-700">
                     <!-- 弹窗头部 -->
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">图片编辑</h3>
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-750">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                            <i class="el-icon-picture-outline mr-2 text-blue-500"></i>
+                            图片编辑
+                        </h3>
                         <button 
-                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                             @click="handleEditorClose">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -35,6 +38,11 @@
                     <!-- 弹窗主体 -->
                     <div class="p-4">
                         <div class="space-y-3">
+                            <!-- 操作提示 -->
+                            <div class="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
+                                <p><i class="el-icon-info-circle mr-1"></i> 提示：可以框选多个区域，按Delete键删除选中的区域</p>
+                            </div>
+                            
                             <!-- 画布容器 -->
                             <div class="w-full border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-900" style="height: calc(100vh - 400px);">
                                 <canvas 
@@ -48,28 +56,34 @@
                             </div>
 
                             <!-- 提示词输入框 -->
-                            <div class="space-y-2">
-                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">提示词</div>
+                            <div class="space-y-1 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div class="flex items-center mb-1">
+                                    <i class="el-icon-edit mr-2 text-blue-500"></i>
+                                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">提示词</div>
+                                </div>
                                 <textarea 
                                     v-model="editPrompt"
-                                    rows="3"
-                                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 sm:text-sm"
-                                    placeholder="请输入提示词">
+                                    rows="2"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 sm:text-sm p-2"
+                                    placeholder="请输入提示词，描述您想要在选中区域生成的内容">
                                 </textarea>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">提示：详细的描述可以帮助AI更好地理解您的需求</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 弹窗底部 -->
-                    <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <div class="flex items-center justify-end space-x-4 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                         <button 
-                            class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            class="inline-flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                             @click="handleEditorClose">
+                            <i class="el-icon-close mr-1"></i>
                             取消
                         </button>
                         <button 
-                            class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                             @click="handleEditorConfirm">
+                            <i class="el-icon-check mr-1"></i>
                             确定
                         </button>
                     </div>
@@ -724,7 +738,8 @@ export default {
             currentTask: null,
             maskBase64: '',
             originalImage: null, // 添加新的数据属性
-            selectionRect: { x: 0, y: 0, width: 0, height: 0 },
+            selectionRects: [], // 存储多个选择框
+            activeSelectionIndex: -1, // 当前活动的选择框索引
             finalSelectionRect: null,
             imageList: [], // 添加图片列表数据
             base64Array: [], // 添加base64数组
@@ -1665,25 +1680,59 @@ export default {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-
-            this.isDrawing = true;
-            this.startX = (e.clientX - rect.left) * scaleX;
-            this.startY = (e.clientY - rect.top) * scaleY;
-
-            // 初始化选择区域
-            this.selectionRect = {
-                x: this.startX,
-                y: this.startY,
-                width: 0,
-                height: 0
-            };
+            
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+            
+            // 检查是否点击了已有的选择框
+            const clickedIndex = this.findClickedSelectionRect(mouseX, mouseY);
+            
+            if (clickedIndex !== -1) {
+                // 如果点击了已有的选择框，设置为活动选择框
+                this.activeSelectionIndex = clickedIndex;
+                // 这里可以添加拖动选择框的逻辑，暂不实现
+            } else {
+                // 如果点击了空白区域，创建新的选择框
+                this.isDrawing = true;
+                this.startX = mouseX;
+                this.startY = mouseY;
+                
+                // 初始化新的选择区域
+                this.selectionRect = {
+                    x: this.startX,
+                    y: this.startY,
+                    width: 0,
+                    height: 0
+                };
+                
+                // 重置活动选择框索引
+                this.activeSelectionIndex = -1;
+            }
+            
+            // 重绘画布
+            this.redrawCanvas();
+        },
+        
+        // 查找点击的选择框
+        findClickedSelectionRect(x, y) {
+            for (let i = 0; i < this.selectionRects.length; i++) {
+                const rect = this.selectionRects[i];
+                if (
+                    x >= rect.x && 
+                    x <= rect.x + rect.width && 
+                    y >= rect.y && 
+                    y <= rect.y + rect.height
+                ) {
+                    return i;
+                }
+            }
+            return -1;
         },
 
         handleMouseMove(e) {
             if (!this.isDrawing || !this.originalImage) return;
 
             const canvas = this.$refs.imageCanvas;
-            // const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -1704,9 +1753,24 @@ export default {
         },
 
         handleMouseUp() {
-            this.isDrawing = false;
-            // 保存最终的选择区域
-            this.finalSelectionRect = { ...this.selectionRect };
+            if (this.isDrawing) {
+                this.isDrawing = false;
+                
+                // 只有当选择框有一定大小时才添加
+                if (this.selectionRect.width > 5 && this.selectionRect.height > 5) {
+                    // 添加新的选择框到数组
+                    this.selectionRects.push({ ...this.selectionRect });
+                    
+                    // 设置当前活动的选择框索引
+                    this.activeSelectionIndex = this.selectionRects.length - 1;
+                }
+                
+                // 重置当前绘制的选择框
+                this.selectionRect = { x: 0, y: 0, width: 0, height: 0 };
+                
+                // 重绘画布
+                this.redrawCanvas();
+            }
         },
 
         redrawCanvas() {
@@ -1722,10 +1786,28 @@ export default {
             // 绘制原始图片
             ctx.drawImage(this.originalImage, 0, 0, canvas.width, canvas.height);
 
-            // 如果有选择区域，绘制选择框
-            if (this.selectionRect.width > 0 && this.selectionRect.height > 0) {
-                // 绘制选择框边框
-                ctx.strokeStyle = '#9254de';
+            // 绘制所有已保存的选择框
+            this.selectionRects.forEach((rect, index) => {
+                // 设置不同的样式，活动选择框使用不同颜色
+                const isActive = index === this.activeSelectionIndex;
+                ctx.strokeStyle = isActive ? '#f56c6c' : '#9254de';
+                ctx.lineWidth = isActive ? 3 : 2;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(
+                    rect.x,
+                    rect.y,
+                    rect.width,
+                    rect.height
+                );
+                ctx.setLineDash([]);
+
+                // 绘制控制点
+                this.drawControlPoints(rect, isActive);
+            });
+
+            // 如果正在绘制新的选择框，也绘制它
+            if (this.isDrawing && this.selectionRect.width > 0 && this.selectionRect.height > 0) {
+                ctx.strokeStyle = '#67c23a'; // 新绘制的框使用绿色
                 ctx.lineWidth = 2;
                 ctx.setLineDash([5, 5]);
                 ctx.strokeRect(
@@ -1735,26 +1817,23 @@ export default {
                     this.selectionRect.height
                 );
                 ctx.setLineDash([]);
-
-                // 绘制控制点
-                this.drawControlPoints();
             }
 
             ctx.restore(); // 恢复之前的状态
         },
 
-        drawControlPoints() {
+        drawControlPoints(rect, isActive) {
             const canvas = this.$refs.imageCanvas;
             const ctx = canvas.getContext('2d');
             const pointSize = 6;
             const points = [
-                { x: this.selectionRect.x, y: this.selectionRect.y }, // 左上
-                { x: this.selectionRect.x + this.selectionRect.width, y: this.selectionRect.y }, // 右上
-                { x: this.selectionRect.x, y: this.selectionRect.y + this.selectionRect.height }, // 左下
-                { x: this.selectionRect.x + this.selectionRect.width, y: this.selectionRect.y + this.selectionRect.height } // 右下
+                { x: rect.x, y: rect.y }, // 左上
+                { x: rect.x + rect.width, y: rect.y }, // 右上
+                { x: rect.x, y: rect.y + rect.height }, // 左下
+                { x: rect.x + rect.width, y: rect.y + rect.height } // 右下
             ];
 
-            ctx.fillStyle = '#9254de';
+            ctx.fillStyle = isActive ? '#f56c6c' : '#9254de';
             points.forEach(point => {
                 ctx.beginPath();
                 ctx.arc(point.x, point.y, pointSize, 0, Math.PI * 2);
@@ -1767,6 +1846,8 @@ export default {
             this.startX = 0;
             this.startY = 0;
             this.selectionRect = { x: 0, y: 0, width: 0, height: 0 };
+            this.selectionRects = []; // 清空所有选择框
+            this.activeSelectionIndex = -1; // 重置活动选择框索引
             this.finalSelectionRect = null;
             this.editPrompt = '';
             this.maskBase64 = '';
@@ -1789,14 +1870,18 @@ export default {
                 ctx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
 
                 // 如果有选择区域，绘制白色矩形（表示要修改的区域）
-                if (this.finalSelectionRect) {
+                if (this.selectionRects.length > 0) {
                     ctx.fillStyle = 'white';
-                    ctx.fillRect(
-                        this.finalSelectionRect.x,
-                        this.finalSelectionRect.y,
-                        this.finalSelectionRect.width,
-                        this.finalSelectionRect.height
-                    );
+                    
+                    // 绘制所有选择框区域
+                    this.selectionRects.forEach(rect => {
+                        ctx.fillRect(
+                            rect.x,
+                            rect.y,
+                            rect.width,
+                            rect.height
+                        );
+                    });
                 }
 
                 return maskCanvas.toDataURL('image/png').split(',')[1];
@@ -1996,6 +2081,8 @@ export default {
             this.base64Array = []; // 清空base64数组
             this.stopCheckingProgress();
             window.removeEventListener('resize', this.checkMobile);
+            // 移除键盘事件监听
+            window.removeEventListener('keydown', this.handleKeyDown);
         },
 
         // 添加应用风格的方法
@@ -2052,11 +2139,27 @@ export default {
             document.body.removeChild(input);
             message.success('提示词已复制');
         },
+
+        // 添加处理键盘事件的方法
+        handleKeyDown(e) {
+            // 如果按下Delete或Backspace键，且有活动选择框
+            if ((e.key === 'Delete' || e.key === 'Backspace') && this.activeSelectionIndex !== -1) {
+                // 删除当前活动的选择框
+                this.selectionRects.splice(this.activeSelectionIndex, 1);
+                // 重置活动选择框索引
+                this.activeSelectionIndex = -1;
+                // 重绘画布
+                this.redrawCanvas();
+            }
+        },
     },
 
     mounted() {
         this.checkMobile();
         this.getUserInfo();
+        
+        // 添加键盘事件监听
+        window.addEventListener('keydown', this.handleKeyDown);
     },
 
     computed: {

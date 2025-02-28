@@ -71,7 +71,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2100;
     backdrop-filter: blur(2px);
   }
   
@@ -85,6 +85,14 @@
     animation: dialog-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .dialog-container {
+      background-color: #1e293b;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+  }
+  
   .dialog-header {
     display: flex;
     justify-content: space-between;
@@ -94,11 +102,26 @@
     border-bottom: 1px solid #ebeef5;
   }
   
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .dialog-header {
+      background: linear-gradient(to right, #1e293b, #0f172a);
+      border-bottom: 1px solid #334155;
+    }
+  }
+  
   .dialog-header h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
     color: #2c3e50;
+  }
+  
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .dialog-header h3 {
+      color: #e2e8f0;
+    }
   }
   
   .close-button {
@@ -114,6 +137,18 @@
   .close-button:hover {
     background-color: rgba(144, 147, 153, 0.1);
     color: #606266;
+  }
+  
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .close-button {
+      color: #94a3b8;
+    }
+    
+    .close-button:hover {
+      background-color: rgba(148, 163, 184, 0.1);
+      color: #cbd5e1;
+    }
   }
   
   .dialog-body {
@@ -134,6 +169,13 @@
     font-size: 15px;
     line-height: 1.6;
     color: #4a5568;
+  }
+  
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .dialog-body p {
+      color: #cbd5e1;
+    }
   }
   
   .dialog-footer {
@@ -162,6 +204,21 @@
     background-color: #eff6ff;
   }
   
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .btn-cancel {
+      background-color: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+    
+    .btn-cancel:hover {
+      color: #60a5fa;
+      border-color: #2563eb;
+      background-color: #1e40af;
+    }
+  }
+  
   .btn-confirm {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #ffffff;
@@ -174,6 +231,19 @@
     background: linear-gradient(135deg, #60a5fa, #3b82f6);
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.25);
     transform: translateY(-1px);
+  }
+  
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    .btn-confirm {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-confirm:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4);
+    }
   }
   
   @keyframes dialog-pop {
