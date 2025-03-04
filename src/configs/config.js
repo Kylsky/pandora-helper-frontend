@@ -7,9 +7,9 @@ const config = {
 
 export const loadConfig = async () => {
   try {
-    const response = await axios.get('/oauth2/config');
+    const response = await axios.get(config.apiBaseUrl + '/oauth2/config');
     console.log(response.data.apiUrl)
-        
+
     // config.apiBaseUrl = response.data.apiUrl || config.apiBaseUrl;
     config.mjBaseUrl = response.data.mjUrl || config.mjBaseUrl;
     // console.log('Configuration loaded:', config);

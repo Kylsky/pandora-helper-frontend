@@ -1,15 +1,15 @@
 <template>
-    <div class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-[#43cea2] to-[#185a9d]">
+    <div class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-[#E6DADA] to-[#274046]">
         <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md transform transition-transform duration-300 hover:-translate-y-2">
-            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Pandora</h1>
+            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Midjourney</h1>
 
             <form @submit.prevent="userlogin()" class="space-y-4">
                 <input type="text" v-model="formData.username" placeholder="用户名" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300">
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300">
                 <input type="password" v-model="formData.password" placeholder="密码" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300">
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300">
                 <button type="submit"
-                    class="w-full py-3 bg-[#43cea2] hover:bg-[#3bb592] text-white rounded-lg font-medium transition duration-300 hover:-translate-y-0.5 relative flex justify-center items-center">
+                    class="w-full py-3 bg-gradient-to-r from-[#5D7B8A] to-[#274046] hover:from-[#536e7c] hover:to-[#1e3238] text-white rounded-lg font-medium transition duration-300 hover:-translate-y-0.5 relative flex justify-center items-center">
                     <span :class="{ 'invisible': loading }">登录</span>
                     <span v-if="loading"
                         class="absolute w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
@@ -28,7 +28,7 @@
                         class="w-9 h-9 cursor-pointer transition-transform duration-300 hover:scale-110" loading="lazy">
                 </div>
                 <button type="button" @click="reset()"
-                    class="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium transition duration-300 hover:border-[#43cea2] hover:text-[#43cea2]">
+                    class="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium transition duration-300 hover:border-[#5D7B8A] hover:text-[#5D7B8A]">
                     重置密码
                 </button>
             </div>
@@ -38,7 +38,7 @@
                     <a 
                         href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
                         target="_blank"
-                        class="text-xs text-gray-600 hover:text-green-500 transition duration-300 flex items-center"
+                        class="text-xs text-gray-600 hover:text-[#5D7B8A] transition duration-300 flex items-center"
                     >
                         <svg class="w-3.5 h-3.5 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
@@ -81,7 +81,7 @@ import apiClient from '../configs/axios'
 import message from '@/configs/message'
 
 export default {
-    name: 'PandoraPage',
+    name: 'MidjourneyPage',
     data() {
         return {
             loading: false,
@@ -126,18 +126,28 @@ export default {
             this.loading = true;
 
             try {
-                const response = await apiClient.post(`${config.apiBaseUrl}/pandora/login`, {
+                const response = await apiClient.post(`${config.apiBaseUrl}/user/login`, {
                     username: this.formData.username,
-                    password: this.formData.password
-                })
+                    password: this.formData.password,
+                });
 
-                const status = response.data.status
-                if (status) {
-                    window.open(response.data.data);
-                } else {
-                    var res = response.data.message
-                    message.error(res);
+                this.loading = false;
+                const status = response.data.status;
+                if (!status) {
+                    message.error(response.data.message);
+                    this.loading = false;
+                    return false;
                 }
+                const user = response.data;
+                const token = user.data.jwt;
+                const avatar = user.data.avatarUrl;
+                localStorage.setItem("token", token)
+                if (avatar) {
+                    localStorage.setItem("img", avatar)
+                }
+                this.loading = false;
+
+                this.$emit('navigate', { name: 'draw' });
             } catch (error) {
                 message.error(error)
             } finally {
@@ -147,7 +157,7 @@ export default {
 
         async initiateOAuth() {
             try {
-                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=pandora`);
+                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=midjourney`);
                 var data = response;
                 if (data.data) {
                     window.location = data.data;
@@ -170,4 +180,4 @@ button[type="submit"].loading .spinner {
 button[type="submit"].loading .btn-text {
     visibility: hidden;
 }
-</style>
+</style> 

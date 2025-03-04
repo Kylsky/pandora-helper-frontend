@@ -34,8 +34,43 @@
                 </button>
             </div>
 
-            <div class="text-center mt-8 text-sm text-gray-500">
-                <span>Powered by Fuclaude</span>
+            <div class="mt-6 text-center">
+                <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                    <a 
+                        href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
+                        target="_blank"
+                        class="text-xs text-gray-600 hover:text-green-500 transition duration-300 flex items-center"
+                    >
+                        <svg class="w-3.5 h-3.5 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                        </svg>
+                        Powered by Yeelo
+                    </a>
+                    <a 
+                        href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth/stargazers" 
+                        target="_blank"
+                        class="inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full text-xs font-medium text-gray-800 hover:from-yellow-100 hover:to-yellow-200 transition duration-300 border border-gray-200 shadow-sm"
+                    >
+                        <svg class="w-3 h-3 text-yellow-500 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                        <span class="mr-0.5 text-xs">Stars</span>
+                        <span class="bg-white px-1.5 py-0.5 rounded-full text-xs font-bold text-gray-700 min-w-[18px] inline-block">
+                            <template v-if="isLoadingStars">
+                                <svg class="animate-spin h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </template>
+                            <template v-else-if="loadStarsFailed">
+                                <span class="text-red-500" title="请切换网络重试">😅</span>
+                            </template>
+                            <template v-else>
+                                {{ starCount }}
+                            </template>
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -53,10 +88,36 @@ export default {
         return {
             isLoading: false,
             username: '',
-            password: ''
+            password: '',
+            starCount: 0,
+            isLoadingStars: true,
+            loadStarsFailed: false
         }
     },
+
+    mounted() {
+        this.fetchGitHubStars();
+    },
     methods: {
+
+        async fetchGitHubStars() {
+            this.isLoadingStars = true;
+            this.loadStarsFailed = false;
+            try {
+                const response = await fetch('https://api.github.com/repos/Kylsky/pandora-helper-with-linux-do-oauth');
+                if (!response.ok) {
+                    // 处理非200响应，包括403
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                this.starCount = data.stargazers_count;
+            } catch (error) {
+                console.error('Failed to fetch GitHub stars:', error);
+                this.loadStarsFailed = true;
+            } finally {
+                this.isLoadingStars = false;
+            }
+        },
         reset() {
             this.$emit('navigate', { name: 'reset' });
         },

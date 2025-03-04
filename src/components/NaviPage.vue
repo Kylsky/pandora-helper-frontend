@@ -72,6 +72,15 @@
           @updateValue="handleResetUpdateValue" />
       </enhanced-dialog>
 
+      <!-- 用户设置对话框 -->
+      <enhanced-dialog :isVisible="settingsModalVisible" :title="'用户设置'"
+        @close="closeSettingsModal" @confirm="submitSettingsForm">
+        <form-input v-for="(field, index) in settingsFormFields"
+          :key="index"
+          :field="field"
+          @updateValue="handleSettingsUpdateValue" />
+      </enhanced-dialog>
+
       <component :is="currentComponent"></component>
     </el-main>
   </el-container>
@@ -127,6 +136,19 @@ export default {
         newPassword: '',
         confirmPassword: ''
       },
+      settingsModalVisible: false,
+      settingsFormFields: [
+        { id: 'mjProxyUrl', label: 'Midjourney Proxy 地址', type: 'text', value: '', required: true },
+        { id: 'mjProxyKey', label: 'Midjourney Proxy 密钥', type: 'text', value: '', required: true },
+        { id: 'chatGptUrl', label: 'ChatGPT 镜像地址', type: 'text', value: '', required: true },
+        { id: 'chatGptPassword', label: 'ChatGPT 镜像密码', type: 'password', value: '', required: true }
+      ],
+      settingsFormData: {
+        mjProxyUrl: '',
+        mjProxyKey: '',
+        chatGptUrl: '',
+        chatGptPassword: ''
+      },
       menuItems: [
         { index: 'accountNav', icon: 'el-icon-s-custom', title: '账号管理' },
         { index: 'shareNav', icon: 'el-icon-share', title: '分享管理' },
@@ -138,6 +160,7 @@ export default {
       dropdownItems: [
         { icon: 'el-icon-key', title: '兑换码激活', action: this.showModal },
         { icon: 'el-icon-refresh', title: '重置密码', action: this.showResetModal },
+        { icon: 'el-icon-setting', title: '用户设置', action: this.showSettingsModal },
         { icon: 'el-icon-switch-button', title: '退出登录', action: this.logout }
       ]
     };
@@ -354,10 +377,11 @@ export default {
           // 查询用户名相同的用户
           const hasPermission = userList.find(user => user.name === currentUsername);
           // 获取具体的权限
-          console.log(hasPermission)
+          const customMjConfig = adminResponse.data.data.customMjConfig ? adminResponse.data.data.customMjConfig : false;
+          console.log(customMjConfig)
 
-          const permission = hasPermission.status;
-          if (permission === 'DISABLED') {
+          const permission = hasPermission?.status;
+          if (permission === 'DISABLED' &&  customMjConfig ) {
             this.showDrawModule = false;
             return;
           }
@@ -373,6 +397,71 @@ export default {
         console.error('获取用户信息失败:', error);
         message.error('获取用户信息失败');
         // this.$router.replace({ name: 'home' });
+      }
+    },
+    handleSettingsUpdateValue(fieldId, newValue) {
+      this.settingsFormData[fieldId] = newValue;
+      const fieldIndex = this.settingsFormFields.findIndex(field => field.id === fieldId);
+      if (fieldIndex !== -1) {
+        this.settingsFormFields[fieldIndex].value = newValue;
+      }
+    },
+    showSettingsModal() {
+      this.getUserSettings();
+      this.settingsModalVisible = true;
+    },
+    closeSettingsModal() {
+      this.settingsModalVisible = false;
+      // 清空表单数据
+      this.settingsFormData = {
+        mjProxyUrl: '',
+        mjProxyKey: '',
+        chatGptUrl: '',
+        chatGptPassword: ''
+      };
+    },
+    async getUserSettings() {
+      try {
+        const response = await apiClient.get(`${config.apiBaseUrl}/share/getUserConfig`, {
+          headers: {
+            'Authorization': "Bearer " + localStorage.getItem('token')
+          }
+        });
+        
+        if (response.status === 200 && response.data.status) {
+          const settings = response.data.data;
+          // 更新表单字段值
+          this.settingsFormFields.forEach(field => {
+            if (settings[field.id]) {
+              field.value = settings[field.id];
+              this.settingsFormData[field.id] = settings[field.id];
+            }
+          });
+        } else {
+          message.error('获取用户配置失败');
+        }
+      } catch (error) {
+        console.error('获取用户配置失败:', error);
+        message.error('获取用户配置失败');
+      }
+    },
+    async submitSettingsForm() {
+      try {
+        const response = await apiClient.post(`${config.apiBaseUrl}/share/updateUserConfig`, this.settingsFormData, {
+          headers: {
+            'Authorization': "Bearer " + localStorage.getItem('token')
+          }
+        });
+        
+        if (response.status === 200) {
+          message.success('设置保存成功');
+          this.closeSettingsModal();
+        } else {
+          message.error('保存设置失败');
+        }
+      } catch (error) {
+        console.error('保存设置失败:', error);
+        message.error('保存设置失败');
       }
     }
   },

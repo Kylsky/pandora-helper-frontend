@@ -35,6 +35,8 @@ export default {
                     await this.startClaudeChat(data.username, data.jmc)
                 } else if (data.shareType === 'panel') {
                     await this.startPanel(data.username, data.jmc)
+                }else if (data.shareType === 'midjourney') {
+                    await this.startMidjourney(data.username, data.jmc)
                 }
             }
         },
@@ -66,13 +68,27 @@ export default {
         },
 
         async startPanel(username, jmc) {
-            console.log("hi")
             const response = await apiClient.get(`${config.apiBaseUrl}/share/checkUser?username=${username}&jmc=${jmc}`, {
                 withCredentials: true,
             });
             if (response.data.status) {
                 localStorage.setItem('token', response.data.data)
                 this.$router.replace({ name: 'navi' });
+            } else {
+                message.error(response.data.message)
+                this.$router.replace({ name: '' });
+            }
+
+
+        },
+
+        async startMidjourney(username, jmc) {
+            const response = await apiClient.get(`${config.apiBaseUrl}/share/checkUser?username=${username}&jmc=${jmc}`, {
+                withCredentials: true,
+            });
+            if (response.data.status) {
+                localStorage.setItem('token', response.data.data)
+                this.$router.replace({ name: 'draw' });
             } else {
                 message.error(response.data.message)
                 this.$router.replace({ name: '' });

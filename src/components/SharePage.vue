@@ -24,20 +24,30 @@
                     class="adaptive-table">
                     <el-table-column prop="uniqueName" label="用户名" min-width="200">
                         <template slot-scope="scope">
-                            <el-popover placement="right" width="220" trigger="hover">
-                                <div class="space-y-2 text-sm">
-                                    <div v-if="scope.row.gptExpiresAt" class="flex items-center justify-between">
-                                        <span class="text-gray-500 dark:text-gray-400">ChatGPT过期时间：</span>
-                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.gptExpiresAt }}</span>
-                                    </div>
-                                    <div v-if="scope.row.claudeExpiresAt" class="flex items-center justify-between">
-                                        <span class="text-gray-500 dark:text-gray-400">Claude过期时间：</span>
-                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.claudeExpiresAt }}</span>
-                                    </div>
-                                    <div v-if="scope.row.apiExpiresAt" class="flex items-center justify-between">
-                                        <span class="text-gray-500 dark:text-gray-400">API过期时间：</span>
-                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.apiExpiresAt }}</span>
-                                    </div>
+                            <el-popover 
+                                placement="right" 
+                                :width="hasAccounts(scope.row) ? 320 : 220" 
+                                trigger="hover">
+                                <div class="space-y-3 text-sm p-1">
+                                    <template v-if="hasAccounts(scope.row)">
+                                        <div v-if="scope.row.gptExpiresAt" class="flex items-center justify-between">
+                                            <span class="text-gray-500 dark:text-gray-400 whitespace-nowrap mr-3">ChatGPT过期时间：</span>
+                                            <span class="text-gray-700 dark:text-gray-300 flex-1 text-right">{{ scope.row.gptExpiresAt }}</span>
+                                        </div>
+                                        <div v-if="scope.row.claudeExpiresAt" class="flex items-center justify-between">
+                                            <span class="text-gray-500 dark:text-gray-400 whitespace-nowrap mr-3">Claude过期时间：</span>
+                                            <span class="text-gray-700 dark:text-gray-300 flex-1 text-right">{{ scope.row.claudeExpiresAt }}</span>
+                                        </div>
+                                        <div v-if="scope.row.apiExpiresAt" class="flex items-center justify-between">
+                                            <span class="text-gray-500 dark:text-gray-400 whitespace-nowrap mr-3">API过期时间：</span>
+                                            <span class="text-gray-700 dark:text-gray-300 flex-1 text-right">{{ scope.row.apiExpiresAt }}</span>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <div class="py-1 text-center text-gray-500 dark:text-gray-400">
+                                            <i class="el-icon-info-circle mr-1"></i> 当前用户暂无账号
+                                        </div>
+                                    </template>
                                 </div>
                                 <div slot="reference" class="flex items-center space-x-2 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
                                     <span class="text-gray-700 dark:text-gray-300">{{ scope.row.uniqueName }}</span>
@@ -523,6 +533,9 @@ export default {
             
             return Math.max(0, diffDays);
         },
+        hasAccounts(item) {
+            return item.gptExpiresAt || item.claudeExpiresAt || item.apiExpiresAt;
+        },
         async checkAdminRole() {
             try {
                 const response = await apiClient.get(`${config.apiBaseUrl}/user/info`, {
@@ -589,5 +602,19 @@ export default {
 /* 移除分页器的边框 */
 :deep(.el-pagination) {
     @apply border-none;
+}
+
+/* 优化弹出框样式 */
+:deep(.el-popover) {
+    @apply dark:bg-gray-800 dark:border-gray-700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-popover .el-popper__arrow) {
+    @apply dark:border-gray-700;
+}
+
+:deep(.el-popover .el-popper__arrow::after) {
+    @apply dark:bg-gray-800;
 }
 </style>
