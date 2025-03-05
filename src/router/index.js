@@ -28,7 +28,7 @@ const routes = [
     { path: '/loading', component: LoadingPage, name: 'loading', meta: { title: 'Loading' } },
     { path: '/claude', component: ClaudePage, name: 'claude', meta: { title: 'Fuclaude' } },
     { path: '/navi', component: NaviPage, name: 'navi', meta: { title: 'Helper' } },
-    { path: '/draw', component: DrawPage, name: 'draw', meta: { title: 'AI绘图' } },
+    { path: '/draw', component: DrawPage, name: 'draw', meta: { title: '图像生成' } },
     
     // 你可以继续添加其他路由
 ];

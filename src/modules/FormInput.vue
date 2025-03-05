@@ -1,24 +1,36 @@
 <!-- FormInput.vue -->
 <template>
-    <div class="form-group">
-        <label v-if="!field.hideLabel" :for="field.id" class="form-label">{{ field.label }}</label>
-        <input v-if="!field.hideLabel && (field.type === 'number' | field.type === 'text' | field.type === 'date' | field.type === 'password')" :type="field.type"
-            v-model="localValue" :id="field.id" class="form-input">
-
-        <select v-if="field.type === 'select'" v-model="localValue" :id="field.id" class="form-select"
-            @change="handleSelectChange($event)">
-            <option v-for="option in field.options" :key="option.value" :value="option.value">
-                {{ option.text }}
-            </option>
-        </select>
-
-        <div v-if="field.type === 'checkbox'" class="switch-wrapper">
-            <input type="checkbox" v-model="localValue" :id="field.id" class="switch-input">
-            <label :for="field.id" class="switch-label">
-                <span class="switch-button"></span>
-            </label>
-            <!-- <span class="switch-text">{{ field.label }}</span> -->
+    <div class="form-group" :style="getContainerStyle()">
+        <!-- 分组标题 -->
+        <div v-if="field.type === 'group'" class="form-group-title">
+            <h4 v-if="field.label" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ field.label }}</h4>
+            <div v-if="field.label" class="h-px bg-gray-200 dark:bg-gray-700 w-full mb-3"></div>
+            <div v-else class="clearfix"></div>
         </div>
+        
+        <!-- 普通表单字段 -->
+        <template v-else>
+            <label v-if="!field.hideLabel && field.type !== 'checkbox'" :for="field.id" class="form-label">{{ field.label }}</label>
+            <input v-if="!field.hideLabel && (field.type === 'number' | field.type === 'text' | field.type === 'date' | field.type === 'password')" :type="field.type"
+                v-model="localValue" :id="field.id" class="form-input">
+
+            <select v-if="field.type === 'select'" v-model="localValue" :id="field.id" class="form-select"
+                @change="handleSelectChange($event)">
+                <option v-for="option in field.options" :key="option.value" :value="option.value">
+                    {{ option.text }}
+                </option>
+            </select>
+
+            <div v-if="field.type === 'checkbox' && !field.hideLabel" class="switch-wrapper" :class="{'inline-switch': field.layout === 'inline'}">
+                <span class="switch-text">{{ field.label }}</span>
+                <div class="switch-container">
+                    <input type="checkbox" v-model="localValue" :id="field.id" class="switch-input">
+                    <label :for="field.id" class="switch-label">
+                        <span class="switch-button"></span>
+                    </label>
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
@@ -41,9 +53,20 @@ export default {
         },
         handleSelectChange(event) {
             const selectedValue = event.target.value;
-            // console.log("选中的值: ", selectedValue);
             // 通过 $emit 将选中的值传递出去
             this.$emit('handleSelectChange', {type:1, field: this.field, value: selectedValue });
+        },
+        getContainerStyle() {
+            if (this.field.layout === 'inline') {
+                return {
+                    display: 'inline-block',
+                    width: this.field.width || 'auto',
+                    verticalAlign: 'top',
+                    paddingRight: '4px',
+                    paddingLeft: '4px'
+                };
+            }
+            return {};
         }
     },
     watch: {
@@ -67,6 +90,18 @@ export default {
 .form-group {
     margin-bottom: 16px;
     max-width: 100%;
+}
+
+.form-group-title {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.clearfix {
+    clear: both;
+    display: block;
+    width: 100%;
+    height: 1px;
 }
 
 .form-label {
@@ -101,6 +136,27 @@ export default {
 
 .switch-wrapper {
     @apply flex items-center space-x-3;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    border: 1px solid transparent;
+}
+
+.switch-wrapper:hover {
+    @apply bg-gray-50 dark:bg-gray-800;
+    border-color: #e5e7eb;
+}
+
+.inline-switch {
+    @apply justify-between;
+    margin-bottom: 0;
+    height: 100%;
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
 }
 
 .switch-input {
@@ -127,6 +183,7 @@ export default {
 
 .switch-text {
     @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+    flex: 1;
 }
 
 /* 移动端适配 */

@@ -154,7 +154,7 @@ export default {
         { index: 'shareNav', icon: 'el-icon-share', title: '分享管理' },
         { index: 'redemptionNav', icon: 'el-icon-shopping-cart-full', title: '兑换码' },
         { index: 'carNav', icon: 'el-icon-truck', title: '停车场' },
-        { index: 'drawNav', icon: 'el-icon-picture-outline', title: 'AI绘图', condition: 'showDrawModule' },
+        { index: 'drawNav', icon: 'el-icon-picture-outline', title: '图像生成', condition: 'showDrawModule' },
         { index: 'freeNav', icon: 'el-icon-medal', title: '免费号池' }
       ],
       dropdownItems: [
@@ -332,7 +332,7 @@ export default {
           if (this.showDrawModule) {
             this.currentComponent = DrawPageVue;
           } else {
-            message.error('您没有AI绘图模块的访问权限');
+            message.error('您没有图像生成模块的访问权限');
           }
           break;
         default:
@@ -385,11 +385,11 @@ export default {
             this.showDrawModule = false;
             return;
           }
-          // 只有当接口返回200时才显示AI绘图模块
+          // 只有当接口返回200时才显示图像生成模块
           this.showDrawModule = adminResponse.status === 200;
         } catch (error) {
-          // 如果/current接口调用失败,不显示AI绘图模块
-          console.log('AI绘图模块权限验证失败:', error);
+          // 如果/current接口调用失败,不显示图像生成模块
+          console.log('图像生成模块权限验证失败:', error);
           this.showDrawModule = false;
         }
 

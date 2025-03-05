@@ -10,7 +10,7 @@
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300" v-model="password">
                 <button type="submit" 
                     :class="{'loading': isLoading}"
-                    class="relative w-full py-3 bg-red-500 text-white rounded-lg text-base font-medium transition-all duration-300 hover:bg-red-600 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50">
+                    class="relative w-full py-3 bg-gradient-to-r from-red-600 to-blue-800 hover:from-red-700 hover:to-blue-900 text-white rounded-lg text-base font-medium transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50">
                     <span class="btn-text">登录</span>
                     <div class="spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden">
                         <div class="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -39,7 +39,7 @@
                     <a 
                         href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
                         target="_blank"
-                        class="text-xs text-gray-600 hover:text-green-500 transition duration-300 flex items-center"
+                        class="text-xs text-gray-600 hover:text-red-500 transition duration-300 flex items-center"
                     >
                         <svg class="w-3.5 h-3.5 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>

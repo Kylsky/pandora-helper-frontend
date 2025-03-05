@@ -236,8 +236,10 @@ export default {
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
                 { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', required: false },
-                { id: 'shared', label: '是否共享', type: 'checkbox', value: false, required: true },
-                { id: 'auto', label: '自动加入', type: 'checkbox', value: false, required: true },
+                { id: 'switchesGroup', label: '账号设置', type: 'group', value: '', required: false },
+                { id: 'shared', label: '是否共享', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%' },
+                { id: 'auto', label: '自动加入', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%' },
+                { id: 'conversationIsolated', label: '会话隔离', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%', hideLabel: false },
             ],
             accountFields: [
                 { id: 'name', label: '账号名称', type: 'text', value: '', required: true },
@@ -246,8 +248,10 @@ export default {
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
                 { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', hideLabel: false },
-                { id: 'shared', label: '是否共享', type: 'checkbox', value: false, required: true },
-                { id: 'auto', label: '自动加入', type: 'checkbox', value: false, required: true },
+                { id: 'switchesGroup', label: '账号设置', type: 'group', value: '', required: false },
+                { id: 'shared', label: '是否共享', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%' },
+                { id: 'auto', label: '自动加入', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%' },
+                { id: 'conversationIsolated', label: '会话隔离', type: 'checkbox', value: false, required: true, layout: 'inline', width: '32%', hideLabel: false },
             ],
             shareFields: [
                 { id: 'username', label: '用户名', type: 'text', value: '', required: true },
@@ -498,7 +502,7 @@ export default {
         },
         handleUpdateValue(fieldId, newValue) {
             this.$set(this.formData, fieldId, newValue)
-
+            console.log("newValue", newValue)
             const fieldIndex = this.formFields.findIndex(field => field.id === fieldId);
             if (fieldIndex !== -1) {
                 this.formFields[fieldIndex].value = newValue;
@@ -507,26 +511,31 @@ export default {
             if (fieldId === 'accountType') {
                 const inputB = this.formFields.find(field => field.id === 'accessToken');
                 const inputC = this.formFields.find(field => field.id === 'refreshToken');
+                const conversationIsolatedField = this.formFields.find(field => field.id === 'conversationIsolated');
                 
                 switch (newValue) {
                     case 1:
                         inputB.label = 'ACCESS_TOKEN';
                         inputC.hideLabel = false;
                         inputC.label = 'REFRESH_TOKEN';
+                        conversationIsolatedField.hideLabel = false ;
                         break;
                     case 2:
                         inputB.label = 'SESSION_KEY';
                         inputC.hideLabel = true;
+                        conversationIsolatedField.hideLabel = false ;
                         break;
                     case 3:
                         inputB.label = 'API_PROXY';
                         inputC.hideLabel = false;
                         inputC.label = 'API_KEY';
+                        conversationIsolatedField.hideLabel = true;
                         break;
                     default:
                         inputB.label = 'ChatGPT';
                         inputC.hideLabel = false;
                         inputC.label = 'ChatGPT';
+                        conversationIsolatedField.hideLabel =   false;
                 }
             }
         },
@@ -575,24 +584,29 @@ export default {
                 });
                 const inputB = this.formFields.find(field => field.id === 'accessToken');
                 const inputC = this.formFields.find(field => field.id === 'refreshToken');
+                const conversationIsolatedField = this.formFields.find(field => field.id === 'conversationIsolated');
                 switch (accountType) {
                     case 1:
                         inputC.hideLabel = false;
                         inputB.label = 'ACCESS_TOKEN';
                         inputC.label = 'REFRESH_TOKEN';
+                        conversationIsolatedField.hideLabel = false;
                         break;
                     case 2:
                         inputB.label = 'SESSION_KEY';
                         inputC.hideLabel = true;
+                        conversationIsolatedField.hideLabel = false;
                         break;
                     case 3:
                         inputB.label = 'API_PROXY';
                         inputC.hideLabel = false;
                         inputC.label = 'API_KEY';
+                        conversationIsolatedField.hideLabel = true;
                         break;
                     default:
                         inputC.hideLabel = false;
                         inputC.label = 'ChatGPT';
+                        conversationIsolatedField.hideLabel = false;
                 }
                 this.modalVisible = true;
             } catch (error) {
@@ -607,6 +621,14 @@ export default {
         async submitForm() {
             try {
                 const itemData = { ...this.formData };
+                
+                // 移除 group 类型的字段
+                Object.keys(itemData).forEach(key => {
+                    const field = this.formFields.find(f => f.id === key);
+                    if (field && field.type === 'group') {
+                        delete itemData[key];
+                    }
+                });
 
                 if (this.shareAddFlag) {
                     itemData.uniqueName = itemData.username
@@ -625,6 +647,7 @@ export default {
                 else if (this.currentIndex !== null) {
                     itemData.auto = itemData.auto ? 1 : 0;
                     itemData.shared = itemData.shared ? 1 : 0;
+                    itemData.conversationIsolated = itemData.conversationIsolated ? 1 : 0;
                     itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
                     itemData.id = this.currentIndex;
                     await apiClient.patch(`${config.apiBaseUrl}/account/update`, itemData, {
@@ -636,6 +659,7 @@ export default {
                 } else {
                     itemData.auto = itemData.auto ? 1 : 0;
                     itemData.shared = itemData.shared ? 1 : 0;
+                    itemData.conversationIsolated = itemData.conversationIsolated ? 1 : 0;
                     itemData.accountType = itemData.accountType === '' ? 1 : itemData.accountType;
                     await apiClient.post(`${config.apiBaseUrl}/account/add`, itemData, {
                         headers: {
@@ -654,9 +678,18 @@ export default {
             this.shareAdd = false;
             this.formData = {};
             this.formFields.forEach(field => {
+                // 跳过 group 类型的字段
+                if (field.type === 'group') return;
+                
                 const defaultValue = field.type === 'checkbox' ? false : '';
                 field.value = defaultValue;
                 this.formData[field.id] = defaultValue;
+                
+                // 根据默认账号类型设置会话隔离字段的显示状态
+                if (field.id === 'conversationIsolated') {
+                    // 默认账号类型通常是 ChatGPT (1)，所以默认显示会话隔离选项
+                    field.hidden = false;
+                }
             });
         },
         emailQuery() {

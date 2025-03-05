@@ -28,6 +28,8 @@ import IndexPage from './IndexPage.vue'
 import PandoraPage from './PandoraPage.vue'
 import ClaudePage from './ClaudePage.vue'
 import MidjourneyPage from './MidjourneyPage.vue'
+// import DrawPage from './DrawPage.vue'
+import ApiPage from './ApiPage.vue'
 
 export default {
     name: 'CardContainer',
@@ -35,12 +37,14 @@ export default {
         IndexPage,
         PandoraPage,
         ClaudePage,
-        MidjourneyPage
+        MidjourneyPage,
+        ApiPage,
+        // DrawPage
     },
     data() {
         return {
-            pages: [IndexPage, PandoraPage, ClaudePage, MidjourneyPage],
-            pageNames: ['Panel', 'Pandora', 'Claude', 'Midjourney'],
+            pages: [IndexPage, PandoraPage, ClaudePage, MidjourneyPage, ApiPage],
+            pageNames: ['Panel', 'Pandora', 'Claude', 'Midjourney', 'API'],
             currentIndex: 0,
             isScrolling: false,
             transitionDuration: 0.8,
