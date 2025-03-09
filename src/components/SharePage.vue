@@ -122,6 +122,16 @@
                             </div>
                         </div>
 
+                        <div v-if="item.gptCarName" class="space-y-2">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">Grok账号</div>
+                            <div class="w-full">
+                                <split-button :name="item.gptCarName" :count="item.gptUserCount || 0" type="gpt"
+                                    @click="openChat(item.gptConfigId, 1)" 
+                                    :days="item.gptExpiresAt ? calculateDays(item.gptExpiresAt) : 0"
+                                    :loading="item.loading"/>
+                            </div>
+                        </div>
+
                         <div v-if="item.claudeCarName" class="space-y-2">
                             <div class="text-gray-500 dark:text-gray-400 text-sm">Claude账号</div>
                             <div class="w-full">

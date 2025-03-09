@@ -1,0 +1,1037 @@
+.loader {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 新的现代化加载动画样式 */
+.modern-spinner {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-ring {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 3px;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 2s;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+.spinner-ring-outer {
+  width: 100%;
+  height: 100%;
+  border-color: transparent;
+  border-left-color: #3B82F6; /* blue-500 */
+  border-top-color: rgba(59, 130, 246, 0.3); /* 半透明 */
+  animation-name: spin-clockwise;
+}
+
+.spinner-ring-middle {
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+  border-color: transparent;
+  border-right-color: #6366F1; /* indigo-500 */
+  border-bottom-color: rgba(99, 102, 241, 0.3); /* 半透明 */
+  animation-name: spin-counterclockwise;
+  animation-duration: 2.5s;
+}
+
+.spinner-ring-inner {
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  border-color: transparent;
+  border-top-color: #8B5CF6; /* violet-500 */
+  border-left-color: rgba(139, 92, 246, 0.3); /* 半透明 */
+  animation-name: spin-clockwise;
+  animation-duration: 1.5s;
+}
+
+.spinner-core {
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes spin-clockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-counterclockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* 自定义高宽比，使用现代aspect-ratio属性和CSS变量 */
+.aspect-ratio-custom {
+  position: relative;
+  aspect-ratio: var(--card-aspect-ratio, 5/4); /* 使用CSS变量，默认5:4的宽高比 */
+}
+
+/* 为不支持aspect-ratio的浏览器提供回退方案 */
+@supports not (aspect-ratio: var(--card-aspect-ratio, 5/4)) {
+  .aspect-ratio-custom {
+    padding-bottom: var(--card-padding-bottom, 80%); /* 使用CSS变量，默认80%的高度 */
+  }
+}
+
+.aspect-ratio-custom > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* 下拉菜单容器 */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+  z-index: 30; /* 确保下拉菜单容器在卡片之上 */
+}
+
+/* 下拉菜单内容样式 */
+.dropdown-content {
+  position: absolute;
+  min-width: 140px; /* 减小宽度 */
+  max-height: 250px; /* 减小高度 */
+  overflow-y: auto; 
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  border-radius: 6px;
+  background-color: white;
+  transform-origin: top center;
+  animation: dropdown-appear 0.15s ease-out;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  margin-top: 3px; /* 减小外边距 */
+}
+
+/* 向上展示的下拉菜单 */
+.dropdown-content.dropdown-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 3px; /* 减小外边距 */
+  transform-origin: bottom center;
+  animation: dropdown-appear-up 0.15s ease-out;
+}
+
+/* 右对齐下拉菜单 */
+.dropdown-content.right-aligned {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* 右对齐且向上展示的下拉菜单 */
+.dropdown-content.right-aligned.bottom-aligned {
+  left: auto;
+  right: 0;
+  top: auto;
+  bottom: 100%;
+}
+
+/* 活动状态的下拉菜单容器提升层级 */
+.dropdown-container:hover {
+  z-index: 200;
+}
+
+.dark .dropdown-content {
+  background-color: #1F2937;
+  border-color: rgba(55, 65, 81, 0.8);
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-5px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* 向上展示的动画 */
+@keyframes dropdown-appear-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) translateX(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}
+
+/* 右对齐的上弹动画 */
+@keyframes dropdown-appear-up-right {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 操作按钮样式 */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(209, 213, 219, 0.8);
+  background-color: white;
+  color: #4B5563;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* 深色模式按钮样式 */
+.dark .action-button {
+  background-color: #1F2937;
+  border-color: rgba(55, 65, 81, 0.8);
+  color: #E5E7EB;
+}
+
+/* 按钮悬停效果 */
+.action-button:hover {
+  background-color: #F3F4F6;
+  border-color: rgba(156, 163, 175, 0.8);
+  color: #1F2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 深色模式按钮悬停效果 */
+.dark .action-button:hover {
+  background-color: #374151;
+  border-color: rgba(75, 85, 99, 0.8);
+  color: #F9FAFB;
+}
+
+/* 下拉菜单项样式 */
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  color: #4B5563;
+  transition: all 0.15s ease;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* 深色模式下拉菜单项 */
+.dark .dropdown-item {
+  color: #E5E7EB;
+}
+
+/* 下拉菜单项悬停效果 */
+.dropdown-item:hover {
+  background-color: #F3F4F6;
+  color: #2563EB;
+}
+
+/* 深色模式下拉菜单项悬停效果 */
+.dark .dropdown-item:hover {
+  background-color: #374151;
+  color: #60A5FA;
+}
+
+/* 图像卡片溢出和层叠处理 */
+.grid-cols-3 > div {
+  overflow: visible !important;
+  z-index: 10;
+  transition: all 0.3s ease;
+  position: relative; /* 确保创建层叠上下文 */
+}
+
+/* 悬停时提升层级，确保下拉菜单显示在顶层 */
+.grid-cols-3 > div:hover {
+  transform: translateY(-2px); /* 减小悬停时的位移 */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+}
+
+/* 操作按钮区域样式 */
+.p-2.pt-1.flex.flex-wrap.gap-1 {
+  gap: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  overflow: visible !important;
+  position: relative; /* 确保创建层叠上下文 */
+  z-index: 20; /* 默认层级 */
+}
+
+/* 使用JavaScript动态添加类来代替:has选择器 */
+.dropdown-active {
+  z-index: 200 !important;
+}
+
+/* 状态徽章样式 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+/* 操作图标按钮样式 */
+.action-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: #6B7280;
+  background-color: transparent;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.action-icon-button:hover {
+  background-color: #F3F4F6;
+  color: #4F46E5;
+}
+
+.dark .action-icon-button:hover {
+  background-color: #374151;
+  color: #818CF8;
+}
+
+/* 加载动画容器样式 - 只占据内容区域 */
+.content-loading-overlay {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 10rem);
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dark .content-loading-overlay {
+  background-color: rgba(17, 24, 39, 0.7);
+}
+
+/* 保留原有的loading-overlay样式，但不再使用 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* 极高的z-index确保覆盖其他元素 */
+}
+
+.dark .loading-overlay {
+  background-color: rgba(17, 24, 39, 0.7);
+}
+
+.loading-container {
+  padding: 1.5rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  max-width: 24rem;
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: loading-appear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .loading-container {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: rgba(55, 65, 81, 0.5);
+}
+
+@keyframes loading-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 失败状态覆盖层动画 */
+@keyframes failure-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.7; }
+}
+
+/* 失败图标动画 */
+@keyframes failure-icon-appear {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 失败文本动画 */
+@keyframes failure-text-appear {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 失败覆盖层样式 */
+.failure-overlay {
+  animation: failure-pulse 3s infinite ease-in-out;
+  background-color: rgba(185, 28, 28, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.failure-icon {
+  animation: failure-icon-appear 0.5s ease-out forwards;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+.failure-text, .failure-reason {
+  animation: failure-text-appear 0.5s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.failure-reason {
+  animation-delay: 0.3s;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 等待中覆盖层动画 */
+@keyframes waiting-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes waiting-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes waiting-text-appear {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 等待中覆盖层样式 */
+.waiting-overlay {
+  animation: waiting-pulse 3s infinite ease-in-out;
+  background-color: rgba(234, 179, 8, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.waiting-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.waiting-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: white;
+  animation: waiting-spin 1.5s linear infinite;
+}
+
+.waiting-ring:nth-child(2) {
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+  animation-duration: 2s;
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-right-color: rgba(255, 255, 255, 0.6);
+}
+
+.waiting-ring:nth-child(3) {
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  animation-duration: 2.5s;
+  border-top-color: rgba(255, 255, 255, 0.7);
+  border-right-color: rgba(255, 255, 255, 0.5);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.waiting-text, .waiting-desc {
+  animation: waiting-text-appear 0.5s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.waiting-desc {
+  animation-delay: 0.3s;
+  max-width: 90%;
+}
+
+/* 提示框容器样式 */
+.tooltip-container {
+  position: relative;
+}
+
+/* 提示框内容样式 */
+.tooltip-content {
+  visibility: hidden;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 180px;
+  max-width: 250px; /* 减小最大宽度 */
+  background-color: white;
+  color: #4B5563;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
+  z-index: 1000;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  font-size: 0.75rem;
+  text-align: left;
+  pointer-events: auto;
+  overflow: hidden;
+  box-sizing: content-box;
+}
+
+/* 深色模式下的提示框 */
+.dark .tooltip-content {
+  background-color: #1F2937;
+  color: #E5E7EB;
+  border-color: rgba(55, 65, 81, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* 三角形指示器 */
+.tooltip-arrow {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-right: 1px solid rgba(229, 231, 235, 0.8);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .tooltip-arrow {
+  background-color: #1F2937;
+  border-color: rgba(55, 65, 81, 0.8);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 内容容器 */
+.tooltip-inner {
+  padding: 8px; /* 减小内边距 */
+  position: relative;
+  z-index: 2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 提示词标题 */
+.tooltip-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 4px; /* 减小外边距 */
+  padding-bottom: 4px; /* 减小内边距 */
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  color: #2563EB;
+  font-size: 0.75rem; /* 减小字体大小 */
+}
+
+.dark .tooltip-title {
+  color: #60A5FA;
+  border-color: rgba(55, 65, 81, 0.8);
+}
+
+/* 提示词内容 */
+.tooltip-prompt {
+  font-size: 0.65rem; /* 减小字体大小 */
+  line-height: 1.4;
+  max-height: 120px; /* 减小最大高度 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  padding: 4px;
+  color: #4B5563;
+  word-break: break-word;
+  word-wrap: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background-color: rgba(243, 244, 246, 0.5);
+  border-radius: 4px;
+  text-overflow: ellipsis;
+}
+
+.dark .tooltip-prompt {
+  color: #E5E7EB;
+  background-color: rgba(31, 41, 55, 0.5);
+}
+
+/* 滚动条样式优化 */
+.tooltip-prompt::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tooltip-prompt::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 4px;
+}
+
+.tooltip-prompt::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+.dark .tooltip-prompt::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+}
+
+.dark .tooltip-prompt::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+/* 悬停时显示提示框 */
+.tooltip-container:hover .tooltip-content,
+.tooltip-content.active {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* 调整按钮悬停效果，增加提示反馈 */
+.tooltip-container:hover {
+  background-color: rgba(243, 244, 246, 0.8);
+  transition: background-color 0.15s ease;
+  border-radius: 4px;
+}
+
+.dark .tooltip-container:hover {
+  background-color: rgba(55, 65, 81, 0.8);
+}
+
+/* 进度条容器样式 */
+.progress-container {
+  width: 80%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* 进度条样式 */
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+  border-radius: 5px;
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 进度条动画效果 */
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* SUBMITTED状态动画样式 */
+.submitted-animation {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.document-icon {
+  position: absolute;
+  width: 36px;
+  height: 42px;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  animation: document-float 2s ease-in-out infinite;
+}
+
+.document-fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 10px 10px 0;
+  border-color: transparent #e0e0e0 transparent transparent;
+}
+
+.document-icon::before, .document-icon::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: #3B82F6;
+}
+
+.document-icon::before {
+  top: 12px;
+  width: 20px;
+  animation: line-pulse 2s ease-in-out infinite;
+}
+
+.document-icon::after {
+  top: 18px;
+  width: 14px;
+  animation: line-pulse 2s ease-in-out 0.3s infinite;
+}
+
+.submitted-checkmark {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: #10B981;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  animation: checkmark-appear 2s ease-in-out infinite;
+}
+
+.submitted-checkmark::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 5px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: translate(-50%, -60%) rotate(-45deg);
+}
+
+@keyframes document-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes line-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes checkmark-appear {
+  0%, 10% { transform: scale(0); opacity: 0; }
+  20%, 90% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 等待中覆盖层动画 */
+@keyframes waiting-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes waiting-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes waiting-text-appear {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 等待中覆盖层样式 */
+.waiting-overlay {
+  animation: waiting-pulse 3s infinite ease-in-out;
+  background-color: rgba(234, 179, 8, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.waiting-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.waiting-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: white;
+  animation: waiting-spin 1.5s linear infinite;
+}
+
+.waiting-ring:nth-child(2) {
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+  animation-duration: 2s;
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-right-color: rgba(255, 255, 255, 0.6);
+}
+
+.waiting-ring:nth-child(3) {
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  animation-duration: 2.5s;
+  border-top-color: rgba(255, 255, 255, 0.7);
+  border-right-color: rgba(255, 255, 255, 0.5);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.waiting-text, .waiting-desc {
+  animation: waiting-text-appear 0.5s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.waiting-desc {
+  animation-delay: 0.3s;
+  max-width: 90%;
+}
+
+/* 等待中覆盖层动画 */
+@keyframes waiting-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes waiting-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes waiting-text-appear {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 等待中覆盖层样式 */
+.waiting-overlay {
+  animation: waiting-pulse 3s infinite ease-in-out;
+  background-color: rgba(234, 179, 8, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.waiting-spinner {
+  position: relative;
+  width: 60px;
+}
+
+/* NOT_START 状态的样式 */
+.not-start-overlay {
+  animation: not-start-pulse 3s infinite ease-in-out;
+  background-color: rgba(79, 70, 229, 0.75); /* 靛蓝色背景 */
+  backdrop-filter: blur(4px);
+}
+
+.not-start-icon {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clock-face {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.clock-hand {
+  position: absolute;
+  background-color: #4338ca;
+  transform-origin: 50% 100%;
+  border-radius: 2px;
+}
+
+.hour-hand {
+  width: 3px;
+  height: 15px;
+  top: 10px;
+  left: 50%;
+  margin-left: -1.5px;
+  animation: hour-rotation 6s linear infinite;
+}
+
+.minute-hand {
+  width: 2px;
+  height: 20px;
+  top: 5px;
+  left: 50%;
+  margin-left: -1px;
+  animation: minute-rotation 1s linear infinite;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  animation: pulse-animation 2s infinite;
+}
+
+.not-start-text, .not-start-desc {
+  animation: not-start-text-appear 0.5s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.not-start-desc {
+  animation-delay: 0.3s;
+  max-width: 90%;
+}
+
+@keyframes not-start-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes hour-rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes minute-rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-animation {
+  0% { transform: scale(0.7); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(0.7); opacity: 1; }
+}
+
+@keyframes not-start-text-appear {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
