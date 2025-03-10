@@ -5,7 +5,7 @@
         <div class="grid grid-cols-1 md:grid-cols-12 gap-0 relative">
           <!-- 垂直居中的伸缩按钮 -->
           <transition name="fade">
-            <div v-if="isPanelCollapsed" class="draw-page-fixed-btn fixed left-0 top-1/2 -translate-y-1/2 z-[2500]">
+            <div v-if="isPanelCollapsed && !isMobile" class="draw-page-fixed-btn fixed left-0 top-1/2 -translate-y-1/2 z-[2500]">
               <button
                 @click="togglePanel"
                 class="flex flex-col items-center justify-center w-12 h-28 rounded-r-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-200/70 dark:border-gray-700/70 group"
@@ -25,10 +25,29 @@
             </div>
           </transition>
 
+          <!-- 移动端切换按钮 -->
+          <div v-if="isMobile" class="fixed bottom-6 left-6 z-[2500]">
+            <button
+              @click="togglePanel"
+              class="flex items-center justify-center w-12 h-12 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-200/70 dark:border-gray-700/70 group"
+            >
+              <svg v-if="!isPanelCollapsed" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+              <svg v-else class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+              </svg>
+            </button>
+          </div>
+
           <!-- 左侧面板：创建图像设置 -->
           <div 
             class="left-panel-transition md:col-span-3 h-screen overflow-auto relative"
-            :class="{ 'md:-translate-x-full md:absolute md:opacity-0 md:pointer-events-none': isPanelCollapsed }"
+            :class="{ 
+              'md:-translate-x-full md:absolute md:opacity-0 md:pointer-events-none': isPanelCollapsed && !isMobile,
+              'fixed inset-0 z-[2000] bg-white/95 dark:bg-gray-800/95': isMobile && !isPanelCollapsed,
+              'hidden': isMobile && isPanelCollapsed
+            }"
           >
             <div class="p-4 md:p-6">
               <!-- 创建表单 -->
@@ -40,8 +59,9 @@
                   @show-settings="showAdvancedSettings = true"
                   @preview="handlePreviewImage"
                 />
-                <!-- 面板收缩按钮 -->
+                <!-- 面板收缩按钮 - 桌面端 -->
                 <button
+                  v-if="!isMobile"
                   @click="togglePanel"
                   class="absolute top-3 right-10 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-600 hover:text-blue-600 dark:hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600 group transform hover:-translate-x-1 z-20"
                   title="收起设置"
@@ -53,6 +73,16 @@
                   </div>
                   <span class="absolute right-full mr-2 opacity-0 group-hover:opacity-100 whitespace-nowrap text-xs font-medium bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-sm transition-opacity duration-300 pointer-events-none">收起设置</span>
                 </button>
+                <!-- 移动端关闭按钮 -->
+                <button
+                  v-if="isMobile && !isPanelCollapsed"
+                  @click="togglePanel"
+                  class="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-600 hover:text-blue-600 dark:hover:text-blue-300 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600 z-20"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -60,7 +90,11 @@
           <!-- 右侧面板：绘图结果 -->
           <div 
             class="right-panel-transition transition-all duration-300 bg-gray-50 dark:bg-gray-800"
-            :class="{ 'md:col-span-12': isPanelCollapsed, 'md:col-span-9': !isPanelCollapsed }"
+            :class="{ 
+              'md:col-span-12': isPanelCollapsed && !isMobile, 
+              'md:col-span-9': !isPanelCollapsed && !isMobile,
+              'mt-0': isMobile
+            }"
           >
             <div class="p-4 pb-20">
               <!-- 任务列表 -->

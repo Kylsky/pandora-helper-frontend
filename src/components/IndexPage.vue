@@ -9,14 +9,14 @@
                     id="username" 
                     placeholder="用户名" 
                     required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition duration-300 text-base"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition duration-300 text-base text-gray-800"
                 >
                 <input 
                     type="password" 
                     id="password" 
                     placeholder="密码" 
                     required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition duration-300 text-base"
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition duration-300 text-base text-gray-800"
                 >
                 <button 
                     type="submit"

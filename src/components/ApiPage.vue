@@ -5,9 +5,9 @@
 
             <form @submit.prevent="userlogin()" class="space-y-4">
                 <input type="text" v-model="formData.username" placeholder="用户名" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300">
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300 text-gray-800">
                 <input type="password" v-model="formData.password" placeholder="密码" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300">
+                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#5D7B8A] focus:outline-none focus:ring-2 focus:ring-[#5D7B8A] focus:ring-opacity-10 text-base transition duration-300 text-gray-800">
                 <button type="submit"
                     class="w-full py-3 bg-gradient-to-r from-[#5D7B8A] to-[#274046] hover:from-[#536e7c] hover:to-[#1e3238] text-white rounded-lg font-medium transition duration-300 hover:-translate-y-0.5 relative flex justify-center items-center">
                     <span :class="{ 'invisible': loading }">登录</span>

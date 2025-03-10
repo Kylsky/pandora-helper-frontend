@@ -5,9 +5,9 @@
 
             <form @submit.prevent="userlogin" class="space-y-4">
                 <input type="text" id="username" placeholder="用户名" required
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300" v-model="username">
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300 text-gray-800" v-model="username">
                 <input type="password" id="password" placeholder="密码" required
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300" v-model="password">
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-base transition-all duration-300 text-gray-800" v-model="password">
                 <button type="submit" 
                     :class="{'loading': isLoading}"
                     class="relative w-full py-3 bg-gradient-to-r from-red-600 to-blue-800 hover:from-red-700 hover:to-blue-900 text-white rounded-lg text-base font-medium transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50">

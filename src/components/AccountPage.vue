@@ -20,137 +20,207 @@
             </el-row>
 
             <!-- PC端表格视图 -->
-            <div v-if="!isMobile" class="hidden md:block">
-                <el-table :data="tableData" style="width: 100%" :fit="true" 
-                    v-loading="loading"
-                    element-loading-text="加载中..."
-                    element-loading-spinner="el-icon-loading"
-                    :cell-style="{ padding: '8px 0' }"
-                    :header-cell-style="{ padding: '8px 0' }"
-                    :row-style="{ height: '48px' }"
-                    :header-row-style="{ height: '48px' }"
-                    size="small">
-                    <el-table-column prop="email" label="电子邮箱" min-width="180" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div class="flex items-center space-x-2">
-                                <i class="el-icon-message text-gray-400 text-sm"></i>
-                                <span class="text-gray-700 dark:text-gray-300">{{ scope.row.email }}</span>
+            <div v-if="!isMobile" class="hidden md:block relative h-full min-h-[300px]">
+                <LoadingSpinner :loading="loading" loadingText="加载中..." type="pulse"/>
+                
+                <!-- 表头 -->
+                <div class="rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 w-full">
+                    <div class="grid grid-cols-12 bg-gray-50 dark:bg-gray-800 font-medium text-sm text-gray-500 dark:text-gray-300">
+                        <div class="col-span-3 py-2.5 px-3">电子邮箱</div>
+                        <div class="col-span-2 py-2.5 px-3">账号名称</div>
+                        <div class="col-span-2 py-2.5 px-3">账号类型</div>
+                        <div class="col-span-1 py-2.5 px-2 text-center">共享</div>
+                        <div class="col-span-2 py-2.5 px-3">更新时间</div>
+                        <div class="col-span-2 py-2.5 px-3">操作</div>
+                    </div>
+                    
+                    <!-- 表格内容 -->
+                    <div class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                        <div v-for="(item, index) in tableData" :key="index" 
+                            class="grid grid-cols-12 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                            <!-- 电子邮箱 -->
+                            <div class="col-span-3 py-2.5 px-3">
+                                <div class="flex items-center space-x-1.5">
+                                    <i class="el-icon-message text-gray-400 text-sm"></i>
+                                    <span class="text-gray-700 dark:text-gray-300 truncate">{{ item.email }}</span>
+                                </div>
                             </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="name" label="账号名称" min-width="120" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <span class="text-gray-700 dark:text-gray-300">{{ scope.row.name }}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="type" label="账号类型" min-width="140" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-gray-700 dark:text-gray-300">{{ scope.row.type }}</span>
-                                <template v-if="scope.row.type === 'ChatGPT'">
-                                    <el-tag v-if="scope.row.planType === 'plus'" class="bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800" effect="plain" size="mini">Plus</el-tag>
-                                    <el-tag v-else-if="scope.row.planType === 'free'" class="bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" effect="plain" size="mini">Free</el-tag>
-                                    <el-tag v-else-if="scope.row.planType === 'team'" class="bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800" effect="plain" size="mini">Team</el-tag>
-                                    <el-tag v-else-if="scope.row.planType === 'pro'" class="bg-black text-yellow-400 border-yellow-500 dark:bg-black/40 dark:text-yellow-300 dark:border-yellow-600" effect="plain" size="mini">Pro</el-tag>
-                                    <el-tag v-else class="bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800" effect="plain" size="mini">已失效</el-tag>
-                                </template>
+                            
+                            <!-- 账号名称 -->
+                            <div class="col-span-2 py-2.5 px-3">
+                                <span class="text-gray-700 dark:text-gray-300">{{ item.name }}</span>
                             </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="shared" label="共享" width="120" align="center" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <i class="el-icon-circle-check text-green-500" v-if="scope.row.shared === 1"></i>
-                            <i class="el-icon-circle-close text-red-500" v-else></i>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="updateTime" label="更新时间" min-width="160" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div class="flex items-center space-x-2">
-                                <i class="el-icon-time text-gray-400 text-sm"></i>
-                                <span class="text-gray-600 dark:text-gray-400 font-medium">{{ scope.row.updateTime }}</span>
+                            
+                            <!-- 账号类型 -->
+                            <div class="col-span-2 py-2 px-3">
+                                <div class="flex items-center gap-1">
+                                    <span class="text-gray-700 dark:text-gray-300 text-sm">{{ item.type }}</span>
+                                    <template v-if="item.type === 'ChatGPT'">
+                                        <span v-if="item.planType === 'plus'" 
+                                            class="px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800 leading-none">
+                                            Plus
+                                        </span>
+                                        <span v-else-if="item.planType === 'free'" 
+                                            class="px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800 leading-none">
+                                            Free
+                                        </span>
+                                        <span v-else-if="item.planType === 'team'" 
+                                            class="px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 leading-none">
+                                            Team
+                                        </span>
+                                        <span v-else-if="item.planType === 'pro'" 
+                                            class="px-1.5 py-0.5 rounded-full text-xs font-medium bg-black text-yellow-400 border-yellow-500 dark:bg-black/40 dark:text-yellow-300 dark:border-yellow-600 leading-none">
+                                            Pro
+                                        </span>
+                                        <span v-else 
+                                            class="px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800 leading-none">
+                                            已失效
+                                        </span>
+                                    </template>
+                                </div>
                             </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="320" fixed="right">
-                        <template slot-scope="scope">
-                            <div class="flex space-x-2">
-                                <el-button type='info' size="mini" v-if="scope.row.accountType === 1"
-                                    @click="refresh(scope.row.id)" class="hover:-translate-y-0.5 transition-transform duration-200">刷新</el-button>
-                                <!-- <el-button type="success" size="mini" v-if="scope.row.type === 'ChatGPT'"
-                                    @click="statistic(scope.row.id)" class="hover:-translate-y-0.5 transition-transform duration-200">统计</el-button> -->
-                                <el-button type="primary" size="mini" @click="showShareModal(scope.row.id)" 
-                                    class="hover:-translate-y-0.5 transition-transform duration-200">共享</el-button>
-                                <el-button type="warning" size="mini" @click="editItem(scope.row.id)"
-                                    class="hover:-translate-y-0.5 transition-transform duration-200">编辑</el-button>
-                                <el-button size="mini" type="danger" @click="showConfirmDialog(scope.row.id)"
-                                    class="hover:-translate-y-0.5 transition-transform duration-200">删除</el-button>
+                            
+                            <!-- 共享 -->
+                            <div class="col-span-1 py-2.5 px-2 text-center">
+                                <span v-if="item.shared === 1" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-50 dark:bg-green-900/20">
+                                    <i class="el-icon-circle-check text-green-500 text-sm"></i>
+                                </span>
+                                <span v-else class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-50 dark:bg-red-900/20">
+                                    <i class="el-icon-circle-close text-red-500 text-sm"></i>
+                                </span>
                             </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
+                            
+                            <!-- 更新时间 -->
+                            <div class="col-span-2 py-2 px-3">
+                                <div class="flex items-center space-x-1">
+                                    <i class="el-icon-time text-gray-400 text-xs"></i>
+                                    <span class="text-gray-600 dark:text-gray-400 text-sm">{{ item.updateTime }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 操作 -->
+                            <div class="col-span-2 py-2.5 px-3">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button v-if="item.accountType === 1"
+                                        @click="refresh(item.id)" 
+                                        class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-200">
+                                        刷新
+                                    </button>
+                                    <button @click="showShareModal(item.id)" 
+                                        class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 hover:-translate-y-0.5 transition-all duration-200">
+                                        共享
+                                    </button>
+                                    <button @click="editItem(item.id)"
+                                        class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 hover:-translate-y-0.5 transition-all duration-200">
+                                        编辑
+                                    </button>
+                                    <button @click="showConfirmDialog(item.id)"
+                                        class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-rose-500 hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700 hover:-translate-y-0.5 transition-all duration-200">
+                                        删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 无数据状态 -->
+                        <div v-if="tableData.length === 0 && !loading" class="py-12 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <p class="text-lg">暂无账号数据</p>
+                            <p class="text-sm mt-2">请添加新账号或修改搜索条件</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 移动端卡片视图 -->
-            <div v-else class="space-y-4 md:hidden" v-loading="loading" 
-                element-loading-text="加载中..."
-                element-loading-spinner="el-icon-loading">
+            <div v-else class="space-y-4 md:hidden relative h-full min-h-[300px]">
+                <LoadingSpinner :loading="loading" loadingText="加载中..." type="pulse"/>
                 <div v-for="(item, index) in tableData" :key="index" 
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border border-gray-100 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full flex items-center space-x-2 max-w-[70%] overflow-hidden">
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                    
+                    <!-- 卡片顶部 -->
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-full flex items-center space-x-1.5 max-w-[70%] overflow-hidden">
                             <i class="el-icon-message"></i>
                             <span class="truncate">{{ item.email }}</span>
                         </div>
-                        <div class="px-3 py-1 rounded-full text-sm font-medium" 
-                            :class="{ 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400': item.shared === 1, 
-                                     'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400': item.shared !== 1 }">
-                            {{ item.shared === 1 ? '已共享' : '未共享' }}
+                        
+                        <div class="flex items-center">
+                            <span v-if="item.shared === 1" class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                <i class="el-icon-check mr-1"></i>已共享
+                            </span>
+                            <span v-else class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                <i class="el-icon-close mr-1"></i>未共享
+                            </span>
                         </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
-                                    <i class="el-icon-user"></i>
-                                    <span>账号类型</span>
-                                </div>
-                                <div class="text-gray-900 dark:text-gray-100 font-semibold">{{ item.type }}</div>
+                    <!-- 卡片内容 -->
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">账号名称</div>
+                            <div class="font-medium text-gray-800 dark:text-gray-200">{{ item.name }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">账号类型</div>
+                            <div class="font-medium text-gray-800 dark:text-gray-200 flex items-center">
+                                {{ item.type }}
+                                <template v-if="item.type === 'ChatGPT'">
+                                    <span v-if="item.planType === 'plus'" 
+                                        class="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400 leading-none">
+                                        Plus
+                                    </span>
+                                    <span v-else-if="item.planType === 'free'" 
+                                        class="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 leading-none">
+                                        Free
+                                    </span>
+                                </template>
                             </div>
-                            <div class="space-y-1">
-                                <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
-                                    <i class="el-icon-time"></i>
-                                    <span>更新时间</span>
-                                </div>
-                                <div class="text-gray-900 dark:text-gray-100 font-semibold">{{ item.updateTime }}</div>
+                        </div>
+                        <div class="col-span-2">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">更新时间</div>
+                            <div class="font-medium text-gray-800 dark:text-gray-200 flex items-center">
+                                <i class="el-icon-time text-gray-400 mr-2"></i>
+                                {{ item.updateTime }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+                    <!-- 分隔线 -->
+                    <div class="h-px w-full bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent my-3"></div>
 
-                    <div class="space-y-3">
-                        <div class="flex space-x-2">
-                            <el-button v-if="item.accountType === 1" type="info" size="mini" @click="refresh(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-refresh mr-1"></i> 刷新
-                            </el-button>
-                            <el-button type="primary" size="mini" @click="showShareModal(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-share mr-1"></i> 共享
-                            </el-button>
-                            <el-button type="warning" size="mini" @click="editItem(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-edit mr-1"></i> 编辑
-                            </el-button>
+                    <!-- 操作按钮 -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="col-span-2 grid grid-cols-2 gap-2.5">
+                            <button v-if="item.accountType === 1" @click="refresh(item.id)"
+                                class="flex items-center justify-center py-1.5 px-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm transition duration-150 shadow-sm hover:shadow">
+                                <i class="el-icon-refresh mr-1.5"></i>刷新
+                            </button>
+                            <button @click="showShareModal(item.id)"
+                                class="flex items-center justify-center py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm transition duration-150 shadow-sm hover:shadow">
+                                <i class="el-icon-share mr-1.5"></i>共享
+                            </button>
                         </div>
-                        <div class="flex">
-                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-delete mr-1"></i> 删除
-                            </el-button>
-                        </div>
+                        <button @click="editItem(item.id)"
+                            class="flex items-center justify-center py-1.5 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm transition duration-150 shadow-sm hover:shadow">
+                            <i class="el-icon-edit mr-1.5"></i>编辑
+                        </button>
+                        <button @click="showConfirmDialog(item.id)"
+                            class="flex items-center justify-center py-1.5 px-3 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-sm transition duration-150 shadow-sm hover:shadow">
+                            <i class="el-icon-delete mr-1.5"></i>删除
+                        </button>
                     </div>
+                </div>
+                
+                <!-- 无数据状态 -->
+                <div v-if="tableData.length === 0 && !loading" class="py-10 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                    <svg class="w-14 h-14 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    <p class="text-base">暂无账号数据</p>
+                    <p class="text-xs mt-1.5">请添加新账号或修改搜索条件</p>
                 </div>
             </div>
 
@@ -162,9 +232,7 @@
                 :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
                 :pager-count="isMobile ? 5 : 7"
                 :total="total"
-                :class="[
-                    isMobile ? 'w-full flex justify-center py-4' : 'fixed bottom-8 right-8 z-10'
-                ]">
+                class="pagination-container">
             </el-pagination>
 
             <!-- 弹窗组件 -->
@@ -201,13 +269,15 @@ import config from '../configs/config'
 import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
 import message from '@/configs/message'
+import LoadingSpinner from './LoadingSpinner.vue'
 
 export default {
     name: 'AccountPage',
     components: {
         ConfirmDialog,
         EnhancedDialog,
-        FormInput
+        FormInput,
+        LoadingSpinner
     },
     data() {
         return {
@@ -232,7 +302,7 @@ export default {
             formFields: [
                 { id: 'name', label: '账号名称', type: 'text', value: '', required: true },
                 { id: 'email', label: '邮箱地址', type: 'text', value: '', required: true },
-                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }], required: true },
+                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }, { value: 3, text: 'API' },{ value: 4, text: 'Grok' }], required: true },
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
                 { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', required: false },
@@ -244,7 +314,7 @@ export default {
             accountFields: [
                 { id: 'name', label: '账号名称', type: 'text', value: '', required: true },
                 { id: 'email', label: '邮箱地址', type: 'text', value: '', required: true },
-                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }, { value: 3, text: 'API' }], required: true },
+                { id: 'accountType', label: '账号类型', type: 'select', value: 'ChatGPT', options: [{ value: 1, text: 'ChatGPT' }, { value: 2, text: 'Claude' }, { value: 3, text: 'API' },{ value: 4, text: 'Grok' }], required: true },
                 { id: 'userLimit', label: '分享人数上限', type: 'text', value: '', required: true },
                 { id: 'accessToken', label: 'ACCESS_TOKEN', type: 'text', value: '', required: true },
                 { id: 'refreshToken', label: 'REFRESH_TOKEN', type: 'text', value: '', hideLabel: false },
@@ -531,6 +601,11 @@ export default {
                         inputC.label = 'API_KEY';
                         conversationIsolatedField.hideLabel = true;
                         break;
+                    case 4:
+                        inputB.label = 'SSO Token';
+                        inputC.hideLabel = true;
+                        conversationIsolatedField.hideLabel = false ;
+                        break;
                     default:
                         inputB.label = 'ChatGPT';
                         inputC.hideLabel = false;
@@ -602,6 +677,11 @@ export default {
                         inputC.hideLabel = false;
                         inputC.label = 'API_KEY';
                         conversationIsolatedField.hideLabel = true;
+                        break;
+                    case 4:
+                        inputB.label = 'SSO Token';
+                        inputC.hideLabel = true;
+                        conversationIsolatedField.hideLabel = false;
                         break;
                     default:
                         inputC.hideLabel = false;
@@ -766,12 +846,109 @@ export default {
 </script>
 
 <style scoped>
+/* 添加圆润字体样式 */
+#accountPanel,
+.el-main,
+button,
+input,
+.el-input__inner,
+.el-pagination,
+.el-popover,
+.pagination-container,
+.card-title,
+.card-content {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", "STHeiti", "WenQuanYi Micro Hei", "Source Han Sans SC", "Noto Sans CJK SC", "Noto Sans SC", "HarmonyOS Sans SC", system-ui, -apple-system, "SF Pro Text", Roboto, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    letter-spacing: 0.015em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "ss02";
+    font-variant-numeric: tabular-nums;
+}
+
+/* 不同元素的字体大小和粗细调整 */
+#accountPanel h2 {
+    font-weight: 600;
+}
+
+.el-button,
+button {
+    font-weight: 500;
+}
+
+/* 更新时间字段字体大小调整 */
+.col-span-2 .text-gray-600.dark\:text-gray-400.text-sm {
+    font-size: 0.8125rem; /* 13px */
+}
+
+/* 账号名称列字体调整 */
+.grid-cols-12 .col-span-3:first-child .text-gray-700,
+.grid-cols-12 .col-span-3:first-child,
+.truncate {
+    font-size: 0.875rem; /* 14px */
+    letter-spacing: -0.01em; /* 字母间距略微紧凑 */
+    font-weight: 600; /* 加粗字体 */
+}
+
+/* 账号名称列特定样式 */
+.col-span-2 .text-gray-700.dark\:text-gray-300:not(.text-sm),
+.col-span-2 > .text-gray-700.dark\:text-gray-300 {
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 600 !important; /* 加粗字体 */
+    letter-spacing: -0.01em !important; /* 字母间距略微紧凑 */
+}
+
+/* 确保邮箱和账号名称列的字体大小和粗细一致 */
+.col-span-3 .text-gray-700.dark\:text-gray-300.truncate,
+.col-span-2 > .text-gray-700.dark\:text-gray-300 {
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 600 !important; /* 加粗字体 */
+}
+
+/* 重要：直接定位账号名称列 */
+#accountPanel .grid-cols-12 > .col-span-2:nth-child(2) > .text-gray-700.dark\:text-gray-300 {
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 600 !important; /* 加粗字体 */
+    letter-spacing: -0.01em !important; /* 字母间距略微紧凑 */
+}
+
+/* 所有内容字体稍微调小 */
+.text-sm {
+    font-size: 0.8125rem; /* 13px */
+}
+
+.text-xs {
+    font-size: 0.75rem; /* 12px */
+}
+
+/* 字体样式增强 - 避免对关键元素产生影响 */
+.text-sm:not(.col-span-2 > .text-gray-700.dark\:text-gray-300):not(.col-span-3 .text-gray-700.dark\:text-gray-300.truncate) {
+    @apply font-sans;
+    letter-spacing: 0.01em;
+}
+
+.text-xs {
+    @apply font-sans;
+    letter-spacing: 0.02em;
+}
+
+.font-medium, .font-semibold {
+    @apply tracking-tight;
+}
+
+/* 标题增强 */
+h2, .text-xl {
+    letter-spacing: -0.02em;
+}
+
 .dark-input :deep(.el-input__inner) {
     @apply dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;
+    @apply font-sans;
 }
 
 .dark-input :deep(.el-input-group__append) {
     @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
+    @apply font-sans;
 }
 
 .dark-input :deep(.el-input__inner:hover),
@@ -781,10 +958,69 @@ export default {
 
 .dark-input :deep(.el-input__inner::placeholder) {
     @apply dark:text-gray-500;
+    @apply font-sans;
+}
+
+/* 添加表格自适应样式 */
+.adaptive-table :deep(.el-table__row) {
+    height: auto !important;
+    min-height: 40px;
+}
+
+.adaptive-table :deep(.el-table__cell) {
+    padding: clamp(4px, 1vh, 12px) 0;
+}
+
+.adaptive-table :deep(.cell) {
+    line-height: 1.4;
+    white-space: normal;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
 }
 
 /* 移除分页器的边框 */
 :deep(.el-pagination) {
-    @apply border-none;
+    @apply flex items-center justify-end gap-2 px-6 py-4 bg-white dark:bg-gray-900 border-0;
+    @apply font-sans;
 }
+
+:deep(.el-pagination button) {
+    @apply inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border-none rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150;
+}
+
+:deep(.el-pagination button:disabled) {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+:deep(.el-pagination .el-pager li) {
+    @apply inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border-none rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150;
+    @apply font-sans;
+}
+
+:deep(.el-pagination .el-pager li.active) {
+    @apply text-white bg-emerald-500 dark:bg-emerald-600 hover:bg-emerald-600 dark:hover:bg-emerald-700;
+}
+
+/* 分页容器样式 */
+.pagination-container {
+    @apply w-full md:w-auto mt-4;
+    @apply md:fixed md:bottom-8 md:right-8 md:z-10 md:rounded-lg md:overflow-hidden;
+}
+
+@media (max-width: 768px) {
+    .pagination-container {
+        @apply flex justify-center;
+    }
+}
+
+/* 表头字体样式 */
+#accountPanel .grid-cols-12.bg-gray-50.dark\:bg-gray-800 .col-span-2,
+#accountPanel .grid-cols-12.bg-gray-50.dark\:bg-gray-800 .col-span-3 {
+    font-size: 0.8125rem; /* 13px */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+/* 标题增强 */
 </style>

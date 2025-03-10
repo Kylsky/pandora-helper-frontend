@@ -22,125 +22,153 @@
             <!-- 主要内容区域 -->
             <div class="flex-1">
                 <!-- PC端表格视图 -->
-                <div v-if="!isMobile" class="hidden md:block">
-                    <el-table :data="tableData" style="width: 100%" :fit="true" 
-                        v-loading="loading"
-                        element-loading-text="加载中..."
-                        element-loading-spinner="el-icon-loading"
-                        class="adaptive-table">
-                        <el-table-column prop="email" label="名称" min-width="200" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <div class="flex items-center space-x-2">
-                                    <i class="el-icon-user text-gray-400 text-sm"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ scope.row.email }}</span>
-                                </div>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="accountType" label="账号类型" min-width="150" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <el-tag size="mini" effect="plain" 
-                                    :class="{
-                                        'bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800': scope.row.accountType === 'ChatGPT',
-                                        'bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800': scope.row.accountType === 'Claude',
-                                        'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800': scope.row.accountType === 'API'
-                                    }">
-                                    {{ scope.row.accountType }}
-                                </el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="code" label="兑换码" min-width="200" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <el-tooltip :content="scope.row.code" placement="top" effect="light">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="el-icon-key text-gray-400 text-sm"></i>
-                                        <span class="text-gray-700 dark:text-gray-300">{{ scope.row.code }}</span>
+                <div v-if="!isMobile" class="hidden md:block relative h-full min-h-[300px]">
+                    <LoadingSpinner :loading="loading" loadingText="加载中..." type="pulse"/>
+                    
+                    <!-- 表头 -->
+                    <div class="rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 w-full">
+                        <div class="grid grid-cols-12 bg-gray-50 dark:bg-gray-800 font-medium text-sm text-gray-500 dark:text-gray-300">
+                            <div class="col-span-4 py-2.5 px-3">名称</div>
+                            <div class="col-span-2 py-2.5 px-3">账号类型</div>
+                            <div class="col-span-3 py-2.5 px-3">兑换码</div>
+                            <div class="col-span-1 py-2.5 px-3">兑换时长</div>
+                            <div class="col-span-2 py-2.5 px-3">操作</div>
+                        </div>
+                        
+                        <!-- 表格内容 -->
+                        <div class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                            <div v-for="(item, index) in tableData" :key="index" 
+                                class="grid grid-cols-12 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                                
+                                <!-- 名称 -->
+                                <div class="col-span-4 py-2.5 px-3">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="el-icon-user text-gray-400"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ item.email }}</span>
                                     </div>
-                                </el-tooltip>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="duration" label="兑换时长" min-width="150" show-overflow-tooltip>
-                            <template slot-scope="scope">
-                                <div class="flex items-center space-x-2">
-                                    <i class="el-icon-time text-gray-400 text-sm"></i>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ scope.row.duration }} 天</span>
                                 </div>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="操作" min-width="200">
-                            <template slot-scope="scope">
-                                <div class="flex space-x-2">
-                                    <el-button type="warning" size="mini" @click="editItem(scope.row.id)"
-                                        class="hover:-translate-y-0.5 transition-transform duration-200">
-                                        <i class="el-icon-edit mr-1"></i> 编辑
-                                    </el-button>
-                                    <el-button type="danger" size="mini" @click="showConfirmDialog(scope.row.id)"
-                                        class="hover:-translate-y-0.5 transition-transform duration-200">
-                                        <i class="el-icon-delete mr-1"></i> 删除
-                                    </el-button>
+                                
+                                <!-- 账号类型 -->
+                                <div class="col-span-2 py-2.5 px-3">
+                                    <span :class="{
+                                        'px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800': item.accountType === 'ChatGPT',
+                                        'px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800': item.accountType === 'Claude',
+                                        'px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800': item.accountType === 'API'
+                                    }">
+                                        {{ item.accountType }}
+                                    </span>
                                 </div>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+                                
+                                <!-- 兑换码 -->
+                                <div class="col-span-3 py-2.5 px-3">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="el-icon-key text-gray-400"></i>
+                                        <span class="text-gray-700 dark:text-gray-300 truncate">{{ item.code }}</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 兑换时长 -->
+                                <div class="col-span-1 py-2.5 px-3">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="el-icon-time text-gray-400"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ item.duration }} 天</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 操作 -->
+                                <div class="col-span-2 py-2.5 px-3">
+                                    <div class="flex gap-1.5">
+                                        <button @click="editItem(item.id)"
+                                            class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 hover:-translate-y-0.5 transition-all duration-200">
+                                            <i class="el-icon-edit mr-1"></i> 编辑
+                                        </button>
+                                        <button @click="showConfirmDialog(item.id)"
+                                            class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 hover:-translate-y-0.5 transition-all duration-200">
+                                            <i class="el-icon-delete mr-1"></i> 删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 无数据状态 -->
+                            <div v-if="tableData.length === 0 && !loading" class="py-12 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                                <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                </svg>
+                                <p class="text-lg">暂无兑换码数据</p>
+                                <p class="text-sm mt-2">请添加新兑换码或修改搜索条件</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 移动端卡片视图 -->
-                <div v-else class="space-y-4 md:hidden" v-loading="loading" 
-                    element-loading-text="加载中..."
-                    element-loading-spinner="el-icon-loading">
+                <div v-else class="space-y-3 md:hidden relative h-full min-h-[300px]">
+                    <LoadingSpinner :loading="loading" loadingText="加载中..." type="pulse"/>
                     <div v-for="(item, index) in tableData" :key="index" 
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border border-gray-100 dark:border-gray-700">
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-full flex items-center space-x-2 max-w-[70%] overflow-hidden">
+                        class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-md border border-gray-100 dark:border-gray-700">
+                        
+                        <!-- 卡片顶部 -->
+                        <div class="flex justify-between items-center mb-2.5">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-xs flex items-center space-x-1.5 max-w-[70%] overflow-hidden">
                                 <i class="el-icon-message"></i>
-                                <el-tooltip :content="item.email" placement="top" effect="light">
-                                    <span class="truncate">{{ item.email }}</span>
-                                </el-tooltip>
+                                <span class="truncate">{{ item.email }}</span>
                             </div>
-                            <div class="px-3 py-1 rounded-full text-sm font-medium"
-                                :class="{
-                                    'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400': item.accountType === 'ChatGPT',
-                                    'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400': item.accountType === 'Claude',
-                                    'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400': item.accountType === 'API'
-                                }">
+                            <span :class="{
+                                'px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800': item.accountType === 'ChatGPT',
+                                'px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800': item.accountType === 'Claude',
+                                'px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800': item.accountType === 'API'
+                            }">
                                 {{ item.accountType }}
+                            </span>
+                        </div>
+
+                        <div class="space-y-2 mb-3">
+                            <!-- 兑换码 -->
+                            <div class="space-y-0.5">
+                                <div class="text-gray-500 dark:text-gray-400 text-xs flex items-center space-x-1.5">
+                                    <i class="el-icon-key"></i>
+                                    <span>兑换码</span>
+                                </div>
+                                <div class="text-gray-900 dark:text-gray-100 font-medium text-sm truncate">
+                                    {{ item.code }}
+                                </div>
+                            </div>
+                            
+                            <!-- 兑换时长 -->
+                            <div class="space-y-0.5">
+                                <div class="text-gray-500 dark:text-gray-400 text-xs flex items-center space-x-1.5">
+                                    <i class="el-icon-time"></i>
+                                    <span>兑换时长</span>
+                                </div>
+                                <div class="text-gray-900 dark:text-gray-100 font-medium text-sm">
+                                    {{ item.duration }} 天
+                                </div>
                             </div>
                         </div>
 
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="space-y-1">
-                                    <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
-                                        <i class="el-icon-key"></i>
-                                        <span>兑换码</span>
-                                    </div>
-                                    <div class="text-gray-900 dark:text-gray-100 font-semibold">
-                                        <el-tooltip :content="item.code" placement="top" effect="light">
-                                            <span>{{ item.code }}</span>
-                                        </el-tooltip>
-                                    </div>
-                                </div>
-                                <div class="space-y-1">
-                                    <div class="text-gray-500 dark:text-gray-400 text-sm flex items-center space-x-2">
-                                        <i class="el-icon-time"></i>
-                                        <span>兑换时长</span>
-                                    </div>
-                                    <div class="text-gray-900 dark:text-gray-100 font-semibold">{{ item.duration }} 天</div>
-                                </div>
-                            </div>
+                        <!-- 操作按钮 -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <button @click="editItem(item.id)"
+                                class="w-full py-1.5 rounded-md text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-1">
+                                <i class="el-icon-edit"></i>
+                                <span>编辑</span>
+                            </button>
+                            <button @click="showConfirmDialog(item.id)"
+                                class="w-full py-1.5 rounded-md text-xs font-medium text-white bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-1">
+                                <i class="el-icon-delete"></i>
+                                <span>删除</span>
+                            </button>
                         </div>
-
-                        <div class="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
-
-                        <div class="flex space-x-2">
-                            <el-button type="warning" size="mini" @click="editItem(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-edit mr-1"></i> 编辑
-                            </el-button>
-                            <el-button type="danger" size="mini" @click="showConfirmDialog(item.id)"
-                                class="flex-1 hover:-translate-y-0.5 transition-transform duration-200">
-                                <i class="el-icon-delete mr-1"></i> 删除
-                            </el-button>
-                        </div>
+                    </div>
+                    
+                    <!-- 移动端无数据状态 -->
+                    <div v-if="tableData.length === 0 && !loading" class="py-10 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                        <svg class="w-14 h-14 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                        </svg>
+                        <p class="text-base">暂无兑换码数据</p>
+                        <p class="text-xs mt-1.5">请添加新兑换码或修改搜索条件</p>
                     </div>
                 </div>
             </div>
@@ -153,9 +181,7 @@
                 :layout="isMobile ? 'prev, pager, next' : 'total, prev, pager, next, jumper'"
                 :pager-count="isMobile ? 5 : 7"
                 :total="total"
-                :class="[
-                    isMobile ? 'w-full flex justify-center py-4' : 'fixed bottom-8 right-8 z-10'
-                ]">
+                class="pagination-container">
             </el-pagination>
 
             <!-- 弹窗组件 -->
@@ -178,13 +204,15 @@ import apiClient from '../configs/axios'
 import FormInput from '../modules/FormInput'
 import message from '@/configs/message'
 import { debounce } from 'lodash'
+import LoadingSpinner from './LoadingSpinner.vue'
 
 export default {
     name: 'RedemptionPage',
     components: {
         ConfirmDialog,
         EnhancedDialog,
-        FormInput
+        FormInput,
+        LoadingSpinner
     },
     data() {
         return {
@@ -280,7 +308,7 @@ export default {
                 const accountField = this.accountFields.find(f => f.id === "accountId");
                 if (accountField && response.data.status) {
                     accountField.options = response.data.data.data.map(item => ({
-                        text: `${item.name}(${item.accountType === 1 ? 'ChatGPT' : item.accountType === 2 ? 'Claude' : 'API'})`,
+                        text: `${item.name}(${item.accountType === 1 ? 'ChatGPT' : item.accountType === 2 ? 'Claude' : item.accountType === 3 ? 'API' : 'Grok'})`,
                         value: item.id
                     }));
                 }
@@ -424,12 +452,86 @@ export default {
 </script>
 
 <style scoped>
+/* 添加圆润字体样式 */
+#redemptionPanel,
+.el-main,
+button,
+input,
+.el-input__inner,
+.el-pagination,
+.el-popover,
+.pagination-container,
+.card-title,
+.card-content,
+.col-span-2 {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", "STHeiti", "WenQuanYi Micro Hei", "Source Han Sans SC", "Noto Sans CJK SC", "Noto Sans SC", "HarmonyOS Sans SC", system-ui, -apple-system, "SF Pro Text", Roboto, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    letter-spacing: 0.015em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "ss02";
+    font-variant-numeric: tabular-nums;
+}
+
+/* 不同元素的字体大小和粗细调整 */
+#redemptionPanel h2 {
+    font-weight: 600;
+}
+
+.el-button,
+button {
+    font-weight: 500;
+}
+
+/* 兑换码用户名字体加粗调整 */
+.grid-cols-12 .col-span-2:first-child,
+.grid-cols-12 .col-span-2:first-child .text-gray-700,
+.truncate {
+    font-size: 0.875rem; /* 14px */
+    letter-spacing: -0.01em; /* 字母间距略微紧凑 */
+    font-weight: 600; /* 加粗字体 */
+}
+
+/* 名称列字体调整 */
+.col-span-4 .text-gray-700.dark\:text-gray-300 {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+}
+
+/* 所有内容字体稍微调小 */
+.text-sm {
+    font-size: 0.8125rem; /* 13px */
+}
+
+.text-xs {
+    font-size: 0.75rem; /* 12px */
+}
+
+/* 兑换码字体调整 */
+.col-span-3 .text-gray-700.dark\:text-gray-300.truncate {
+    font-size: 0.8125rem; /* 13px */
+    letter-spacing: -0.01em;
+}
+
+/* 兑换时长字体调整 */
+.col-span-1 .text-gray-700.dark\:text-gray-300 {
+    font-size: 0.8125rem; /* 13px */
+}
+
+/* 移动端卡片字体调整 */
+.text-gray-900.dark\:text-gray-100.font-medium.text-sm.truncate,
+.text-gray-900.dark\:text-gray-100.font-medium.text-sm {
+    font-size: 0.8125rem; /* 13px */
+}
+
 .dark-input :deep(.el-input__inner) {
     @apply dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700;
+    @apply font-sans;
 }
 
 .dark-input :deep(.el-input-group__append) {
     @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
+    @apply font-sans;
 }
 
 .dark-input :deep(.el-input__inner:hover),
@@ -439,6 +541,7 @@ export default {
 
 .dark-input :deep(.el-input__inner::placeholder) {
     @apply dark:text-gray-500;
+    @apply font-sans;
 }
 
 /* 添加表格自适应样式 */
@@ -461,6 +564,37 @@ export default {
 
 /* 移除分页器的边框 */
 :deep(.el-pagination) {
-    @apply border-none;
+    @apply flex items-center justify-end gap-2 px-6 py-4 bg-white dark:bg-gray-900 border-0;
+    @apply font-sans;
+}
+
+:deep(.el-pagination button) {
+    @apply inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border-none rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150;
+    @apply font-sans;
+}
+
+:deep(.el-pagination button:disabled) {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+:deep(.el-pagination .el-pager li) {
+    @apply inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border-none rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150;
+    @apply font-sans;
+}
+
+:deep(.el-pagination .el-pager li.active) {
+    @apply text-white bg-emerald-500 dark:bg-emerald-600 hover:bg-emerald-600 dark:hover:bg-emerald-700;
+}
+
+/* 分页容器样式 */
+.pagination-container {
+    @apply w-full md:w-auto mt-4;
+    @apply md:fixed md:bottom-8 md:right-8 md:z-10 md:rounded-lg md:overflow-hidden;
+}
+
+@media (max-width: 768px) {
+    .pagination-container {
+        @apply flex justify-center;
+    }
 }
 </style>

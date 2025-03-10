@@ -1,7 +1,7 @@
 <template>
   <div @click.stop>
-    <!-- 图像结果网格 - 减小间距和内边距 -->
-    <div v-if="!isLoading" class="grid grid-cols-3 gap-2 pb-1">
+    <!-- 图像结果网格 - 移动端响应式布局 -->
+    <div v-if="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pb-1">
       <div v-for="(task, index) in paginatedTasks" :key="task.id || index"
         class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:translate-y-[-2px]">
 
@@ -175,8 +175,8 @@
           </div>
         </div>
 
-        <!-- MJ操作按钮区域 - 减小内边距和间距 -->
-        <div v-if="task.buttons && task.buttons.length" class="p-2 pt-1 flex flex-wrap gap-1 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
+        <!-- MJ操作按钮区域 - 移动端优化间距 -->
+        <div v-if="task.buttons && task.buttons.length" class="p-2 pt-1 flex flex-wrap gap-1 sm:gap-1.5 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
           <!-- 放大操作下拉菜单 -->
           <div class="relative dropdown-container" data-category="upsample" v-if="getCategoryButtons(task.buttons, 'upsample').length"
             @mouseleave="startCloseDropdown(task.id, 'upsample')">
@@ -317,9 +317,9 @@
     </div>
 
     <!-- 空状态提示 - 垂直居中 -->
-    <div v-if="!isLoading && !tasks.length" class="empty-state">
-      <div class="empty-state-card transition-all duration-300 hover:scale-105 border border-gray-100 dark:border-gray-700">
-        <div class="empty-state-icon">
+    <div v-if="!isLoading && !tasks.length" class="flex flex-col items-center justify-center h-[calc(100vh-10rem)] w-full text-center">
+      <div class="p-8 bg-white dark:bg-gray-800 rounded-xl shadow-md dark:shadow-gray-900/30 w-full max-w-md transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-lg border border-gray-100 dark:border-gray-700">
+        <div class="mb-4 text-gray-300 dark:text-gray-600">
           <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -327,12 +327,12 @@
             </path>
           </svg>
         </div>
-        <h3 class="empty-state-heading text-gray-600 dark:text-gray-300">暂无图像</h3>
-        <p class="empty-state-text">在左侧输入提示词开始生成图像</p>
+        <h3 class="mb-2 text-xl font-semibold text-gray-700 dark:text-gray-200">暂无图像</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">在左侧输入提示词开始生成图像</p>
       </div>
     </div>
 
-    <!-- 分页控制 - 上移分页组件 -->
+    <!-- 分页控制 - 移动端自适应 -->
     <div class="pagination-component fixed bottom-6 right-6 z-50">
       <nav
         class="inline-flex items-center gap-1 p-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
@@ -346,10 +346,12 @@
           </svg>
         </button>
 
-        <!-- 页码按钮组 -->
+        <!-- 页码按钮组 - 移动端隐藏部分页码 -->
         <div class="flex items-center gap-1 z-30">
           <template v-for="page in getPageRange()">
-            <button v-if="page !== '...'" :key="page" @click="handlePageChange(page)"
+            <!-- 移动端隐藏非当前页码，除了第一页和最后一页 -->
+            <button v-if="page !== '...' && (page === 1 || page === totalPages || page === currentPage || window.innerWidth > 640)"
+              :key="page" @click="handlePageChange(page)"
               class="flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full text-sm font-medium transition-all duration-200 border-0 bg-transparent focus:outline-none transform hover:scale-105"
               :class="[
                 currentPage === page
@@ -359,7 +361,9 @@
               ]">
               {{ page }}
             </button>
-            <span v-else :key="'ellipsis-' + page"
+            <!-- 省略号占位符 - 在移动端上只在当前页前后显示 -->
+            <span v-else-if="page === '...' && ((currentPage > 2 && getPageRangeIndex(page) === 1) || (currentPage < totalPages - 1 && getPageRangeIndex(page) > 1) || window.innerWidth > 640)" 
+              :key="'ellipsis-' + getPageRangeIndex(page)"
               class="flex items-center justify-center w-8 h-8 text-gray-400 dark:text-gray-500 text-xs tracking-wider select-none">
               •••
             </span>
@@ -583,6 +587,13 @@ export default {
       }
 
       return range;
+    },
+    
+    // 获取省略号在页码范围中的索引位置，用于处理移动端分页显示
+    getPageRangeIndex(page) {
+      if (page !== '...') return 0;
+      const range = this.getPageRange();
+      return range.findIndex(p => p === '...');
     },
 
     formatTime(timestamp) {
@@ -837,7 +848,8 @@ export default {
 
             // 如果任务已完成或失败，停止轮询
             const status = taskData.displays?.status || taskData.status;
-            if (status && !['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START'].includes(status)) {
+            const finalStatus = status === '' ? 'NOT_START' : status;
+            if (finalStatus && !['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START', 'MODAL'].includes(finalStatus)) {
               this.stopPollingTask(taskId);
             }
 
@@ -845,10 +857,17 @@ export default {
             const taskIndex = this.tasks.findIndex(task => (task.id === taskId || task.taskId === taskId));
             if (taskIndex !== -1) {
               // 使用Vue的响应式更新方法
-              this.$set(this.tasks, taskIndex, { ...this.tasks[taskIndex], ...taskData });
+              const updatedTaskData = { ...taskData };
+              if (updatedTaskData.status === '') {
+                updatedTaskData.status = 'NOT_START';
+              }
+              if (updatedTaskData.displays && updatedTaskData.displays.status === '') {
+                updatedTaskData.displays.status = 'NOT_START';
+              }
+              this.$set(this.tasks, taskIndex, { ...this.tasks[taskIndex], ...updatedTaskData });
 
               // 输出日志，方便调试
-              console.log(`已更新任务 ${taskId} 状态: ${status}`);
+              console.log(`已更新任务 ${taskId} 状态: ${finalStatus}`);
             } else {
               console.log(`找不到任务 ${taskId} 在当前列表中，无法更新本地状态`);
             }
@@ -1425,7 +1444,7 @@ export default {
         if (!taskId) return;
 
         const status = task.status;
-        if (status && ['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START','MODAL'].includes(status)) {
+        if (status && ['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START','MODAL', ''].includes(status)) {
           console.log('status', status);
 
           pendingTaskCount++;
@@ -1457,7 +1476,7 @@ export default {
         const task = this.tasks.find(t => (t.id === taskId || t.taskId === taskId));
         if (task) {
           const status = task.displays?.status || task.status;
-          if (status && ['SUBMITTED', 'IN_PROGRESS', 'PENDING','MODAL'].includes(status)) {
+          if (status && ['SUBMITTED', 'IN_PROGRESS', 'PENDING','MODAL','NOT_START', ''].includes(status)) {
             this.startPollingTask(taskId);
           }
         }
@@ -1814,6 +1833,31 @@ export default {
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .action-button {
+    @apply text-xs py-1 px-2;
+  }
+  
+  .action-icon-button {
+    @apply w-6 h-6;
+  }
+  
+  .dropdown-content {
+    @apply min-w-[140px];
+  }
+  
+  .dropdown-item {
+    @apply py-2 px-3 text-xs;
+  }
+  
+  .aspect-ratio-custom {
+    height: 0;
+    padding-bottom: 100%;
+    padding-right: 100%;
   }
 }
 </style>

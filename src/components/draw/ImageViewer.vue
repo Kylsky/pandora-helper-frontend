@@ -4,7 +4,7 @@
     class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center"
     @click.self="closeViewer"
     @keydown.esc="closeViewer">
-    <div class="relative w-full h-full flex flex-col items-center justify-center p-4 sm:p-8">
+    <div class="relative w-full h-full flex flex-col items-center justify-center p-2 sm:p-8">
       <!-- 顶部控制栏 -->
       <div class="absolute top-4 right-4 left-4 flex items-center justify-between z-[9999]">
         <div class="text-white/80 text-sm">
@@ -30,23 +30,26 @@
         </div>
       </div>
 
-      <!-- 图片区域 -->
-      <div class="relative max-w-full max-h-full flex items-center justify-center overflow-hidden rounded-lg">
+      <!-- 图片区域 - 确保在移动端居中显示 -->
+      <div class="relative w-full max-w-[100vw] h-[calc(100vh-10rem)] max-h-[80vh] flex items-center justify-center overflow-hidden rounded-lg">
         <img 
           :src="imageUrl" 
           :style="imageStyle"
-          class="max-w-full max-h-[calc(100vh-8rem)] object-contain rounded shadow-2xl transition-transform duration-300" 
+          class="max-w-full max-h-full object-contain rounded shadow-2xl transition-transform duration-300" 
           @click.stop
           @wheel.prevent="handleZoom"
           @mousedown="startDrag"
           @mousemove="drag"
           @mouseup="stopDrag"
           @mouseleave="stopDrag"
+          @touchstart="startTouchDrag"
+          @touchmove.prevent="touchDrag"
+          @touchend="stopTouchDrag"
           ref="previewImage">
       </div>
 
-      <!-- 底部控制栏 -->
-      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 py-2 px-4 bg-gray-800/60 backdrop-blur-sm rounded-full text-white/80 z-[9999]">
+      <!-- 底部控制栏 - 移动端优化位置 -->
+      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 sm:space-x-4 py-2 px-3 sm:px-4 bg-gray-800/60 backdrop-blur-sm rounded-full text-white/80 z-[9999]">
         <button 
           class="hover:text-white transition-colors rounded-full p-1.5"
           @click="resetImage"
@@ -177,6 +180,36 @@ export default {
       this.isDragging = false;
       this.lastTranslateX = this.translateX;
       this.lastTranslateY = this.translateY;
+    },
+    
+    // 触摸事件处理
+    startTouchDrag(event) {
+      if (event.touches.length !== 1) return;
+      
+      this.isDragging = true;
+      this.dragStartX = event.touches[0].clientX;
+      this.dragStartY = event.touches[0].clientY;
+      
+      // 添加触摸事件处理时，阻止页面滚动
+      document.body.style.overflow = 'hidden';
+    },
+    
+    touchDrag(event) {
+      if (!this.isDragging || event.touches.length !== 1) return;
+      
+      const dx = (event.touches[0].clientX - this.dragStartX) / this.zoom;
+      const dy = (event.touches[0].clientY - this.dragStartY) / this.zoom;
+      
+      this.translateX = this.lastTranslateX + dx;
+      this.translateY = this.lastTranslateY + dy;
+    },
+    
+    stopTouchDrag() {
+      if (!this.isDragging) return;
+      
+      this.isDragging = false;
+      this.lastTranslateX = this.translateX;
+      this.lastTranslateY = this.translateY;
     }
   },
   watch: {
@@ -208,5 +241,28 @@ export default {
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
+}
+
+/* 移动设备优化 */
+@media (max-width: 640px) {
+  img {
+    max-width: 100% !important;
+    max-height: calc(100vh - 10rem) !important;
+  }
+  
+  /* 移动端上更明显的滚动和缩放提示 */
+  img::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 80%, rgba(0,0,0,0.2) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  img:active::after {
+    opacity: 1;
+  }
 }
 </style> 

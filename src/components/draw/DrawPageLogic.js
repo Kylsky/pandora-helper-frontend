@@ -421,7 +421,18 @@ export default {
                 if (response.status === 200 && response.data.data.list) {
                     // 直接使用新的API返回格式
                     this.taskQueue = response.data.data.list;
-
+                    // 遍历任务队列，处理空状态
+                    this.taskQueue = this.taskQueue.map(task => {
+                        // 如果状态为空，设置为 NOT_START
+                        if (!task.status || task.status === '') {
+                            task.status = 'NOT_START';
+                        }
+                        // 同时处理 displays 中的状态
+                        if (task.displays && (!task.displays.status || task.displays.status === '')) {
+                            task.displays.status = 'NOT_START';
+                        }
+                        return task;
+                    });
                     // 更新分页信息
                     this.pagination.total = response.data.data.pagination.total;
                 } else {
@@ -447,7 +458,7 @@ export default {
                 // 如果有任务处于进行中状态，则刷新所有任务的状态
                 const hasInProgressTasks = this.taskQueue.some(task => {
                     const status = task.displays?.status || task.status;
-                    return ['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START','MODAL'].includes(status);
+                    return ['SUBMITTED', 'IN_PROGRESS', 'PENDING', 'NOT_START','MODAL',''].includes(status);
                 });
 
                 if (hasInProgressTasks) {

@@ -8206,7 +8206,9 @@
           "FAILURE",
           "SUCCESS",
           "MODAL",
-          "CANCEL"
+          "CANCEL",
+          "PENDING",
+          ""
         ],
         "type": "string",
         "description": "任务状态枚举."

@@ -5,7 +5,7 @@
     placement="top"
     effect="light"
   >
-    <button class="split-button" :class="[type, {'disabled': count === 0 || loading}]" @click="handleClick">
+    <button class="split-button" :class="[type, {'disabled': count === 0 || loading}, {'compact': compact}]" @click="handleClick">
       <span class="name-section">
         <i v-if="!loading" :class="typeIcon" class="type-icon"></i>
         <i v-else class="el-icon-loading type-icon"></i>
@@ -45,7 +45,7 @@ export default {
       type: String,
       default: 'gpt',
       validator: function(value) {
-        return ['gpt', 'claude', 'api'].indexOf(value) !== -1
+        return ['gpt', 'claude', 'api', 'grok'].indexOf(value) !== -1
       }
     },
     maxLength: {
@@ -55,6 +55,10 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    compact: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -62,7 +66,8 @@ export default {
       const icons = {
         gpt: 'el-icon-chat-dot-round',
         claude: 'el-icon-message',
-        api: 'el-icon-connection'
+        api: 'el-icon-connection',
+        grok: 'el-icon-data-analysis'
       }
       return icons[this.type] || 'el-icon-chat-dot-round'
     },
@@ -104,6 +109,31 @@ export default {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   min-width: 100px;
   max-width: 180px;
+}
+
+/* 紧凑模式样式 */
+.split-button.compact {
+  height: 22px;
+  font-size: 11px;
+  min-width: 90px;
+  box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.08);
+}
+
+.split-button.compact .name-section {
+  padding: 0 5px;
+  min-width: 50px;
+  max-width: 80px;
+}
+
+.split-button.compact .count-section,
+.split-button.compact .days-section {
+  padding: 0 4px;
+}
+
+.split-button.compact .type-icon,
+.split-button.compact .user-icon {
+  font-size: 11px;
+  margin-right: 2px;
 }
 
 .dark .split-button {
@@ -181,6 +211,27 @@ export default {
 .dark .api .days-section {
   background-color: rgba(217, 119, 6, 0.2);
   color: #fbbf24;
+}
+
+/* Grok 样式 */
+.grok .name-section {
+  background-color: #8b5cf6;
+}
+
+.dark .grok .name-section {
+  background-color: #7c3aed;
+}
+
+.grok .count-section,
+.grok .days-section {
+  background-color: #f5f3ff;
+  color: #6d28d9;
+}
+
+.dark .grok .count-section,
+.dark .grok .days-section {
+  background-color: rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
 }
 
 /* 禁用状态样式 */

@@ -30,7 +30,7 @@ import ClaudePage from './ClaudePage.vue'
 import MidjourneyPage from './MidjourneyPage.vue'
 // import DrawPage from './DrawPage.vue'
 import ApiPage from './ApiPage.vue'
-
+import GrokPage from './GrokPage.vue'
 export default {
     name: 'CardContainer',
     components: {
@@ -39,12 +39,13 @@ export default {
         ClaudePage,
         MidjourneyPage,
         ApiPage,
+        GrokPage,
         // DrawPage
     },
     data() {
         return {
-            pages: [IndexPage, PandoraPage, ClaudePage, MidjourneyPage, ApiPage],
-            pageNames: ['Panel', 'Pandora', 'Claude', 'Midjourney', 'API'],
+            pages: [IndexPage, PandoraPage, ClaudePage, MidjourneyPage, ApiPage, GrokPage],
+            pageNames: ['Panel', 'Pandora', 'Claude', 'Midjourney', 'API', 'Grok'],
             currentIndex: 0,
             isScrolling: false,
             transitionDuration: 0.8,

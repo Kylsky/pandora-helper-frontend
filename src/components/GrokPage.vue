@@ -1,34 +1,35 @@
 <template>
-    <div class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-[#43cea2] to-[#185a9d]">
+    <div class="min-h-screen flex justify-center items-center p-5 bg-gradient-to-br from-blue-500 to-orange-500 font-sans">
         <div class="bg-white rounded-xl shadow-lg p-10 w-full max-w-md transform transition-transform duration-300 hover:-translate-y-2">
-            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Pandora</h1>
+            <h1 class="text-center text-2xl font-semibold text-gray-800 mb-8">Grok</h1>
 
-            <form @submit.prevent="userlogin()" class="space-y-4">
-                <input type="text" v-model="formData.username" placeholder="用户名" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300 text-gray-800">
-                <input type="password" v-model="formData.password" placeholder="密码" required
-                    class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-[#43cea2] focus:outline-none focus:ring-2 focus:ring-[#43cea2] focus:ring-opacity-10 text-base transition duration-300 text-gray-800">
-                <button type="submit"
-                    class="w-full py-3 bg-gradient-to-r from-[#43cea2] to-[#1a4f8f] hover:from-[#3bb592] hover:to-[#164679] text-white rounded-lg font-medium transition duration-300 hover:-translate-y-0.5 relative flex justify-center items-center">
-                    <span :class="{ 'invisible': loading }">登录</span>
-                    <span v-if="loading"
-                        class="absolute w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
-                    </span>
+            <form @submit.prevent="userlogin" class="space-y-4">
+                <input type="text" id="username" placeholder="用户名" required
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 text-base transition-all duration-300 text-gray-800" v-model="username">
+                <input type="password" id="password" placeholder="密码" required
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 text-base transition-all duration-300 text-gray-800" v-model="password">
+                <button type="submit" 
+                    :class="{'loading': isLoading}"
+                    class="relative w-full py-3 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white rounded-lg text-base font-medium transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                    <span class="btn-text">登录</span>
+                    <div class="spinner absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden">
+                        <div class="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </div>
                 </button>
             </form>
 
-            <div class="relative flex items-center justify-center my-6">
+            <div class="relative flex items-center justify-center my-5">
                 <div class="absolute w-full border-t border-gray-200"></div>
-                <span class="relative px-4 bg-white text-gray-500">OR</span>
+                <div class="relative px-4 bg-white text-sm text-gray-500">OR</div>
             </div>
 
             <div class="text-center">
                 <div class="flex justify-center my-4">
-                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()"
+                    <img src="../assets/linuxdo.webp" alt="LINUX DO" @click="initiateOAuth()" 
                         class="w-9 h-9 cursor-pointer transition-transform duration-300 hover:scale-110" loading="lazy">
                 </div>
                 <button type="button" @click="reset()"
-                    class="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium transition duration-300 hover:border-[#43cea2] hover:text-[#43cea2]">
+                    class="w-full py-3 bg-white text-gray-800 border-2 border-gray-200 rounded-lg text-base font-medium transition-all duration-300 hover:border-blue-500 hover:text-blue-500 focus:outline-none">
                     重置密码
                 </button>
             </div>
@@ -38,7 +39,7 @@
                     <a 
                         href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth" 
                         target="_blank"
-                        class="text-xs text-gray-600 hover:text-green-500 transition duration-300 flex items-center"
+                        class="text-xs text-gray-600 hover:text-blue-500 transition duration-300 flex items-center"
                     >
                         <svg class="w-3.5 h-3.5 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
@@ -48,9 +49,9 @@
                     <a 
                         href="https://github.com/Kylsky/pandora-helper-with-linux-do-oauth/stargazers" 
                         target="_blank"
-                        class="inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full text-xs font-medium text-gray-800 hover:from-yellow-100 hover:to-yellow-200 transition duration-300 border border-gray-200 shadow-sm"
+                        class="inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full text-xs font-medium text-gray-800 hover:from-blue-100 hover:to-orange-100 transition duration-300 border border-gray-200 shadow-sm"
                     >
-                        <svg class="w-3 h-3 text-yellow-500 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <svg class="w-3 h-3 text-orange-500 mr-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                         </svg>
                         <span class="mr-0.5 text-xs">Stars</span>
@@ -80,15 +81,14 @@ import config from '../configs/config'
 import apiClient from '../configs/axios'
 import message from '@/configs/message'
 
+
 export default {
-    name: 'PandoraPage',
+    name: 'GrokPage',
     data() {
         return {
-            loading: false,
-            formData: {
-                username: '',
-                password: ''
-            },
+            isLoading: false,
+            username: '',
+            password: '',
             starCount: 0,
             isLoadingStars: true,
             loadStarsFailed: false
@@ -99,9 +99,6 @@ export default {
         this.fetchGitHubStars();
     },
     methods: {
-        reset() {
-            this.$emit('navigate', { name: 'reset' });
-        },
 
         async fetchGitHubStars() {
             this.isLoadingStars = true;
@@ -121,14 +118,17 @@ export default {
                 this.isLoadingStars = false;
             }
         },
+        reset() {
+            this.$emit('navigate', { name: 'reset' });
+        },
 
         async userlogin() {
-            this.loading = true;
-
+            this.isLoading = true;
+            
             try {
-                const response = await apiClient.post(`${config.apiBaseUrl}/pandora/login`, {
-                    username: this.formData.username,
-                    password: this.formData.password
+                const response = await apiClient.post(`${config.apiBaseUrl}/grok/login`, {
+                    username: this.username,
+                    password: this.password
                 })
 
                 const status = response.data.status
@@ -136,18 +136,18 @@ export default {
                     window.open(response.data.data);
                 } else {
                     var res = response.data.message
-                    message.error(res);
+                    message.error(res)
                 }
             } catch (error) {
                 message.error(error)
             } finally {
-                this.loading = false;
+                this.isLoading = false;
             }
         },
 
         async initiateOAuth() {
             try {
-                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=pandora`);
+                const response = await apiClient.get(`${config.apiBaseUrl}/oauth2/initiate?type=grok`);
                 var data = response;
                 if (data.data) {
                     window.location = data.data;
@@ -162,7 +162,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 button[type="submit"].loading .spinner {
     display: block;
 }
@@ -170,4 +170,4 @@ button[type="submit"].loading .spinner {
 button[type="submit"].loading .btn-text {
     visibility: hidden;
 }
-</style>
+</style> 
