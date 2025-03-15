@@ -133,16 +133,17 @@
   max-height: 250px; /* 减小高度 */
   overflow-y: auto; 
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
+  z-index: 1050;
   border-radius: 6px;
   background-color: white;
   transform-origin: top center;
   animation: dropdown-appear 0.15s ease-out;
   border: 1px solid rgba(229, 231, 235, 0.8);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0; /* 从左侧对齐，避免transform影响 */
   top: 100%;
   margin-top: 3px; /* 减小外边距 */
+  opacity: 1;
+  visibility: visible;
 }
 
 /* 向上展示的下拉菜单 */
@@ -156,23 +157,24 @@
 }
 
 /* 右对齐下拉菜单 */
-.dropdown-content.right-aligned {
+.dropdown-content.dropdown-right-aligned {
   left: auto;
   right: 0;
   transform: none;
 }
 
-/* 右对齐且向上展示的下拉菜单 */
-.dropdown-content.right-aligned.bottom-aligned {
-  left: auto;
-  right: 0;
-  top: auto;
-  bottom: 100%;
+/* 左对齐下拉菜单 */
+.dropdown-content.dropdown-left-aligned {
+  left: 0;
+  right: auto;
+  transform: none;
 }
 
 /* 活动状态的下拉菜单容器提升层级 */
-.dropdown-container:hover {
-  z-index: 200;
+.dropdown-container:hover,
+.dropdown-container:focus-within,
+.dropdown-container.dropdown-active {
+  z-index: 1050 !important;
 }
 
 .dark .dropdown-content {
@@ -183,11 +185,11 @@
 @keyframes dropdown-appear {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-5px) scale(0.95);
+    transform: translateY(-5px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -195,11 +197,11 @@
 @keyframes dropdown-appear-up {
   from {
     opacity: 0;
-    transform: translateY(10px) translateX(-50%);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) translateX(-50%);
+    transform: translateY(0);
   }
 }
 
@@ -311,7 +313,7 @@
 
 /* 使用JavaScript动态添加类来代替:has选择器 */
 .dropdown-active {
-  z-index: 200 !important;
+  z-index: 1050 !important; /* 提高z-index确保在所有元素之上 */
 }
 
 /* 状态徽章样式 */
@@ -1033,5 +1035,51 @@
 @keyframes not-start-text-appear {
   0% { transform: translateY(10px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .action-button {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.5rem;
+    min-height: 32px;
+    min-width: 60px;
+  }
+  
+  .action-icon-button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .dropdown-content {
+    min-width: 140px;
+  }
+  
+  .dropdown-item {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.7rem;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* 确保最后一个按钮的下拉菜单不会溢出屏幕 */
+  .dropdown-container:last-child .dropdown-content,
+  .p-2.pt-1.flex.flex-wrap.gap-1 > div:last-child .dropdown-content {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+  
+  /* 增强边缘按钮的可点击区域 */
+  .dropdown-container {
+    margin-bottom: 6px;
+  }
+  
+  /* 确保点击区域足够大 */
+  .dropdown-container button {
+    position: relative;
+    z-index: 5;
+  }
 }
 

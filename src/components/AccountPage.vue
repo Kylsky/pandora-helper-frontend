@@ -101,6 +101,7 @@
                             <!-- 操作 -->
                             <div class="col-span-2 py-2.5 px-3">
                                 <div class="flex flex-wrap gap-1.5">
+                                    
                                     <button v-if="item.accountType === 1"
                                         @click="refresh(item.id)" 
                                         class="px-2.5 py-0.5 rounded-md text-xs font-medium text-white bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-200">

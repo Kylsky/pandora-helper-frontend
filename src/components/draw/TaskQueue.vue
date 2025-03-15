@@ -84,11 +84,11 @@
               <!-- 时钟表盘 -->
               <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 border-4 border-gray-300 dark:border-gray-600 relative flex items-center justify-center shadow-lg">
                 <!-- 时针 -->
-                <div class="absolute w-[1.5px] h-3 bg-gray-700 dark:bg-gray-300 rounded origin-bottom transform rotate-45" style="animation: rotate360 10s linear infinite;"></div>
+                <div class="absolute w-[1.5px] h-4 bg-gray-700 dark:bg-gray-300 rounded origin-center -translate-y-1 translate-x-1 transform rotate-45" style="animation: rotate360 10s linear infinite;"></div>
                 <!-- 分针 -->
-                <div class="absolute w-[1px] h-4 bg-gray-700 dark:bg-gray-300 rounded origin-bottom transform rotate-180" style="animation: rotate360 2s linear infinite;"></div>
+                <div class="absolute w-[1px] h-5 bg-gray-700 dark:bg-gray-300 rounded origin-center -translate-y-2 transform rotate-180" style="animation: rotate360 2s linear infinite;"></div>
                 <!-- 中心点 -->
-                <div class="absolute w-1.5 h-1.5 bg-gray-700 dark:bg-gray-300 rounded-full"></div>
+                <div class="absolute w-2 h-2 bg-gray-700 dark:bg-gray-300 rounded-full"></div>
               </div>
               <!-- 脉冲环 -->
               <div class="absolute inset-0 rounded-full border-2 border-blue-400/40 dark:border-blue-300/40 animate-ping" style="animation-duration: 2s;"></div>
@@ -176,11 +176,12 @@
         </div>
 
         <!-- MJ操作按钮区域 - 移动端优化间距 -->
-        <div v-if="task.buttons && task.buttons.length" class="p-2 pt-1 flex flex-wrap gap-1 sm:gap-1.5 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm">
+        <div v-if="task.buttons && task.buttons.length" class="p-2 pt-1 flex flex-wrap gap-1 sm:gap-1.5 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm mobile-buttons-container">
           <!-- 放大操作下拉菜单 -->
-          <div class="relative dropdown-container" data-category="upsample" v-if="getCategoryButtons(task.buttons, 'upsample').length"
+          <div class="relative dropdown-container mobile-button" data-category="upsample" v-if="getCategoryButtons(task.buttons, 'upsample').length"
             @mouseleave="startCloseDropdown(task.id, 'upsample')">
             <button class="action-button bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/50 shadow-sm" :data-task-id="task.id" data-category="upsample"
+              @click="toggleDropdown(task.id, 'upsample')" 
               @mouseenter="toggleDropdown(task.id, 'upsample', true)">
               <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -191,8 +192,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            <div class="dropdown-content" v-show="isDropdownOpen(task.id, 'upsample')"
-              @mouseenter="cancelCloseDropdown(task.id, 'upsample')" @mouseleave="closeDropdown(task.id, 'upsample')"
+            <div class="dropdown-content" :style="isDropdownOpen(task.id, 'upsample') ? 'display: block;' : 'display: none;'"
+              @mouseenter="cancelCloseDropdown(task.id, 'upsample')" 
+              @mouseleave="closeDropdown(task.id, 'upsample')"
               :data-dropdown-id="task.id + '-upsample'">
               <div class="py-1">
                 <button v-for="(btn, btnIndex) in getCategoryButtons(task.buttons, 'upsample')" :key="btnIndex"
@@ -205,9 +207,10 @@
           </div>
           
           <!-- 变换操作下拉菜单 -->
-          <div class="relative dropdown-container" data-category="variation" v-if="getCategoryButtons(task.buttons, 'variation').length"
+          <div class="relative dropdown-container mobile-button" data-category="variation" v-if="getCategoryButtons(task.buttons, 'variation').length"
             @mouseleave="startCloseDropdown(task.id, 'variation')">
             <button class="action-button bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-800/50 shadow-sm" :data-task-id="task.id" data-category="variation"
+              @click="toggleDropdown(task.id, 'variation')" 
               @mouseenter="toggleDropdown(task.id, 'variation', true)">
               <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -219,8 +222,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            <div class="dropdown-content" v-show="isDropdownOpen(task.id, 'variation')"
-              @mouseenter="cancelCloseDropdown(task.id, 'variation')" @mouseleave="closeDropdown(task.id, 'variation')"
+            <div class="dropdown-content" :style="isDropdownOpen(task.id, 'variation') ? 'display: block;' : 'display: none;'"
+              @mouseenter="cancelCloseDropdown(task.id, 'variation')" 
+              @mouseleave="closeDropdown(task.id, 'variation')"
               :data-dropdown-id="task.id + '-variation'">
               <div class="py-1">
                 <button v-for="(btn, btnIndex) in getCategoryButtons(task.buttons, 'variation')" :key="btnIndex"
@@ -233,9 +237,10 @@
           </div>
 
           <!-- 移动操作下拉菜单 -->
-          <div class="relative dropdown-container" data-category="pan" v-if="getCategoryButtons(task.buttons, 'pan').length"
+          <div class="relative dropdown-container mobile-button" data-category="pan" v-if="getCategoryButtons(task.buttons, 'pan').length"
             @mouseleave="startCloseDropdown(task.id, 'pan')">
             <button class="action-button bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-800/50 shadow-sm" :data-task-id="task.id" data-category="pan"
+              @click="toggleDropdown(task.id, 'pan')" 
               @mouseenter="toggleDropdown(task.id, 'pan', true)">
               <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -248,8 +253,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            <div class="dropdown-content" v-show="isDropdownOpen(task.id, 'pan')"
-              @mouseenter="cancelCloseDropdown(task.id, 'pan')" @mouseleave="closeDropdown(task.id, 'pan')">
+            <div class="dropdown-content" :style="isDropdownOpen(task.id, 'pan') ? 'display: block;' : 'display: none;'"
+              @mouseenter="cancelCloseDropdown(task.id, 'pan')" 
+              @mouseleave="closeDropdown(task.id, 'pan')"
+              :data-dropdown-id="task.id + '-pan'">
               <div class="py-1">
                 <button v-for="(btn, btnIndex) in getCategoryButtons(task.buttons, 'pan')" :key="btnIndex"
                   @click.stop="handleMjAction(task, btn)" class="dropdown-item hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-purple-900/30 dark:hover:text-purple-400">
@@ -260,9 +267,10 @@
             </div>
           </div>
 
-          <div class="relative dropdown-container" data-category="zoom_out" v-if="getCategoryButtons(task.buttons, 'zoom_out').length"
+          <div class="relative dropdown-container mobile-button" data-category="zoom_out" v-if="getCategoryButtons(task.buttons, 'zoom_out').length"
             @mouseleave="startCloseDropdown(task.id, 'zoom_out')">
             <button class="action-button bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-800/50 shadow-sm" :data-task-id="task.id" data-category="zoom_out"
+              @click="toggleDropdown(task.id, 'zoom_out')" 
               @mouseenter="toggleDropdown(task.id, 'zoom_out', true)">
               <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -275,8 +283,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            <div class="dropdown-content" v-show="isDropdownOpen(task.id, 'zoom_out')"
-              @mouseenter="cancelCloseDropdown(task.id, 'zoom_out')" @mouseleave="closeDropdown(task.id, 'zoom_out')">
+            <div class="dropdown-content" :style="isDropdownOpen(task.id, 'zoom_out') ? 'display: block;' : 'display: none;'"
+              @mouseenter="cancelCloseDropdown(task.id, 'zoom_out')" 
+              @mouseleave="closeDropdown(task.id, 'zoom_out')"
+              :data-dropdown-id="task.id + '-zoom_out'">
               <div class="py-1">
                 <button v-for="(btn, btnIndex) in getCategoryButtons(task.buttons, 'zoom_out')" :key="btnIndex"
                   @click.stop="handleMjAction(task, btn)" class="dropdown-item hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/30 dark:hover:text-amber-400">
@@ -350,7 +360,7 @@
         <div class="flex items-center gap-1 z-30">
           <template v-for="page in getPageRange()">
             <!-- 移动端隐藏非当前页码，除了第一页和最后一页 -->
-            <button v-if="page !== '...' && (page === 1 || page === totalPages || page === currentPage || window.innerWidth > 640)"
+            <button v-if="page !== '...' && (page === 1 || page === totalPages || page === currentPage || isWideScreen)"
               :key="page" @click="handlePageChange(page)"
               class="flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full text-sm font-medium transition-all duration-200 border-0 bg-transparent focus:outline-none transform hover:scale-105"
               :class="[
@@ -362,7 +372,7 @@
               {{ page }}
             </button>
             <!-- 省略号占位符 - 在移动端上只在当前页前后显示 -->
-            <span v-else-if="page === '...' && ((currentPage > 2 && getPageRangeIndex(page) === 1) || (currentPage < totalPages - 1 && getPageRangeIndex(page) > 1) || window.innerWidth > 640)" 
+            <span v-else-if="page === '...' && ((currentPage > 2 && getPageRangeIndex(page) === 1) || (currentPage < totalPages - 1 && getPageRangeIndex(page) > 1) || isWideScreen)" 
               :key="'ellipsis-' + getPageRangeIndex(page)"
               class="flex items-center justify-center w-8 h-8 text-gray-400 dark:text-gray-500 text-xs tracking-wider select-none">
               •••
@@ -433,7 +443,11 @@ export default {
       pollingIntervals: {}, // 存储轮询的定时器
       aspectRatio: "5/4", // 默认宽高比
       cardStyles: {}, // 存储计算后的卡片样式
-      scrollTimer: null // 滚动事件防抖定时器
+      scrollTimer: null, // 滚动事件防抖定时器
+      touchStartTime: null, // 触摸开始时间
+      touchStartX: null, // 触摸开始X坐标
+      touchStartY: null, // 触摸开始Y坐标
+      windowWidth: 1024, // 添加一个默认窗口宽度值
     };
   },
   watch: {
@@ -501,12 +515,18 @@ export default {
       }
       // 否则使用本地数组长度
       return Math.max(1, Math.ceil(this.tasks.length / this.itemsPerPage));
+    },
+    isWideScreen() {
+      return this.getWindowWidth() > 768;
     }
   },
   mounted() {
     // 添加全局点击事件监听，用于关闭所有下拉菜单
     document.addEventListener('click', this.closeAllDropdowns);
-
+    // 添加触摸事件支持
+    document.addEventListener('touchstart', this.handleTouchStart);
+    document.addEventListener('touchend', this.handleTouchEnd);
+    
     // 添加窗口大小变化监听，用于重新检测下拉菜单位置
     window.addEventListener('resize', this.handleResize);
     
@@ -515,6 +535,9 @@ export default {
 
     // 初始化加载状态
     this.isLoadingDebounced = this.loading;
+
+    // 更新窗口宽度
+    this.updateWindowWidth();
 
     // 计算屏幕比例并设置卡片宽高比
     this.calculateAspectRatio();
@@ -527,6 +550,10 @@ export default {
   beforeDestroy() {
     // 移除事件监听
     document.removeEventListener('click', this.closeAllDropdowns);
+    // 清理触摸事件监听
+    document.removeEventListener('touchstart', this.handleTouchStart);
+    document.removeEventListener('touchend', this.handleTouchEnd);
+    
     window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('scroll', this.handleScroll);
 
@@ -537,7 +564,7 @@ export default {
 
     // 清除加载状态防抖计时器
     clearTimeout(this.loadingDebounceTimer);
-
+    
     // 清除所有轮询定时器
     Object.keys(this.pollingIntervals).forEach(taskId => {
       clearInterval(this.pollingIntervals[taskId]);
@@ -546,6 +573,22 @@ export default {
     this.pollingIntervals = {};
   },
   methods: {
+    // 安全获取窗口宽度
+    getWindowWidth() {
+      // 确保 window 对象存在，否则返回已保存的值
+      if (typeof window !== 'undefined') {
+        return window.innerWidth;
+      }
+      return this.windowWidth; // 默认值或之前保存的值
+    },
+
+    // 更新窗口宽度
+    updateWindowWidth() {
+      if (typeof window !== 'undefined') {
+        this.windowWidth = window.innerWidth;
+      }
+    },
+
     // 分页相关方法
     handlePageChange(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -967,20 +1010,52 @@ export default {
     // 下拉菜单控制
     toggleDropdown(taskId, category, isOpen = null) {
       const key = `${taskId}-${category}`;
-      // console.log('toggleDropdown', taskId, category, isOpen);
-      // 设置当前下拉菜单的状态
-      if (isOpen !== null) {
-        this.$set(this.dropdowns, key, isOpen);
-      } else {
-        this.$set(this.dropdowns, key, !this.dropdowns[key]);
+      const isMobile = this.getWindowWidth() <= 768;
+      
+      // PC端鼠标悬停直接打开
+      if (!isMobile && isOpen === true) {
+        // 设置当前下拉菜单的状态为打开
+        this.$set(this.dropdowns, key, true);
+        
+        // 先关闭所有其他打开的下拉菜单，避免冲突
+        Object.keys(this.dropdowns).forEach(k => {
+          if (k !== key && this.dropdowns[k]) {
+            this.$set(this.dropdowns, k, false);
+          }
+        });
+      } 
+      // 移动端直接打开
+      else if (isMobile && isOpen === null) {
+        isOpen = true;
+        
+        // 先关闭所有其他打开的下拉菜单，避免冲突
+        Object.keys(this.dropdowns).forEach(k => {
+          if (k !== key && this.dropdowns[k]) {
+            this.$set(this.dropdowns, k, false);
+          }
+        });
+        
+        // 设置当前下拉菜单的状态
+        this.$set(this.dropdowns, key, true);
       }
-
-      // 关闭其他下拉菜单
-      Object.keys(this.dropdowns).forEach(k => {
-        if (k !== key && this.dropdowns[k]) {
-          this.$set(this.dropdowns, k, false);
+      // 其他情况处理（如点击切换）
+      else {
+        // 先关闭所有打开的下拉菜单，避免冲突
+        if (isOpen === true || (isOpen === null && !this.dropdowns[key])) {
+          Object.keys(this.dropdowns).forEach(k => {
+            if (k !== key && this.dropdowns[k]) {
+              this.$set(this.dropdowns, k, false);
+            }
+          });
         }
-      });
+        
+        // 设置当前下拉菜单的状态
+        if (isOpen !== null) {
+          this.$set(this.dropdowns, key, isOpen);
+        } else {
+          this.$set(this.dropdowns, key, !this.dropdowns[key]);
+        }
+      }
 
       // 添加和移除层级类
       this.$nextTick(() => {
@@ -992,18 +1067,31 @@ export default {
 
         // 为当前打开的下拉添加高层级类
         if (isOpen !== false && (isOpen === true || this.dropdowns[key])) {
-          const currentContainer = this.$el.querySelector(`[data-task-id="${taskId}"][data-category="${category}"]`).closest('.dropdown-container');
-          if (currentContainer) {
-            currentContainer.classList.add('dropdown-active');
+          const buttonElement = this.$el.querySelector(`[data-task-id="${taskId}"][data-category="${category}"]`);
+          if (buttonElement) {
+            const currentContainer = buttonElement.closest('.dropdown-container');
+            if (currentContainer) {
+              currentContainer.classList.add('dropdown-active');
 
-            // 也为父元素添加高层级
-            const buttonArea = currentContainer.closest('.p-2.pt-1.flex.flex-wrap.gap-1');
-            if (buttonArea) {
-              buttonArea.classList.add('dropdown-active');
+              // 也为父元素添加高层级
+              const buttonArea = currentContainer.closest('.p-2.pt-1.flex.flex-wrap.gap-1');
+              if (buttonArea) {
+                buttonArea.classList.add('dropdown-active');
+              }
+
+              // 检测是否需要向上展示下拉菜单
+              this.checkDropdownPosition(taskId, category);
+              
+              // 如果是移动设备，在一定时间后自动关闭下拉菜单
+              if (isMobile) {
+                setTimeout(() => {
+                  // 如果下拉菜单仍然是打开状态，就关闭它
+                  if (this.dropdowns[key]) {
+                    this.closeDropdown(taskId, category);
+                  }
+                }, 3000); // 3秒后自动关闭
+              }
             }
-
-            // 检测是否需要向上展示下拉菜单
-            this.checkDropdownPosition(taskId, category);
           }
         }
       });
@@ -1017,79 +1105,113 @@ export default {
 
         if (buttonElement && dropdownElement) {
           const buttonRect = buttonElement.getBoundingClientRect();
-          const dropdownHeight = dropdownElement.scrollHeight;
           const dropdownWidth = dropdownElement.scrollWidth;
-          const windowHeight = window.innerHeight;
-          const windowWidth = window.innerWidth;
-          const spaceBelow = windowHeight - buttonRect.bottom;
-          // const spaceRight = windowWidth - buttonRect.left;
-
-          // 检测页面底部空间是否足够
-          // 如果下方空间不足以显示下拉菜单，则向上展示
-          if (spaceBelow < dropdownHeight + 10) { // 添加10px的缓冲
-            dropdownElement.classList.add('dropdown-up');
-            
-            // 检查上方空间是否也不足，如果是则调整样式使菜单高度适应
-            const spaceAbove = buttonRect.top;
-            if (spaceAbove < dropdownHeight + 10) {
-              // 设置最大高度为可用空间减去缓冲
-              dropdownElement.style.maxHeight = `${spaceAbove - 10}px`;
-            }
-          } else {
-            dropdownElement.classList.remove('dropdown-up');
-            
-            // 检查是否有任何底部固定元素（如分页组件）会与下拉菜单重叠
-            const paginationElement = document.querySelector('.pagination-component');
-            if (paginationElement) {
-              const paginationRect = paginationElement.getBoundingClientRect();
-              // 如果分页组件会与下拉菜单重叠
-              if (buttonRect.bottom + dropdownHeight > paginationRect.top) {
-                dropdownElement.classList.add('dropdown-up');
-              }
-            }
-            
-            // 检查是否有其他伸展按钮或UI元素会与下拉菜单重叠
-            const expandButtons = document.querySelectorAll('.expand-button, .el-button--circle, .pagination-component, [class*="expand"], [class*="float"], [class*="fixed"], [class*="btn"], button[class*="fixed"], .action-button, .floating-button');
-            expandButtons.forEach(button => {
-              if (!button.contains(buttonElement)) { // 避免检测自身
-                const buttonExpandRect = button.getBoundingClientRect();
-                // 检测是否会发生重叠
-                if (this.checkOverlap(
-                  {left: buttonRect.left, right: buttonRect.left + dropdownWidth, top: buttonRect.bottom, bottom: buttonRect.bottom + dropdownHeight},
-                  {left: buttonExpandRect.left, right: buttonExpandRect.right, top: buttonExpandRect.top, bottom: buttonExpandRect.bottom}
-                )) {
-                  dropdownElement.classList.add('dropdown-up');
-                }
-              }
-            });
-          }
+          const windowWidth = this.getWindowWidth();
+          const spaceRight = windowWidth - buttonRect.left;
+          const spaceLeft = buttonRect.right;
           
-          // 检测左右方向的溢出
-          // 右侧溢出处理
-          if (buttonRect.left + dropdownWidth > windowWidth) {
-            dropdownElement.classList.add('dropdown-right-aligned');
-          } else {
+          // 重置所有位置样式
+          dropdownElement.classList.remove('dropdown-right-aligned');
+          dropdownElement.classList.remove('dropdown-left-aligned');
+          dropdownElement.style.maxHeight = '';
+          
+          // 始终让菜单向上展开
+          dropdownElement.classList.add('dropdown-up');
+          
+          // 获取按钮容器和当前按钮的序号
+          const container = buttonElement.closest('.p-2.pt-1.flex.flex-wrap.gap-1');
+          const allButtons = container ? Array.from(container.querySelectorAll('.dropdown-container')) : [];
+          const buttonIndex = allButtons.findIndex(btn => btn.contains(buttonElement));
+          
+          // 判断是否为第一个或最后一个按钮
+          const isFirstButton = buttonIndex === 0;
+          const isLastButton = buttonIndex === allButtons.length - 1 || this.isLastItemInRow(buttonElement);
+          
+          // 第一个按钮左对齐（默认）
+          if (isFirstButton) {
             dropdownElement.classList.remove('dropdown-right-aligned');
-          }
-          
-          // 左侧溢出处理
-          if (buttonRect.right - dropdownWidth < 0) {
-            dropdownElement.classList.add('dropdown-left-aligned');
-          } else {
             dropdownElement.classList.remove('dropdown-left-aligned');
           }
+          // 最后一个按钮右对齐
+          else if (isLastButton) {
+            dropdownElement.classList.add('dropdown-right-aligned');
+          }
+          // 其他按钮根据空间自动调整
+          else {
+            // 是否靠近右边缘 - 需要左对齐
+            if (spaceRight < dropdownWidth + 10) {
+              dropdownElement.classList.add('dropdown-right-aligned');
+            }
+            // 是否靠近左边缘 - 需要右对齐
+            else if (spaceLeft < dropdownWidth + 10) {
+              dropdownElement.classList.add('dropdown-left-aligned');
+            }
+          }
+          
+          // 检查上方空间是否不足
+          const spaceAbove = buttonRect.top;
+          const dropdownHeight = dropdownElement.scrollHeight;
+          if (spaceAbove < dropdownHeight + 10) {
+            // 设置最大高度为可用空间减去缓冲
+            dropdownElement.style.maxHeight = `${spaceAbove - 10}px`;
+          }
+          
+          // 检查移动端设备
+          if (this.getWindowWidth() <= 768) {
+            // 在移动端，优先向上展示最后一项的下拉菜单
+            if (isLastButton && !dropdownElement.classList.contains('dropdown-right-aligned')) {
+              dropdownElement.classList.add('dropdown-right-aligned');
+            }
+          }
+          
+          // 检查是否有固定元素遮挡
+          this.checkFixedElementsOverlap(dropdownElement);
         }
       });
     },
     
-    // 检测两个矩形是否重叠
-    checkOverlap(rect1, rect2) {
-      return !(
-        rect1.right < rect2.left ||
-        rect1.left > rect2.right ||
-        rect1.bottom < rect2.top ||
-        rect1.top > rect2.bottom
-      );
+    // 检查是否是行中的最后一个项目
+    isLastItemInRow(element) {
+      if (!element) return false;
+      
+      // 获取所有同级元素
+      const container = element.closest('.p-2.pt-1.flex.flex-wrap.gap-1');
+      if (!container) return false;
+      
+      const items = container.querySelectorAll('.dropdown-container');
+      if (!items.length) return false;
+      
+      // 获取当前元素的位置
+      const rect = element.getBoundingClientRect();
+      
+      // 检查右侧是否有其他元素
+      for (let i = 0; i < items.length; i++) {
+        const otherRect = items[i].getBoundingClientRect();
+        
+        // 如果找到右侧同一行的元素，则当前元素不是最后一个
+        if (Math.abs(otherRect.top - rect.top) < 10 && otherRect.left > rect.left) {
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    
+    // 检查是否与固定元素重叠
+    checkFixedElementsOverlap(dropdownElement) {
+      // 检查是否有任何底部固定元素（如分页组件）会与下拉菜单重叠
+      const paginationElement = document.querySelector('.pagination-component');
+      if (paginationElement) {
+        // 始终向上展示
+        dropdownElement.classList.add('dropdown-up');
+      }
+      
+      // 检查是否有其他固定位置元素
+      const fixedElements = document.querySelectorAll('.fixed, [style*="position: fixed"], .pagination-component, .floating-button, [style*="position:fixed"]');
+      fixedElements.forEach(() => {
+        // 始终向上展示
+        dropdownElement.classList.add('dropdown-up');
+      });
     },
 
     isDropdownOpen(taskId, category) {
@@ -1100,9 +1222,12 @@ export default {
     // 启动延时关闭
     startCloseDropdown(taskId, category) {
       const key = `${taskId}-${category}`;
+      // PC端使用较短的延迟，使关闭更灵敏
+      const closeDelay = window.innerWidth > 768 ? 200 : 300;
+      
       this.closeTimers[key] = setTimeout(() => {
         this.$set(this.dropdowns, key, false);
-      }, 300); // 300ms的延迟
+      }, closeDelay);
     },
 
     // 取消延时关闭
@@ -1111,6 +1236,11 @@ export default {
       if (this.closeTimers[key]) {
         clearTimeout(this.closeTimers[key]);
         delete this.closeTimers[key];
+      }
+      
+      // 确保下拉菜单保持打开状态
+      if (!this.dropdowns[key]) {
+        this.$set(this.dropdowns, key, true);
       }
     },
 
@@ -1289,108 +1419,54 @@ export default {
       
       // 关闭所有不应再显示的下拉菜单
       this.ensureVisibleDropdowns();
-    },
-    
-    // 确保只有可视的下拉菜单保持打开
-    ensureVisibleDropdowns() {
-      this.$nextTick(() => {
-        Object.keys(this.dropdowns).forEach(key => {
-          if (this.dropdowns[key]) {
-            const [taskId, category] = key.split('-');
-            if (taskId && category) {
-              const buttonElement = this.$el.querySelector(`[data-task-id="${taskId}"][data-category="${category}"]`);
-              if (!buttonElement || !this.isElementInViewport(buttonElement)) {
-                this.closeDropdown(taskId, category);
-              }
-            }
-          }
-        });
-      });
-    },
-    
-    // 检查元素是否在视口内
-    isElementInViewport(el) {
-      if (!el) return false;
       
-      const rect = el.getBoundingClientRect();
-      return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      // 移动端下，关闭所有下拉菜单
+      if (window.innerWidth <= 768) {
+        this.closeAllDropdowns();
+      }
+    },
+    
+    // 处理触摸开始事件
+    handleTouchStart(event) {
+      // 记录触摸开始时间和位置
+      this.touchStartTime = Date.now();
+      this.touchStartX = event.touches[0].clientX;
+      this.touchStartY = event.touches[0].clientY;
+    },
+    
+    // 处理触摸结束事件
+    handleTouchEnd(event) {
+      // 只处理短促的触摸，避免与滚动混淆
+      const touchDuration = Date.now() - this.touchStartTime;
+      if (touchDuration > 300) return; // 触摸时间过长，可能是滚动
+      
+      // 计算触摸移动距离
+      const touchEndX = event.changedTouches[0].clientX;
+      const touchEndY = event.changedTouches[0].clientY;
+      const moveDistance = Math.sqrt(
+        Math.pow(touchEndX - this.touchStartX, 2) + 
+        Math.pow(touchEndY - this.touchStartY, 2)
       );
-    },
-
-    // 检查任务是否有重新生成按钮
-    hasRerollButton(task) {
-      if (!task.buttons || !task.buttons.length) return false;
-
-      // 寻找自定义ID包含reroll的按钮
-      return task.buttons.some(btn => btn.customId && btn.customId.includes('reroll'));
-    },
-
-    // 处理重新生成操作
-    handleReroll(task) {
-      // 寻找重新生成按钮
-      const rerollButton = task.buttons.find(btn => btn.customId && btn.customId.includes('reroll'));
-      if (rerollButton) {
-        // 获取任务ID
-        const taskId = task.id || task.taskId;
-        if (!taskId) {
-          console.error('无法获取任务ID，无法开始轮询');
-          return;
-        }
-
-        // 回到第一页
-        if (this.currentPage !== 1) {
-          this.currentPage = 1;
-          this.$emit('page-change', 1);
-        }
-
-        console.log(`触发重新生成操作，任务ID: ${taskId}`);
-
-        // 直接使用 handleMjAction 处理，它会自动启动轮询
-        this.handleMjAction(task, rerollButton);
-      }
-    },
-
-    getTaskPrompt(task) {
-      // 从不同可能的数据结构中获取提示词
-      let prompt = '';
-      if (task.promptFull) {
-        prompt = task.promptFull;
-      } else {
-        // 如果有任何包含 prompt 字样的属性，尝试使用
-        const promptKeys = Object.keys(task).filter(key =>
-          key.toLowerCase().includes('prompt') && typeof task[key] === 'string');
-
-        if (promptKeys.length > 0) {
-          prompt = task[promptKeys[0]];
+      
+      // 如果移动距离太大，可能是滑动而非点击
+      if (moveDistance > 10) return;
+      
+      // 找到触摸的下拉菜单按钮
+      const target = event.target;
+      const buttonElement = target.closest('[data-category]');
+      
+      if (buttonElement) {
+        const taskId = buttonElement.getAttribute('data-task-id');
+        const category = buttonElement.getAttribute('data-category');
+        
+        if (taskId && category) {
+          // 在移动设备上点击按钮直接打开下拉菜单
+          if (window.innerWidth <= 768) {
+            this.toggleDropdown(taskId, category, true);
+            event.preventDefault(); // 阻止默认行为
+          }
         }
       }
-
-      // 确保提示词不包含会破坏布局的特殊字符序列
-      return this.sanitizePrompt(prompt);
-    },
-
-    // 清理提示词中可能导致布局问题的内容
-    sanitizePrompt(text) {
-      if (!text) return '';
-
-      // 移除可能导致显示问题的特殊字符序列
-      return text;
-    },
-
-    // 处理长文本截断显示
-    truncateText(text, maxLength = 200) { // 减少最大长度
-      if (!text) return '';
-      if (text.length <= maxLength) return text;
-
-      // 找到合适的截断点，避免在单词中间截断
-      const breakPoint = text.lastIndexOf(' ', maxLength);
-      const truncatePoint = breakPoint > maxLength / 2 ? breakPoint : maxLength;
-
-      return text.substring(0, truncatePoint) + '...';
     },
 
     // 保持提示框可见
@@ -1587,6 +1663,108 @@ export default {
           }
         });
       }, 100); // 100ms的防抖延迟
+    },
+
+    // 检查元素是否在视口内
+    isElementInViewport(el) {
+      if (!el) return false;
+      
+      const rect = el.getBoundingClientRect();
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+    },
+
+    // 检查任务是否有重新生成按钮
+    hasRerollButton(task) {
+      if (!task.buttons || !task.buttons.length) return false;
+
+      // 寻找自定义ID包含reroll的按钮
+      return task.buttons.some(btn => btn.customId && btn.customId.includes('reroll'));
+    },
+
+    // 处理重新生成操作
+    handleReroll(task) {
+      // 寻找重新生成按钮
+      const rerollButton = task.buttons.find(btn => btn.customId && btn.customId.includes('reroll'));
+      if (rerollButton) {
+        // 获取任务ID
+        const taskId = task.id || task.taskId;
+        if (!taskId) {
+          console.error('无法获取任务ID，无法开始轮询');
+          return;
+        }
+
+        // 回到第一页
+        if (this.currentPage !== 1) {
+          this.currentPage = 1;
+          this.$emit('page-change', 1);
+        }
+
+        console.log(`触发重新生成操作，任务ID: ${taskId}`);
+
+        // 直接使用 handleMjAction 处理，它会自动启动轮询
+        this.handleMjAction(task, rerollButton);
+      }
+    },
+
+    getTaskPrompt(task) {
+      // 从不同可能的数据结构中获取提示词
+      let prompt = '';
+      if (task.promptFull) {
+        prompt = task.promptFull;
+      } else {
+        // 如果有任何包含 prompt 字样的属性，尝试使用
+        const promptKeys = Object.keys(task).filter(key =>
+          key.toLowerCase().includes('prompt') && typeof task[key] === 'string');
+
+        if (promptKeys.length > 0) {
+          prompt = task[promptKeys[0]];
+        }
+      }
+
+      // 确保提示词不包含会破坏布局的特殊字符序列
+      return this.sanitizePrompt(prompt);
+    },
+
+    // 清理提示词中可能导致布局问题的内容
+    sanitizePrompt(text) {
+      if (!text) return '';
+
+      // 移除可能导致显示问题的特殊字符序列
+      return text;
+    },
+
+    // 处理长文本截断显示
+    truncateText(text, maxLength = 200) { // 减少最大长度
+      if (!text) return '';
+      if (text.length <= maxLength) return text;
+
+      // 找到合适的截断点，避免在单词中间截断
+      const breakPoint = text.lastIndexOf(' ', maxLength);
+      const truncatePoint = breakPoint > maxLength / 2 ? breakPoint : maxLength;
+
+      return text.substring(0, truncatePoint) + '...';
+    },
+
+    // 确保只有可视的下拉菜单保持打开
+    ensureVisibleDropdowns() {
+      this.$nextTick(() => {
+        Object.keys(this.dropdowns).forEach(key => {
+          if (this.dropdowns[key]) {
+            const [taskId, category] = key.split('-');
+            if (taskId && category) {
+              const buttonElement = this.$el.querySelector(`[data-task-id="${taskId}"][data-category="${category}"]`);
+              if (!buttonElement || !this.isElementInViewport(buttonElement)) {
+                this.closeDropdown(taskId, category);
+              }
+            }
+          }
+        });
+      });
     },
   }
 };
@@ -1858,6 +2036,112 @@ export default {
     height: 0;
     padding-bottom: 100%;
     padding-right: 100%;
+  }
+  
+  /* 确保移动端按钮每排四个 */
+  .mobile-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25rem;
+    width: 100%;
+  }
+  
+  .mobile-button {
+    width: 100%;
+  }
+  
+  .mobile-button .action-button {
+    width: 100%;
+    min-width: unset;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.6rem;
+    padding: 0.35rem 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 调整文字大小而不是隐藏 */
+  .mobile-button .action-button span {
+    font-size: 0.6rem;
+    margin: 0 1px;
+  }
+  
+  .mobile-button .action-button svg.ml-0\.5 {
+    display: none;
+  }
+  
+  .mobile-button .action-button svg.mr-0\.5 {
+    margin-right: 2px;
+    width: 0.6rem;
+    height: 0.6rem;
+  }
+}
+
+/* 移动端特定样式优化 */
+@media (max-width: 768px) {
+  /* 增大按钮点击区域 */
+  .action-button {
+    padding: 0.5rem 0.75rem;
+    min-height: 2.5rem;
+    font-size: 0.9rem;
+  }
+  
+  /* 增大下拉菜单项的点击区域 */
+  .dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+  
+  /* 确保下拉菜单有足够大的宽度 */
+  .dropdown-content {
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 改善移动端的下拉菜单动画 */
+  .dropdown-container .dropdown-content {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  
+  /* 给下拉菜单项添加活跃状态效果 */
+  .dropdown-item:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* PC端特定样式优化 */
+@media (min-width: 769px) {
+  /* 优化下拉菜单的悬浮体验 */
+  .dropdown-content {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    transform-origin: top center;
+  }
+  
+  /* 添加悬浮动画效果 */
+  .dropdown-container:hover .action-button {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 优化下拉菜单的显示时机 */
+  .dropdown-container {
+    z-index: 10;
+  }
+  
+  .dropdown-container.dropdown-active {
+    z-index: 1000;
+  }
+  
+  /* 优化下拉菜单项的悬浮效果 */
+  .dropdown-item {
+    transition: background-color 0.1s ease, color 0.1s ease, transform 0.1s ease;
+  }
+  
+  .dropdown-item:hover {
+    transform: translateX(2px);
   }
 }
 </style>

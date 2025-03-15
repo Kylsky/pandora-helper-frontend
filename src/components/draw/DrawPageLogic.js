@@ -304,27 +304,26 @@ export default {
                 console.log('提交的绘图请求:', submitData);
 
                 // 处理图片上传
-                let referenceImageBase64 = null;
+                let base64Array = [];
                 
                 if (formData.imageList && formData.imageList.length > 0) {
-                    // 使用第一张图片作为参考图片
-                    referenceImageBase64 = formData.imageList[0].url;
-                    if (referenceImageBase64.startsWith('data:image')) {
-                        referenceImageBase64 = referenceImageBase64.split(',')[1];
-                    }
+                    // 处理所有上传的图片
+                    base64Array = formData.imageList.map(image => {
+                        let base64 = image.url;
+                        return base64;
+                    });
                 } else if (formData.referenceImage) {
-                    // 兼容旧版本
-                    referenceImageBase64 = formData.referenceImage;
-                    if (referenceImageBase64.startsWith('data:image')) {
-                        referenceImageBase64 = referenceImageBase64.split(',')[1];
-                    }
+                    // 兼容旧版本单图片上传
+                    console.log('formData.referenceImage', formData.referenceImage);
+                    let base64 = formData.referenceImage;
+                    base64Array.push(base64);
                 }
 
                 // 根据选择的模型选择不同的API
                 let apiEndpoint = `${config.apiBaseUrl}/mj/submit/imagine`;
                 let requestData = {
                     prompt: submitData.prompt,
-                    base64: referenceImageBase64 || null,
+                    base64Array: base64Array.length > 0 ? base64Array : null,
                 };
 
                 // 处理不同的AI引擎
@@ -348,7 +347,7 @@ export default {
                             prompt: submitData.prompt,
                             negative_prompt: submitData.negative_prompt,
                             model: formData.modelId,
-                            base64: referenceImageBase64 || null,
+                            base64Array: base64Array.length > 0 ? base64Array : null,
                         };
                         break;
                 }
