@@ -141,13 +141,15 @@ export default {
         { id: 'mjProxyUrl', label: 'Midjourney Proxy 地址', type: 'text', value: '', required: true },
         { id: 'mjProxyKey', label: 'Midjourney Proxy 密钥', type: 'text', value: '', required: true },
         { id: 'chatGptUrl', label: 'ChatGPT 镜像地址', type: 'text', value: '', required: true },
-        { id: 'chatGptPassword', label: 'ChatGPT 镜像密码', type: 'password', value: '', required: true }
+        { id: 'chatGptPassword', label: 'ChatGPT 镜像密码', type: 'password', value: '', required: true },
+        { id: 'proxyUrl', label: '镜像代理', type: 'text', value: '', required: true }
       ],
       settingsFormData: {
         mjProxyUrl: '',
         mjProxyKey: '',
         chatGptUrl: '',
-        chatGptPassword: ''
+        chatGptPassword: '',
+        proxyUrl: ''
       },
       menuItems: [
         { index: 'accountNav', icon: 'el-icon-s-custom', title: '账号管理' },
@@ -417,7 +419,8 @@ export default {
         mjProxyUrl: '',
         mjProxyKey: '',
         chatGptUrl: '',
-        chatGptPassword: ''
+        chatGptPassword: '',
+        proxyUrl: ''
       };
     },
     async getUserSettings() {
