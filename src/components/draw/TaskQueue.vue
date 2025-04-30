@@ -803,12 +803,6 @@ export default {
 
       // 然后异步执行操作
       this.$nextTick(() => {
-        // 将页面重置为第一页
-        if (this.currentPage !== 1) {
-          this.currentPage = 1;
-          this.$emit('page-change', 1);
-        }
-
         console.log(`触发MJ操作: ${btn.label || '未知操作'} 任务ID: ${taskId}`);
 
         // 触发MJ操作事件
@@ -1698,15 +1692,9 @@ export default {
           return;
         }
 
-        // 回到第一页
-        if (this.currentPage !== 1) {
-          this.currentPage = 1;
-          this.$emit('page-change', 1);
-        }
-
         console.log(`触发重新生成操作，任务ID: ${taskId}`);
 
-        // 直接使用 handleMjAction 处理，它会自动启动轮询
+        // 直接使用 handleMjAction 处理，它会在用户确认后决定是否跳转页面
         this.handleMjAction(task, rerollButton);
       }
     },

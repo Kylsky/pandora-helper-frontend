@@ -21,6 +21,20 @@ export default {
             // 设置抽屉状态
             showAdvancedSettings: false,
 
+            // 提示对话框状态
+            showPromptDialog: false,
+            promptDialogOptions: {
+                title: '',
+                message: '',
+                defaultValue: '',
+                placeholder: '',
+                validator: null,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+            },
+            promptDialogCallback: null,
+            promptDialogAction: null,
+
             // 表单数据
             formData: {
                 prompt: '',
@@ -61,7 +75,8 @@ export default {
 
             // 定时器
             queueTimer: null,
-            queueInterval: 5000 // 5秒轮询一次
+            queueInterval: 5000, // 5秒轮询一次
+            windowWidth: window.innerWidth
         };
     },
     mounted() {
@@ -561,6 +576,36 @@ export default {
             }
         },
 
+        // ===== PromptDialog方法 =====
+        showPrompt(options, action, callback) {
+            this.promptDialogOptions = {
+                title: options.title || '提示',
+                message: options.message || '',
+                defaultValue: options.inputValue || '',
+                placeholder: options.inputPlaceholder || '请输入',
+                validator: options.inputValidator || null,
+                confirmButtonText: options.confirmButtonText || '确定',
+                cancelButtonText: options.cancelButtonText || '取消'
+            };
+            this.promptDialogAction = action;
+            this.promptDialogCallback = callback;
+            this.showPromptDialog = true;
+        },
+
+        handlePromptConfirm(value) {
+            if (this.promptDialogCallback) {
+                this.promptDialogCallback({
+                    value,
+                    action: this.promptDialogAction
+                });
+            }
+            this.showPromptDialog = false;
+        },
+
+        handlePromptCancel() {
+            this.showPromptDialog = false;
+        },
+
         // ===== MJ操作功能 =====
         async handleMjAction(task, btn) {
             try {
@@ -659,10 +704,10 @@ export default {
                         });
 
                         if (actionResponse.data.status && actionResponse.data.data.code === 21) {
-                            // 如果返回code=21，弹出提示词输入框
-                            this.$prompt(`请输入Variation提示词`, '设置', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            // 如果返回code=21，使用自定义提示对话框
+                            this.showPrompt({
+                                title: '设置',
+                                message: '请输入Variation提示词',
                                 inputPlaceholder: '请输入提示词',
                                 inputValue: actionResponse.data.data.properties?.finalPrompt || task.prompt,
                                 inputValidator: (value) => {
@@ -671,8 +716,9 @@ export default {
                                     }
                                     return true;
                                 }
-                            }).then(async ({ value: newPrompt }) => {
+                            }, 'variation', async ({ value: newPrompt }) => {
                                 try {
+                                    this.loading = true;
                                     const modalResponse = await axios.post(`${config.apiBaseUrl}/mj/submit/modal`, {
                                         taskId: actionResponse.data.data.result,
                                         prompt: newPrompt
@@ -687,16 +733,15 @@ export default {
                                         this.pagination.current = 1;
                                         this.loading = false;
                                         await this.fetchTaskQueue();
-                                        // this.startQueueTimer();
                                     } else {
                                         this.$message.error(modalResponse.data.data?.description || '提交失败');
                                     }
                                 } catch (error) {
                                     console.error('Modal submit error:', error);
                                     this.$message.error('提交失败，请重试');
+                                } finally {
+                                    this.loading = false;
                                 }
-                            }).catch(() => {
-                                // 用户取消操作
                             });
                         } else if (actionResponse.data.status && actionResponse.data.data.code === 1) {
                             // 如果直接返回成功
@@ -705,7 +750,6 @@ export default {
                             this.pagination.current = 1;
                             this.loading = false;
                             await this.fetchTaskQueue();
-                            //   this.startQueueTimer();
                         } else {
                             this.$message.error(actionResponse.data.data?.description || '提交失败');
                         }
@@ -730,10 +774,10 @@ export default {
                         });
 
                         if (actionResponse.data.status && actionResponse.data.data.code === 21) {
-                            // 如果返回code=21，弹出提示词输入框
-                            this.$prompt(`请输入重绘提示词`, '设置', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            // 如果返回code=21，使用自定义提示对话框
+                            this.showPrompt({
+                                title: '设置',
+                                message: '请输入重绘提示词',
                                 inputPlaceholder: '请输入提示词',
                                 inputValue: actionResponse.data.data.properties?.finalPrompt || task.prompt,
                                 inputValidator: (value) => {
@@ -742,8 +786,9 @@ export default {
                                     }
                                     return true;
                                 }
-                            }).then(async ({ value: newPrompt }) => {
+                            }, 'reroll', async ({ value: newPrompt }) => {
                                 try {
+                                    this.loading = true;
                                     const modalResponse = await axios.post(`${config.apiBaseUrl}/mj/submit/modal`, {
                                         taskId: actionResponse.data.data.result,
                                         prompt: newPrompt
@@ -755,6 +800,7 @@ export default {
 
                                     if (modalResponse.data.status && modalResponse.data.data.code === 1) {
                                         this.$message.success('重绘操作已提交');
+                                        // 只在确认后才跳转到第一页
                                         this.pagination.current = 1;
                                         this.loading = false;
                                         await this.fetchTaskQueue();
@@ -764,17 +810,17 @@ export default {
                                 } catch (error) {
                                     console.error('Modal submit error:', error);
                                     this.$message.error('提交失败，请重试');
+                                } finally {
+                                    this.loading = false;
                                 }
-                            }).catch(() => {
-                                // 用户取消操作
                             });
                         } else if (actionResponse.data.status && actionResponse.data.data.code === 1) {
                             // 如果直接返回成功
                             this.$message.success('重绘操作已提交');
+                            // 直接成功时才跳转到第一页
                             this.pagination.current = 1;
                             this.loading = false;
                             await this.fetchTaskQueue();
-                            // this.startQueueTimer();
                         } else {
                             this.$message.error(actionResponse.data.data?.description || '提交失败');
                         }
@@ -799,14 +845,14 @@ export default {
                         });
 
                         if (actionResponse.data.status && actionResponse.data.data.code === 21) {
-                            // 如果返回code=21，弹出提示词输入框
+                            // 如果返回code=21，使用自定义提示对话框
                             const direction = customId.includes('pan_left') ? '向左平移' :
                                 customId.includes('pan_right') ? '向右平移' :
                                     customId.includes('pan_up') ? '向上平移' : '向下平移';
 
-                            this.$prompt(`请输入${direction}的提示词`, '平移设置', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            this.showPrompt({
+                                title: '平移设置',
+                                message: `请输入${direction}的提示词`,
                                 inputPlaceholder: '请输入提示词',
                                 inputValue: actionResponse.data.data.properties?.finalPrompt || task.prompt,
                                 inputValidator: (value) => {
@@ -815,8 +861,9 @@ export default {
                                     }
                                     return true;
                                 }
-                            }).then(async ({ value: newPrompt }) => {
+                            }, 'pan', async ({ value: newPrompt }) => {
                                 try {
+                                    this.loading = true;
                                     const modalResponse = await axios.post(`${config.apiBaseUrl}/mj/submit/modal`, {
                                         taskId: actionResponse.data.data.result,
                                         prompt: newPrompt
@@ -831,16 +878,15 @@ export default {
                                         this.pagination.current = 1;
                                         this.loading = false;
                                         await this.fetchTaskQueue();
-                                        // this.startQueueTimer();
                                     } else {
                                         this.$message.error(modalResponse.data.data?.description || '提交失败');
                                     }
                                 } catch (error) {
                                     console.error('Modal submit error:', error);
                                     this.$message.error('提交失败，请重试');
+                                } finally {
+                                    this.loading = false;
                                 }
-                            }).catch(() => {
-                                // 用户取消操作
                             });
                         } else if (actionResponse.data.status && actionResponse.data.data.code === 1) {
                             // 如果直接返回成功
@@ -848,7 +894,6 @@ export default {
                             this.pagination.current = 1;
                             this.loading = false;
                             await this.fetchTaskQueue();
-                            //   this.startQueueTimer();
                         } else {
                             this.$message.error(actionResponse.data.data?.description || '提交失败');
                         }
@@ -873,20 +918,21 @@ export default {
                         });
 
                         if (actionResponse.data.status && actionResponse.data.data.code === 21) {
-                            // 如果返回code=21，弹出提示词输入框
-                            this.$prompt(`请输入缩放的提示词`, '设置', {
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
+                            // 如果返回code=21，使用自定义提示对话框
+                            this.showPrompt({
+                                title: '设置',
+                                message: '请输入缩放的提示词',
                                 inputPlaceholder: '请输入提示词',
-                                inputValue: '',  // 将默认值设为空字符串
+                                inputValue: '',
                                 inputValidator: (value) => {
                                     if (!value || value.trim() === '') {
                                         return '提示词不能为空';
                                     }
                                     return true;
                                 }
-                            }).then(async ({ value: newPrompt }) => {
+                            }, 'zoom', async ({ value: newPrompt }) => {
                                 try {
+                                    this.loading = true;
                                     const modalResponse = await axios.post(`${config.apiBaseUrl}/mj/submit/modal`, {
                                         taskId: actionResponse.data.data.result,
                                         prompt: newPrompt
@@ -901,16 +947,15 @@ export default {
                                         this.pagination.current = 1;
                                         this.loading = false;
                                         await this.fetchTaskQueue();
-                                        // this.startQueueTimer();
                                     } else {
                                         this.$message.error(modalResponse.data.data?.description || '提交失败');
                                     }
                                 } catch (error) {
                                     console.error('Modal submit error:', error);
                                     this.$message.error('提交失败，请重试');
+                                } finally {
+                                    this.loading = false;
                                 }
-                            }).catch(() => {
-                                // 用户取消操作
                             });
                         } else if (actionResponse.data.status && actionResponse.data.data.code === 1) {
                             // 如果直接返回成功
@@ -918,7 +963,6 @@ export default {
                             this.pagination.current = 1;
                             this.loading = false;
                             await this.fetchTaskQueue();
-                            //   this.startQueueTimer();
                         } else {
                             this.$message.error(actionResponse.data.data?.description || '提交失败');
                         }
@@ -964,6 +1008,6 @@ export default {
                 // 刷新页面显示的任务列表（只在操作后需要一次）
                 // await this.fetchTaskQueue();
             }
-        }
+        },
     }
 }; 

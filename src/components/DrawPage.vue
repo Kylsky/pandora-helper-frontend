@@ -145,6 +145,20 @@
       :init-form-data="formData"
       @apply="handleSettingsApply"
     />
+
+    <PromptDialog 
+      :visible.sync="showPromptDialog"
+      :title="promptDialogOptions.title"
+      :message="promptDialogOptions.message"
+      :default-value="promptDialogOptions.defaultValue"
+      :placeholder="promptDialogOptions.placeholder"
+      :validator="promptDialogOptions.validator"
+      :confirm-button-text="promptDialogOptions.confirmButtonText"
+      :cancel-button-text="promptDialogOptions.cancelButtonText"
+      :loading="loading"
+      @confirm="handlePromptConfirm"
+      @cancel="handlePromptCancel"
+    />
   </el-container>
 </template>
 
@@ -154,6 +168,7 @@ import ImageEditor from './draw/ImageEditor.vue';
 import SettingsDrawer from './draw/SettingsDrawer.vue';
 import TaskQueue from './draw/TaskQueue.vue';
 import PromptForm from './draw/PromptForm.vue';
+import PromptDialog from './draw/PromptDialog.vue';
 import drawPageLogic from './draw/DrawPageLogic.js';
 
 export default {
@@ -163,7 +178,8 @@ export default {
     ImageEditor,
     SettingsDrawer,
     TaskQueue,
-    PromptForm
+    PromptForm,
+    PromptDialog
   },
   mixins: [drawPageLogic]
 };
